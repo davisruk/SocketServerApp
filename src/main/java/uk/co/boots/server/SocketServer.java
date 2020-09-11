@@ -20,15 +20,17 @@ public class SocketServer {
 	@Getter
 	@Value("${tcp_port}")
 	private int port;
-
-	private ServerSocket sc;
-
+	@Value("${num_messages}")
+	private int messages;
+	
+	private static ServerSocket sc;
+	
 	public void startServer() {
 		try {
 			sc = new ServerSocket(port);
 			System.out.println("Server started and listening on port " + port);
 			while (true) {
-				new ClientSocketHandler(sc.accept()).start();
+				new ClientSocketHandler(sc.accept(), messages).start();
 			}
 		} catch (IOException ioe) {
 		}
@@ -37,6 +39,7 @@ public class SocketServer {
 	@RequiredArgsConstructor
 	private static class ClientSocketHandler extends Thread {
 		private final Socket client;
+		private final int numMessages;
 		private DataOutputStream out;
 		private DataInputStream din;
 		private final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -51,7 +54,7 @@ public class SocketServer {
 				out = new DataOutputStream(client.getOutputStream());
 				din = new DataInputStream(new BufferedInputStream(client.getInputStream()));
 				// write 32R messages in loop
-				for (int i = 0; i < 5; i++) {
+				for (int i = 0; i < numMessages; i++) {
 					out.write("\r0005232R1403TOTE0000167865001T0205s06175941O01040001\n".getBytes());
 					// block until we receive a 42R
 					boolean stop = false;
@@ -109,6 +112,7 @@ public class SocketServer {
 			din.close();
 			out.close();
 			client.close();
+			sc.close();
 		}
 	}
 }

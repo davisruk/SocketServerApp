@@ -30,11 +30,12 @@ docker {
 }
 
 def server_port=7777
+def messages_to_exchange=1000
 dockerRun {
     name = "tcp-server"
     image = "davisruk/${project.name.toLowerCase()}:${version}"
     ports("9401:${server_port}")
-    env 'tcp_port': "${server_port}"
+    env 'tcp_port': "${server_port}", 'num_messages':"${messages_to_exchange}"
 }
 
 test {
