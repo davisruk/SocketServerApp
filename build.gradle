@@ -1,0 +1,42 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.3.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+ 	id "io.freefair.lombok" version "5.2.1"
+ 	id 'com.palantir.docker' version '0.25.0'
+	id 'com.palantir.docker-run' version '0.25.0'
+	id 'java'
+}
+
+group = 'uk.co.boots'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = '14'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+docker {
+	name "davisruk/${project.name.toLowerCase()}:${version}"
+	buildArgs([JAR_FILE: "build/libs/${project.name}-${version}.jar"])
+	copySpec.from("build").into("build")
+}
+
+def server_port=7777
+dockerRun {
+    name = "tcp-server"
+    image = "davisruk/${project.name.toLowerCase()}:${version}"
+    ports("9401:${server_port}")
+    env 'tcp_port': "${server_port}"
+}
+
+test {
+	useJUnitPlatform()
+}
