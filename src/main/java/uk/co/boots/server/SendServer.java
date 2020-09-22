@@ -59,7 +59,8 @@ public class SendServer implements SocketServer {
 				System.out.println(ioe.getMessage());
 			}
 
-			while (!osrBuffer.isStarted())
+			// client has connected - block until totes start releasing from OSR
+			while (!osrBuffer.getOsrConfig().isReleasing())
 				;
 
 			System.out.println("osrBuffer Started");

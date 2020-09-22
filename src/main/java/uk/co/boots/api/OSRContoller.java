@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.co.boots.osr.OSRBuffer;
+import uk.co.boots.osr.OSRConfig;
 
 @RestController
 @RequestMapping("/osr")
@@ -14,8 +15,13 @@ public class OSRContoller {
 	@Autowired
 	private OSRBuffer osrBuffer;
 	
-	@PostMapping("/start")
-	void newEmployee(@RequestBody StartParams params) {
+	@PostMapping("/releaseState")
+	void setOSRReleaseState(@RequestBody StartParams params) {
 		osrBuffer.setStarted (params.start);
+	}
+	
+	@PostMapping("/newConfig")
+	void setOSRConfig (@RequestBody OSRConfig newConfig) {
+		osrBuffer.setOsrConfig(newConfig);
 	}
 }
