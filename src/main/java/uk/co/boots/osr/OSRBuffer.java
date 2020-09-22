@@ -1,19 +1,18 @@
 package uk.co.boots.osr;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Component ("osrBuffer")
 public class OSRBuffer {
 
 	@Getter
-	private List<String> totes = new ArrayList<String>();
+	private ArrayDeque<String> totes = new ArrayDeque<String>();
 	@Getter
 	@Autowired
 	OSRConfig osrConfig;

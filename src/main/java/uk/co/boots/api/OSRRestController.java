@@ -11,7 +11,7 @@ import uk.co.boots.osr.OSRConfig;
 
 @RestController
 @RequestMapping("/osr")
-public class OSRContoller {
+public class OSRRestController {
 	@Autowired
 	private OSRBuffer osrBuffer;
 	
