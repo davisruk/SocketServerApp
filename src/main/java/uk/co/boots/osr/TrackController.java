@@ -1,6 +1,6 @@
 package uk.co.boots.osr;
 
-import java.util.ArrayDeque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -26,18 +26,19 @@ public class TrackController implements ToteEventHandler {
 		this.client = client;
 		System.out.println("Track controller started");
 		OSRConfig config = osrBuffer.getOsrConfig(); 
-		while (!config.isReleasing())
-			;
 		int maxTotes = config.getMaxTotesOnTrack();
 		System.out.println("osrBuffer Started");
 		// write 32R messages in loop
-		ArrayDeque<String> totes = osrBuffer.getTotes();
+		ConcurrentLinkedDeque<Tote> totes = osrBuffer.getTotes();
 		while (!totes.isEmpty()) {
+			// osrBuffer needs to be releasing totes - wait if not 
+			while (!config.isReleasing())
+				;			
 			// make sure we don't release too many totes at once
 			if (activeTotes < maxTotes) { 
 				// send 32R short
-				String currentTote = totes.pop().replace("12N", "32R");
-				client.send32R(currentTote);
+				Tote currentTote = totes.pop();
+				client.send32R(currentTote.getThirtyTwoRShort());
 				// start tote on track
 				toteController.releaseTote(currentTote, this, client);
 				try {
@@ -64,13 +65,13 @@ public class TrackController implements ToteEventHandler {
 	}
 
 	@Override
-	public void handleToteActivation(String tote) {
+	public void handleToteActivation(Tote tote) {
 		incrementActiveTotes();
 		
 	}
 
 	@Override
-	public void handleToteDeactivation(String tote) {
+	public void handleToteDeactivation(Tote tote) {
 		// TODO Auto-generated method stub
 		decrementActiveTotes();
 	}

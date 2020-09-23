@@ -13,7 +13,7 @@ public class ToteController {
 	OSRBuffer osrBuffer;
 	
 	@Async
-	public void releaseTote (String tote, ToteEventHandler handler, SendClientSocketHandler client) {
+	public void releaseTote (Tote tote, ToteEventHandler handler, SendClientSocketHandler client) {
 		handler.handleToteActivation(tote);
 		long started = System.currentTimeMillis();
 		long trackTravelTimeLeft = osrBuffer.getOsrConfig().getToteTrackTravelTime();
@@ -34,7 +34,7 @@ public class ToteController {
 			}
 		}
 		// tote has travelled track, send back 32R Long
-		client.send32RLong(tote);
+		client.send32RLong(tote.getThirtyTwoRLong());
 		handler.handleToteDeactivation(tote);
 	}
 

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import uk.co.boots.osr.OSRBuffer;
+import uk.co.boots.osr.Tote;
 
 @Component
 @Setter
@@ -77,8 +78,9 @@ public class ReceiveServer implements SocketServer {
 						if ("12N".equals(readString.substring(1, 4))) {
 							// strip first and last chars
 							String data = readString.substring(1, readString.length()-1);
-							osrBuffer.addTote(data);							
-							out.write(("\n22N" + data.substring(4) + "\r").getBytes());
+							Tote tote = new Tote(data);
+							osrBuffer.addTote(tote);							
+							out.write(("\n" + tote.getTwentyTwoN() + "\r").getBytes());
 						}
 
 						System.out.println(outputString);

@@ -1,7 +1,6 @@
 package uk.co.boots.osr;
 
-import java.util.ArrayDeque;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import lombok.Getter;
 public class OSRBuffer {
 
 	@Getter
-	private ArrayDeque<String> totes = new ArrayDeque<String>();
+	private ConcurrentLinkedDeque<Tote> totes = new ConcurrentLinkedDeque<Tote>();
 	@Getter
 	@Autowired
 	OSRConfig osrConfig;
@@ -36,7 +35,7 @@ public class OSRBuffer {
 		
 	}
 	
-	public void addTote(String twelveN) {
-		totes.add(twelveN);
+	public void addTote(Tote tote) {
+		totes.add(tote);
 	}
 }
