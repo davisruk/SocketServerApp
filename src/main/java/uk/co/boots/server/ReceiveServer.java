@@ -16,8 +16,11 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import uk.co.boots.messages.BasicMessage;
+import uk.co.boots.messages.Deserializer;
+import uk.co.boots.messages.DeserializerFactory;
+import uk.co.boots.messages.MessageProcessor;
 import uk.co.boots.osr.OSRBuffer;
-import uk.co.boots.osr.Tote;
 
 @Component
 @Setter
@@ -55,7 +58,7 @@ public class ReceiveServer implements SocketServer {
 	
 		public void run() {
 			try {
-				byte[] readBuffer = new byte[10];
+				byte[] readBuffer = new byte[10000];
 				int totalRead = 0;
 				int bytesRead = 0;
 				byte[] finalBuffer = null;
@@ -75,15 +78,14 @@ public class ReceiveServer implements SocketServer {
 						String readString = new String(finalBuffer, 0, totalRead, StandardCharsets.UTF_8);
 						String outputString = "Server received string: " + readString + "HEX:["
 								+ s.substring(0, s.length() - 1) + "]";
-						if ("12N".equals(readString.substring(1, 4))) {
-							// strip first and last chars
-							String data = readString.substring(1, readString.length()-1);
-							Tote tote = new Tote(data);
-							osrBuffer.addTote(tote);							
-							out.write(("\n" + tote.getTwentyTwoN() + "\r").getBytes());
+						Deserializer d = DeserializerFactory.getDeserializerFor(readString.substring(1, 4));
+						BasicMessage m = d.deserialize(finalBuffer);
+						MessageProcessor mp = d.getProcessor();
+//						mp.process(m);
+						if (mp.hasResponse()) {
+							//out.write(mp.getResponse());
+							out.write(m.getResponse());
 						}
-
-						System.out.println(outputString);
 
 						// reset vars for next message on internal stream buffer
 						totalRead = 0;
