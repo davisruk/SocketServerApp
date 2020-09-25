@@ -9,25 +9,7 @@ import uk.co.boots.messages.SerialisationControlField;
 @Data
 @ToString(callSuper = true)
 public class OrderLineArrayList extends ArrayList<OrderLine> {
-	private static final char identifier = 'X';
 
-	public static final SerialisationControlField identifierInfo = new SerialisationControlField ("identifier", 0, 1);
-	public static final SerialisationControlField numberOrderLinesInfo = new SerialisationControlField ("numberOfOrderLines", identifierInfo.getNextOffset(), 3);
-	public static final SerialisationControlField orderLineRefInfo = new SerialisationControlField ("lengthOfOrderLineRef", numberOrderLinesInfo.getNextOffset(), 2);
-	public static final SerialisationControlField orderLineTypeInfo = new SerialisationControlField ("lengthOfOrderLineType", orderLineRefInfo.getNextOffset(), 2);	
-	public static final SerialisationControlField pharmacyIdInfo = new SerialisationControlField ("lengthOfPharmacyId", orderLineTypeInfo.getNextOffset(), 2);
-	public static final SerialisationControlField patientIdInfo = new SerialisationControlField ("lengthOfPatientId", pharmacyIdInfo.getNextOffset(), 2);
-	public static final SerialisationControlField prescriptionIdInfo = new SerialisationControlField ("lengthOfPrescriptionId", patientIdInfo.getNextOffset(), 2);
-	public static final SerialisationControlField productIdInfo = new SerialisationControlField ("lengthOfProductId", prescriptionIdInfo.getNextOffset(), 2);
-	public static final SerialisationControlField numPacksInfo = new SerialisationControlField ("lengthOfNumPacks", productIdInfo.getNextOffset(), 2);
-	public static final SerialisationControlField packsPickedInfo = new SerialisationControlField ("lengthOfPacksPicked", numPacksInfo.getNextOffset(), 2);
-	public static final SerialisationControlField numPillsInfo = new SerialisationControlField ("lengthOfNumPills", packsPickedInfo.getNextOffset(), 2);
-	public static final SerialisationControlField refOrderIdInfo = new SerialisationControlField ("lengthOfRefOrderId", numPillsInfo.getNextOffset(), 2);
-	public static final SerialisationControlField refSheetNumInfo = new SerialisationControlField ("lengthOfRefSheetNum", refOrderIdInfo.getNextOffset(), 2);
-	
-	public static final int orderLineDataOffset = refSheetNumInfo.getNextOffset();
-
-	
 	private int numberOfOrderLines;
 	private int orderLineReferenceNumberLength;
 	private int orderLineTypeLength;

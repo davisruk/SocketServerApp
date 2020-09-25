@@ -1,11 +1,19 @@
 package uk.co.boots.messages.twelven;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.BasicRecord;
 import uk.co.boots.messages.Deserializer;
 import uk.co.boots.messages.MessageProcessor;
+import uk.co.boots.messages.shared.HeaderSerializationControl;
 
+@Service
 public class TwelveNDeserializer implements Deserializer {
+
+	@Autowired
+	private TwelveNSerializationControl twelveNSerializationControl;
 
 	// NOTE - all offsets within SerializationControlField instances are relative
 	// i.e
@@ -15,6 +23,7 @@ public class TwelveNDeserializer implements Deserializer {
 	// the current position
 	@Override
 	public BasicMessage deserialize(byte[] messagePayload) {
+
 		TwelveN record = new TwelveN();
 		record.setHeader(readHeader(messagePayload));
 
@@ -59,11 +68,12 @@ public class TwelveNDeserializer implements Deserializer {
 	}
 
 	private Header readHeader(byte[] payload) {
+		HeaderSerializationControl hsc = twelveNSerializationControl.getHeaderSerializationControl();
 		Header h = new Header();
 		h.setOrderIdLength(
-				Integer.parseInt(new String(payload, Header.orderIdInfo.getOffset(), Header.orderIdInfo.getSize())));
+				Integer.parseInt(new String(payload, hsc.getOrderIdInfo().getOffset(), hsc.getOrderIdInfo().getSize())));
 		h.setSheetNumberLength(Integer
-				.valueOf(new String(payload, Header.sheetNumberInfo.getOffset(), Header.sheetNumberInfo.getSize())));
+				.valueOf(new String(payload, hsc.sheetNumberInfo.getOffset(), Header.sheetNumberInfo.getSize())));
 
 		h.setOrderId(new String(payload, h.getOrderIdDataOffset(), h.getOrderIdLength()));
 		h.setSheetNumber(new String(payload, h.getSheetNumberDataOffset(), h.getSheetNumberLength()));
@@ -72,19 +82,20 @@ public class TwelveNDeserializer implements Deserializer {
 
 	private OrderLineArrayList readOrderLines (byte[] messagePayload, int offset) {
 		OrderLineArrayList l = new OrderLineArrayList();
-		l.setNumberOfOrderLines(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.numberOrderLinesInfo.getOffset(),  OrderLineArrayList.numberOrderLinesInfo.getSize())));
-		l.setOrderLineReferenceNumberLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.orderLineRefInfo.getOffset(),  OrderLineArrayList.orderLineRefInfo.getSize())));
-		l.setOrderLineTypeLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.orderLineTypeInfo.getOffset(),  OrderLineArrayList.orderLineTypeInfo.getSize())));
-		l.setPharmacyIdLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.pharmacyIdInfo.getOffset(),  OrderLineArrayList.pharmacyIdInfo.getSize())));
-		l.setPatientIdLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.patientIdInfo.getOffset(),  OrderLineArrayList.patientIdInfo.getSize())));
-		l.setPrescriptionIdLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.prescriptionIdInfo.getOffset(),  OrderLineArrayList.prescriptionIdInfo.getSize())));
-		l.setProductIdLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.productIdInfo.getOffset(),  OrderLineArrayList.productIdInfo.getSize())));
-		l.setNumPacksLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.numPacksInfo.getOffset(),  OrderLineArrayList.numPacksInfo.getSize())));
-		l.setPacksPickedLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.packsPickedInfo.getOffset(),  OrderLineArrayList.packsPickedInfo.getSize())));
-		l.setNumPillsLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.numPillsInfo.getOffset(),  OrderLineArrayList.numPillsInfo.getSize())));
-		l.setRefOrderIdLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.refOrderIdInfo.getOffset(),  OrderLineArrayList.refOrderIdInfo.getSize())));
-		l.setRefSheetNumLength(Integer.parseInt(new String(messagePayload, offset + OrderLineArrayList.refSheetNumInfo.getOffset(),  OrderLineArrayList.refSheetNumInfo.getSize())));
-		for (int i=0, currentOffset = offset + OrderLineArrayList.refSheetNumInfo.getNextOffset(); i < l.getNumberOfOrderLines(); i++, currentOffset += l.getNextLineOffset() ) {
+		OrderLineArrayListSerializationControl sc = twelveNSerializationControl.getOrderLineArrayListSerializationControl();
+		l.setNumberOfOrderLines(Integer.parseInt(new String(messagePayload, offset + sc.getNumberOrderLinesInfo().getOffset(),  sc.getNumberOrderLinesInfo().getSize())));
+		l.setOrderLineReferenceNumberLength(Integer.parseInt(new String(messagePayload, offset + sc.getOrderLineRefInfo().getOffset(),  sc.getOrderLineRefInfo().getSize())));
+		l.setOrderLineTypeLength(Integer.parseInt(new String(messagePayload, offset + sc.getOrderLineTypeInfo().getOffset(),  sc.getOrderLineTypeInfo().getSize())));
+		l.setPharmacyIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPharmacyIdInfo().getOffset(),  sc.getPharmacyIdInfo().getSize())));
+		l.setPatientIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPatientIdInfo().getOffset(),  sc.getPatientIdInfo().getSize())));
+		l.setPrescriptionIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPrescriptionIdInfo().getOffset(),  sc.getPrescriptionIdInfo().getSize())));
+		l.setProductIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getProductIdInfo().getOffset(),  sc.getProductIdInfo().getSize())));
+		l.setNumPacksLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPacksInfo().getOffset(),  sc.getNumPacksInfo().getSize())));
+		l.setPacksPickedLength(Integer.parseInt(new String(messagePayload, offset + sc.getPacksPickedInfo().getOffset(),  sc.getPacksPickedInfo().getSize())));
+		l.setNumPillsLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPillsInfo().getOffset(),  sc.getNumPillsInfo().getSize())));
+		l.setRefOrderIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefOrderIdInfo().getOffset(),  sc.getRefOrderIdInfo().getSize())));
+		l.setRefSheetNumLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefSheetNumInfo().getOffset(),  sc.getRefSheetNumInfo().getSize())));
+		for (int i=0, currentOffset = offset + sc.getRefSheetNumInfo().getNextOffset(); i < l.getNumberOfOrderLines(); i++, currentOffset += l.getNextLineOffset() ) {
 			OrderLine line = new OrderLine();
 			line.setOrderLineNumber(new String(messagePayload, currentOffset + l.getOrderLineReferenceNumberOffset(), l.getOrderLineReferenceNumberLength()));
 			line.setOrderLineType(new String(messagePayload, currentOffset + l.getOrderLineTypeOffset(), l.getOrderLineTypeLength()));
@@ -140,8 +151,12 @@ public class TwelveNDeserializer implements Deserializer {
 
 	@Override
 	public MessageProcessor getProcessor() {
-		// TODO Auto-generated method stub
 		return new TwelveNProcessor();
+	}
+
+	@Override
+	public boolean canHandle(String messageType) {
+		return "12N".equals(messageType);
 	}
 
 }

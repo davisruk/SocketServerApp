@@ -1,13 +1,22 @@
 package uk.co.boots.messages;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
-import uk.co.boots.messages.twelven.TwelveNDeserializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+
+@Component
 public class DeserializerFactory{
-	private static Map<String, Deserializer> deserializers = Map.of("12N", new TwelveNDeserializer()); 
 
-	public static Deserializer getDeserializerFor(String messageType) {
-		return deserializers.get(messageType);
-	}
+	@Autowired
+	private List<Deserializer> deserializers; 
+
+	public Optional<Deserializer> getDeserializer(String messageType) {
+        return deserializers.stream()
+            .filter(service -> service.canHandle(messageType))
+            .findFirst();
+    }	
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +34,9 @@ public class ReceiveServer implements SocketServer {
 
 	@Autowired
 	private OSRBuffer osrBuffer;
-
+	@Autowired
+	private DeserializerFactory deserializerFactory;
+	
 	private static ServerSocket sc;
 
 	@Async
@@ -78,7 +81,7 @@ public class ReceiveServer implements SocketServer {
 						String readString = new String(finalBuffer, 0, totalRead, StandardCharsets.UTF_8);
 						String outputString = "Server received string: " + readString + "HEX:["
 								+ s.substring(0, s.length() - 1) + "]";
-						Deserializer d = DeserializerFactory.getDeserializerFor(readString.substring(1, 4));
+						Deserializer d = deserializerFactory.getDeserializer(readString.substring(1, 4)).get();
 						BasicMessage m = d.deserialize(finalBuffer);
 						MessageProcessor mp = d.getProcessor();
 //						mp.process(m);
