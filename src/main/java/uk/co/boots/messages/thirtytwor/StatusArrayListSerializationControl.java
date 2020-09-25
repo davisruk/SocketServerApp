@@ -2,9 +2,11 @@ package uk.co.boots.messages.thirtytwor;
 
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
 import uk.co.boots.messages.SerialisationControlField;
 
 @Component
+@Getter
 public class StatusArrayListSerializationControl {
 
 	private final char identifier = 'O';
