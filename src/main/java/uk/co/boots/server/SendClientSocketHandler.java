@@ -41,6 +41,14 @@ public class SendClientSocketHandler {
 		sendMessage ("[32R Long] " + message);
 	}
 	
+	public synchronized void sendMessage (byte[] message) {
+		try {
+			out.write(("\n" + new String(message) + "\r").getBytes());
+		} catch (IOException ioe) {
+			System.out.println(ioe.getMessage());
+		}
+	}
+	
 	private byte[] addBytesToArray(byte[] toArray, byte[] fromArray, int numBytesToAdd) throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		if (toArray != null && toArray.length > 0)

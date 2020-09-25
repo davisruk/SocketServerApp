@@ -36,7 +36,7 @@ public class ReceiveServer implements SocketServer {
 	private OSRBuffer osrBuffer;
 	@Autowired
 	private DeserializerFactory deserializerFactory;
-	
+
 	private static ServerSocket sc;
 
 	@Async
@@ -58,7 +58,7 @@ public class ReceiveServer implements SocketServer {
 		private DataOutputStream out;
 		private DataInputStream din;
 		private final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-	
+
 		public void run() {
 			try {
 				byte[] readBuffer = new byte[10000];
@@ -84,10 +84,9 @@ public class ReceiveServer implements SocketServer {
 						Deserializer d = deserializerFactory.getDeserializer(readString.substring(1, 4)).get();
 						BasicMessage m = d.deserialize(finalBuffer);
 						MessageProcessor mp = d.getProcessor();
-//						mp.process(m);
+						mp.process(m);
 						if (mp.hasResponse()) {
-							//out.write(mp.getResponse());
-							out.write(m.getResponse());
+							out.write(mp.getResponse(m));
 						}
 
 						// reset vars for next message on internal stream buffer

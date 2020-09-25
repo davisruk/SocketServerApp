@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import uk.co.boots.messages.shared.Tote;
 
 @Component ("osrBuffer")
 public class OSRBuffer {
@@ -35,7 +36,7 @@ public class OSRBuffer {
 		
 	}
 	
-	public void addTote(Tote tote) {
-		totes.add(tote);
+	public void addToteMessage(Tote msg) {
+		totes.add(msg);
 	}
 }

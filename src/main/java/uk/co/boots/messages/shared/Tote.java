@@ -12,7 +12,7 @@ import uk.co.boots.messages.twelven.OrderPriority;
 import uk.co.boots.messages.twelven.ServiceCentre;
 
 @Data
-public class ToteMessage implements BasicMessage {
+public class Tote implements BasicMessage {
 	private Header header;
 	private ToteIdentifier toteIdentifier;
 	private TransportContainer transportContainer;

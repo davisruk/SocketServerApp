@@ -4,13 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import uk.co.boots.messages.Serializer;
+import uk.co.boots.messages.SerializerFactory;
+import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.server.SendClientSocketHandler;
 
 @Component
 public class ToteController {
 
 	@Autowired
-	OSRBuffer osrBuffer;
+	private OSRBuffer osrBuffer;
+	@Autowired
+	private SerializerFactory serializerFactory; 
 	
 	@Async
 	public void releaseTote (Tote tote, ToteEventHandler handler, SendClientSocketHandler client) {
@@ -34,7 +39,8 @@ public class ToteController {
 			}
 		}
 		// tote has travelled track, send back 32R Long
-		client.send32RLong(tote.getThirtyTwoRLong());
+		Serializer s = serializerFactory.getSerializer("32RLong").get();
+		client.sendMessage(s.serialize(tote));
 		handler.handleToteDeactivation(tote);
 	}
 

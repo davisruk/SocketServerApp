@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.server.SendClientSocketHandler;
 
 @Component
@@ -30,6 +31,9 @@ public class TrackController implements ToteEventHandler {
 		System.out.println("osrBuffer Started");
 		// write 32R messages in loop
 		ConcurrentLinkedDeque<Tote> totes = osrBuffer.getTotes();
+		// osrBuffer needs to be releasing totes - wait if not 
+		while (!config.isReleasing())
+			;			
 		while (!totes.isEmpty()) {
 			// osrBuffer needs to be releasing totes - wait if not 
 			while (!config.isReleasing())
@@ -38,7 +42,6 @@ public class TrackController implements ToteEventHandler {
 			if (activeTotes < maxTotes) { 
 				// send 32R short
 				Tote currentTote = totes.pop();
-				client.send32R(currentTote.getThirtyTwoRShort());
 				// start tote on track
 				toteController.releaseTote(currentTote, this, client);
 				try {

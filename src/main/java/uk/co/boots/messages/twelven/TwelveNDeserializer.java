@@ -12,7 +12,7 @@ import uk.co.boots.messages.shared.HeaderSerializationControl;
 import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.OrderLineArrayList;
 import uk.co.boots.messages.shared.ToteIdentifier;
-import uk.co.boots.messages.shared.ToteMessage;
+import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.shared.TransportContainer;
 
 @Service
@@ -20,6 +20,9 @@ public class TwelveNDeserializer implements Deserializer {
 
 	@Autowired
 	private TwelveNSerializationControl twelveNSerializationControl;
+	
+	@Autowired
+	private TwelveNProcessor twelveNProcessor;
 
 	// NOTE - all offsets within SerializationControlField instances are relative
 	// i.e
@@ -30,7 +33,7 @@ public class TwelveNDeserializer implements Deserializer {
 	@Override
 	public BasicMessage deserialize(byte[] messagePayload) {
 
-		ToteMessage record = new ToteMessage();
+		Tote record = new Tote();
 		record.setHeader(readHeader(messagePayload));
 
 		// now we may get a Tote, Transport, Order Priority, Departure Time or Service
@@ -158,7 +161,7 @@ public class TwelveNDeserializer implements Deserializer {
 
 	@Override
 	public MessageProcessor getProcessor() {
-		return new TwelveNProcessor();
+		return twelveNProcessor;
 	}
 
 	@Override
