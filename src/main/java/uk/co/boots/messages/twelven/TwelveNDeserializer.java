@@ -7,7 +7,13 @@ import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.BasicRecord;
 import uk.co.boots.messages.Deserializer;
 import uk.co.boots.messages.MessageProcessor;
+import uk.co.boots.messages.shared.Header;
 import uk.co.boots.messages.shared.HeaderSerializationControl;
+import uk.co.boots.messages.shared.OrderLine;
+import uk.co.boots.messages.shared.OrderLineArrayList;
+import uk.co.boots.messages.shared.ToteIdentifier;
+import uk.co.boots.messages.shared.ToteMessage;
+import uk.co.boots.messages.shared.TransportContainer;
 
 @Service
 public class TwelveNDeserializer implements Deserializer {
@@ -24,14 +30,15 @@ public class TwelveNDeserializer implements Deserializer {
 	@Override
 	public BasicMessage deserialize(byte[] messagePayload) {
 
-		TwelveN record = new TwelveN();
+		ToteMessage record = new ToteMessage();
 		record.setHeader(readHeader(messagePayload));
 
 		// now we may get a Tote, Transport, Order Priority, Departure Time or Service
 		// Centre in any order
 		// read next byte to determine which record type it is
 		BasicRecord br = null;
-		int currentOffset = record.getHeader().getMessageDataOffset();
+		Header h = record.getHeader();
+		int currentOffset = twelveNSerializationControl.getHeaderSerializationControl().getNextDataOffset(h);
 		for (int i = 0; i < 5; i++, currentOffset += br
 				.getNextRecordOffset()) {
 			switch (messagePayload[currentOffset]) {
@@ -73,10 +80,10 @@ public class TwelveNDeserializer implements Deserializer {
 		h.setOrderIdLength(
 				Integer.parseInt(new String(payload, hsc.getOrderIdInfo().getOffset(), hsc.getOrderIdInfo().getSize())));
 		h.setSheetNumberLength(Integer
-				.valueOf(new String(payload, hsc.sheetNumberInfo.getOffset(), Header.sheetNumberInfo.getSize())));
+				.valueOf(new String(payload, hsc.getSheetNumberInfo().getOffset(), hsc.getSheetNumberInfo().getSize())));
 
-		h.setOrderId(new String(payload, h.getOrderIdDataOffset(), h.getOrderIdLength()));
-		h.setSheetNumber(new String(payload, h.getSheetNumberDataOffset(), h.getSheetNumberLength()));
+		h.setOrderId(new String(payload, hsc.getMessageDataOffset(), h.getOrderIdLength()));
+		h.setSheetNumber(new String(payload, hsc.getSheetNumberDataOffset(h), h.getSheetNumberLength()));
 		return h;
 	}
 
@@ -95,19 +102,19 @@ public class TwelveNDeserializer implements Deserializer {
 		l.setNumPillsLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPillsInfo().getOffset(),  sc.getNumPillsInfo().getSize())));
 		l.setRefOrderIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefOrderIdInfo().getOffset(),  sc.getRefOrderIdInfo().getSize())));
 		l.setRefSheetNumLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefSheetNumInfo().getOffset(),  sc.getRefSheetNumInfo().getSize())));
-		for (int i=0, currentOffset = offset + sc.getRefSheetNumInfo().getNextOffset(); i < l.getNumberOfOrderLines(); i++, currentOffset += l.getNextLineOffset() ) {
+		for (int i=0, currentOffset = offset + sc.getRefSheetNumInfo().getNextOffset(); i < l.getNumberOfOrderLines(); i++, currentOffset += sc.getNextLineOffset(l) ) {
 			OrderLine line = new OrderLine();
-			line.setOrderLineNumber(new String(messagePayload, currentOffset + l.getOrderLineReferenceNumberOffset(), l.getOrderLineReferenceNumberLength()));
-			line.setOrderLineType(new String(messagePayload, currentOffset + l.getOrderLineTypeOffset(), l.getOrderLineTypeLength()));
-			line.setPharmacyId(new String(messagePayload, currentOffset + l.getPharmacyIdOffset(), l.getPharmacyIdLength()));
-			line.setPatientId(new String(messagePayload, currentOffset + l.getPatientIdOffset(), l.getPatientIdLength()));
-			line.setPrescriptionId(new String(messagePayload, currentOffset + l.getPrescriptionIdOffset(), l.getPrescriptionIdLength()));
-			line.setProductId(new String(messagePayload, currentOffset + l.getProductIdOffset(), l.getProductIdLength()));
-			line.setNumberOfPacks(new String(messagePayload, currentOffset + l.getNumPacksOffset(), l.getNumPacksLength()));
-			line.setNumberOfPacksPicked(new String(messagePayload, currentOffset + l.getPacksPickedOffset(), l.getPacksPickedLength()));
-			line.setNumberOfPills(new String(messagePayload, currentOffset + l.getNumPillsOffset(), l.getNumPillsLength()));
-			line.setReferenceOrderId(new String(messagePayload, currentOffset + l.getRefOrderIdOffset(), l.getRefOrderIdLength()));
-			line.setReferenceSheetNumber(new String(messagePayload, currentOffset + l.getRefSheetNumOffset(), l.getRefSheetNumLength()));
+			line.setOrderLineNumber(new String(messagePayload, currentOffset + sc.getOrderLineReferenceNumberOffset(l), l.getOrderLineReferenceNumberLength()));
+			line.setOrderLineType(new String(messagePayload, currentOffset + sc.getOrderLineTypeOffset(l), l.getOrderLineTypeLength()));
+			line.setPharmacyId(new String(messagePayload, currentOffset + sc.getPharmacyIdOffset(l), l.getPharmacyIdLength()));
+			line.setPatientId(new String(messagePayload, currentOffset + sc.getPatientIdOffset(l), l.getPatientIdLength()));
+			line.setPrescriptionId(new String(messagePayload, currentOffset + sc.getPrescriptionIdOffset(l), l.getPrescriptionIdLength()));
+			line.setProductId(new String(messagePayload, currentOffset + sc.getProductIdOffset(l), l.getProductIdLength()));
+			line.setNumberOfPacks(new String(messagePayload, currentOffset + sc.getNumPacksOffset(l), l.getNumPacksLength()));
+			line.setNumberOfPacksPicked(new String(messagePayload, currentOffset + sc.getPacksPickedOffset(l), l.getPacksPickedLength()));
+			line.setNumberOfPills(new String(messagePayload, currentOffset + sc.getNumPillsOffset(l), l.getNumPillsLength()));
+			line.setReferenceOrderId(new String(messagePayload, currentOffset + sc.getRefOrderIdOffset(l), l.getRefOrderIdLength()));
+			line.setReferenceSheetNumber(new String(messagePayload, currentOffset + sc.getRefSheetNumOffset(l), l.getRefSheetNumLength()));
 			l.add(line);
 		}
 		return l;

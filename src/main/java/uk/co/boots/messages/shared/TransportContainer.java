@@ -1,4 +1,4 @@
-package uk.co.boots.messages.twelven;
+package uk.co.boots.messages.shared;
 
 import uk.co.boots.messages.BasicRecord;
 

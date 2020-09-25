@@ -1,4 +1,4 @@
-package uk.co.boots.messages.twelven;
+package uk.co.boots.messages.shared;
 
 import lombok.Data;
 
@@ -15,5 +15,5 @@ public class OrderLine {
 	private String numberOfPills;
 	private String referenceOrderId;
 	private String referenceSheetNumber;
-
+	
 }

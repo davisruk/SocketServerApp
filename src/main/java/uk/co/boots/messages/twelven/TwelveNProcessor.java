@@ -2,13 +2,14 @@ package uk.co.boots.messages.twelven;
 
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.MessageProcessor;
+import uk.co.boots.messages.shared.ToteMessage;
 
 public class TwelveNProcessor implements MessageProcessor {
 
 	@Override
 	public void process(BasicMessage m) {
 		// TODO Auto-generated method stub
-		TwelveN twelveN = (TwelveN) m;
+		ToteMessage twelveN = (ToteMessage) m;
 	}
 
 	@Override

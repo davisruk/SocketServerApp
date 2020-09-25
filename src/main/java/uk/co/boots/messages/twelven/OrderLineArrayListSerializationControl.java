@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import uk.co.boots.messages.SerialisationControlField;
+import uk.co.boots.messages.shared.OrderLineArrayList;
 
 @Component
 @Getter
@@ -26,4 +27,53 @@ public class OrderLineArrayListSerializationControl {
 	
 	private final int orderLineDataOffset = refSheetNumInfo.getNextOffset();
 
+	public int getOrderLineReferenceNumberOffset(OrderLineArrayList al) {
+		// we don't count numberOfOrderLines
+		return 0;
+	}
+	
+	public int getOrderLineTypeOffset(OrderLineArrayList al) {
+		return getOrderLineReferenceNumberOffset(al) + al.getOrderLineReferenceNumberLength();
+	}
+	
+	public int getPharmacyIdOffset(OrderLineArrayList al) {
+		return getOrderLineTypeOffset(al) + al.getOrderLineTypeLength(); 
+	}
+	
+	public int getPatientIdOffset(OrderLineArrayList al) {
+		return getPharmacyIdOffset(al) + al.getPharmacyIdLength();
+	}
+
+	public int getPrescriptionIdOffset(OrderLineArrayList al) {
+		return getPatientIdOffset(al) + al.getPatientIdLength();
+	}
+	
+	public int getProductIdOffset(OrderLineArrayList al) {
+		return getPrescriptionIdOffset(al) + al.getPrescriptionIdLength();
+	}
+	
+	public int getNumPacksOffset(OrderLineArrayList al) {
+		return getProductIdOffset(al) + al.getProductIdLength();
+	}
+	
+	public int getPacksPickedOffset(OrderLineArrayList al) {
+		return getNumPacksOffset(al) + al.getNumPacksLength();
+	}
+	
+	public int getNumPillsOffset(OrderLineArrayList al) {
+		return getPacksPickedOffset(al) + al.getPacksPickedLength();
+	}
+	
+	public int getRefOrderIdOffset(OrderLineArrayList al) {
+		return getNumPillsOffset(al) + al.getNumPillsLength();
+	}
+	
+	public int getRefSheetNumOffset(OrderLineArrayList al) {
+		return getRefOrderIdOffset(al) + al.getRefOrderIdLength();
+	}
+		
+	public int getNextLineOffset(OrderLineArrayList al) {
+		return getRefSheetNumOffset(al) + al.getRefSheetNumLength();
+	}
+	
 }

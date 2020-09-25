@@ -6,17 +6,13 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import lombok.Getter;
-
 @Component
-public class DeserializerFactory{
+public class DeserializerFactory {
 
 	@Autowired
-	private List<Deserializer> deserializers; 
+	private List<Deserializer> deserializers;
 
 	public Optional<Deserializer> getDeserializer(String messageType) {
-        return deserializers.stream()
-            .filter(service -> service.canHandle(messageType))
-            .findFirst();
-    }	
+		return deserializers.stream().filter(service -> service.canHandle(messageType)).findFirst();
+	}
 }
