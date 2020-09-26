@@ -32,7 +32,7 @@ public class OrderLineArrayList extends ArrayList<OrderLine> {
 	private int plasticBagIdLength;
 	private int productBarcodeLength;
 	private int operatorIdLength;
-	private int roleIdLenght;
+	private int roleIdLength;
 	private int timestampLength;
 	private int statusLength;
 }

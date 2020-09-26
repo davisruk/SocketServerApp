@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class SerialisationControlField {
-	private String fieldName;
+	private String format;
 	private int offset;
 	private int size;
 	

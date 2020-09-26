@@ -8,9 +8,9 @@ import uk.co.boots.messages.SerialisationControlField;
 @Component
 @Getter
 public class HeaderSerializationControl {
-	private final SerialisationControlField identifierInfo = new SerialisationControlField ("identifier", 1, 3);
-	private final SerialisationControlField orderIdInfo = new SerialisationControlField ("lengthOfOrderId", identifierInfo.getNextOffset(), 2);
-	private final SerialisationControlField sheetNumberInfo = new SerialisationControlField ("lengthOfOrderId", orderIdInfo.getNextOffset(), 2);
+	private final SerialisationControlField identifierInfo = new SerialisationControlField ("%c", 1, 3);
+	private final SerialisationControlField orderIdInfo = new SerialisationControlField ("%02d", identifierInfo.getNextOffset(), 2);
+	private final SerialisationControlField sheetNumberInfo = new SerialisationControlField ("%02d", orderIdInfo.getNextOffset(), 2);
 	private final int headerDataOffset = sheetNumberInfo.getNextOffset(); 
 	
 	public int getMessageDataOffset() {

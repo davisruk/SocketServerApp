@@ -1,8 +1,11 @@
 package uk.co.boots.messages.thirtytwor;
 
+import org.springframework.stereotype.Component;
+
 import lombok.Data;
 import uk.co.boots.messages.SerialisationControlField;
 
+@Component
 @Data
 public class OperatorArrayListSerializationControl {
 	private final SerialisationControlField operatorIdInfo;
@@ -10,8 +13,8 @@ public class OperatorArrayListSerializationControl {
 	private final SerialisationControlField timestampInfo;
 	
 	public OperatorArrayListSerializationControl (OrderLineArrayListSerializationControl lineControl) {
-		operatorIdInfo = new SerialisationControlField ("lengthOfOperatorId", lineControl.getProductBarcodeInfo().getNextOffset(), 2);
-		roleIdInfo = new SerialisationControlField ("lengthOfRoleId", operatorIdInfo.getNextOffset(), 2);
-		timestampInfo = new SerialisationControlField ("lengthOfTimestamp", roleIdInfo.getNextOffset(), 2);
+		operatorIdInfo = new SerialisationControlField ("%02d", lineControl.getProductBarcodeInfo().getNextOffset(), 2);
+		roleIdInfo = new SerialisationControlField ("%02d", operatorIdInfo.getNextOffset(), 2);
+		timestampInfo = new SerialisationControlField ("%02d", roleIdInfo.getNextOffset(), 2);
 	}
 }
