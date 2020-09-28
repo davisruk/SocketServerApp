@@ -4,6 +4,7 @@ import lombok.Data;
 import uk.co.boots.messages.SerialisationControlField;
 
 @Data
+//@Embeddable
 public class Header {
 	public static final SerialisationControlField identifierInfo = new SerialisationControlField ("identifier", 1, 3);
 	public static final SerialisationControlField orderIdInfo = new SerialisationControlField ("lengthOfOrderId", identifierInfo.getNextOffset(), 2);
