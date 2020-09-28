@@ -1,8 +1,6 @@
 package uk.co.boots.osr;
 
 import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -10,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.messages.Serializer;
 import uk.co.boots.messages.SerializerFactory;
-import uk.co.boots.messages.shared.OrderLine;
+import uk.co.boots.messages.shared.OrderLineArrayList;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.OperatorArrayList;
@@ -70,7 +68,9 @@ public class ToteController {
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
 		// need to get a tote processor to setup data that would be created whilst on
 		// the track
+		System.out.println("Sending message back");
 		client.sendMessage(s.serialize(tote));
+		System.out.println("Finished Sending message back");
 		handler.handleToteDeactivation(tote);
 	}
 
@@ -81,14 +81,17 @@ public class ToteController {
 		op.setOperatorId("RDavis  ");
 		op.setRoleId("Solution Architect  ");
 		oal.add(op);
-
-		t.getOrderLines().forEach(line -> {
-			Calendar opc = Calendar.getInstance();
-			opc.setTimeInMillis(start.getTimeInMillis() - end.getTimeInMillis() / 2);
-			// poor encapsulation - refactor
-			op.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
-			line.setOperators(oal);
-		});
+		
+		OrderLineArrayList olal = t.getOrderLines(); 
+		if (olal != null) { 
+			olal.forEach(line -> {
+				Calendar opc = Calendar.getInstance();
+				opc.setTimeInMillis(start.getTimeInMillis() - end.getTimeInMillis() / 2);
+				// poor encapsulation - refactor
+				op.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
+				line.setOperators(oal);
+			});
+		}
 	}
 
 	private String convertDate(Calendar c) {

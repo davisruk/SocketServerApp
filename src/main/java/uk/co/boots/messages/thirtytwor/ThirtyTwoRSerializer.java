@@ -74,6 +74,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 	}
 	
 	private StringBuffer processStatus (StatusArrayList sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
+		if (sal == null) return sb;
 		sal.setStatusLength(4);
 		sb.append(sc.getIdentifier());
 		sb.append(String.format(sc.getNumberOfEntries().getFormat(), sal.getNumberOfLines()));
@@ -85,6 +86,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 	private StringBuffer processOrderLines(OrderLineArrayList ola, StringBuffer sb, OrderLineArrayListSerializationControl sc) {
 		OperatorArrayListSerializationControl oc = sc.getOperatorArrayListSerializationControl();
 		
+		if (ola == null) return sb;
 		// Refactor - These are not set in the 12N, should really get this info from the serialization controller
 		ola.setPlasticBagIdLength(8);
 		ola.setProductBarcodeLength(13);
@@ -134,6 +136,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 	}
 	
 	private StringBuffer processOperators (OperatorArrayList oal, StringBuffer sb, OperatorArrayListSerializationControl sc) {
+		if (oal == null) return sb;
 		sb.append(String.format("%02d", oal.getNumberOfLines()));
 		for (int i = 0; i < oal.size(); i++) {
 			OperatorLine ol = oal.get(i);

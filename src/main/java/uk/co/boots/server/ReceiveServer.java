@@ -60,12 +60,21 @@ public class ReceiveServer implements SocketServer {
 				while (!finished) {
 					byte[] messageBytes;
 					boolean finishedMessage = false;
-						ByteArrayOutputStream buf = new ByteArrayOutputStream();
-						int b;
-						while (!finishedMessage && (b = ins.read()) > 0) {
+					boolean messageStarted = false;
+					ByteArrayOutputStream buf = new ByteArrayOutputStream();
+					int b, bytesRead=0;
+					while (!finishedMessage && (b = ins.read()) > 0) {
+						bytesRead ++;
+						if (bytesRead == 1) {
+							// this is the first byte, we want to ensure that it's a 0x0D framing byte
+							// some tools will replace 0x0D with a space
+							messageStarted = b == 0x0D || b==0x20;
+						}
+						if (messageStarted) {
 							buf.write(b);
 							finishedMessage = b == 0x0A;
 						}
+					}
 					messageBytes = buf.toByteArray();
 					String msgType = new String(messageBytes, 1, 3);
 					Deserializer d = deserializerFactory.getDeserializer(msgType).get();

@@ -48,26 +48,31 @@ public class TwelveNDeserializer implements Deserializer {
 				case 'T': {
 					record.setToteIdentifier(readToteIdentifier(messagePayload, currentOffset));
 					br = record.getToteIdentifier();
+					br.setTote(record);
 					break;
 				}
 				case 'C': {
 					record.setTransportContainer(readTransportContainer(messagePayload, currentOffset));
 					br = record.getTransportContainer();
+					br.setTote(record);
 					break;
 				}
 				case 'U': {
 					record.setOrderPriority(readOrderPriority(messagePayload, currentOffset));
 					br = record.getOrderPriority();
+					br.setTote(record);
 					break;
 				}
 				case 'E': {
 					record.setServiceCentre(readServiceCentre(messagePayload, currentOffset));
 					br = record.getServiceCentre();
+					br.setTote(record);
 					break;
 				}
 				case 'e': {
 					record.setDepartureTime(readDepartureTime(messagePayload, currentOffset));
 					br = record.getDepartureTime();
+					br.setTote(record);
 					break;
 				}
 			}
