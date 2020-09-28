@@ -12,18 +12,12 @@ import uk.co.boots.osr.OSRBuffer;
 @Component
 public class TwelveNProcessor implements MessageProcessor {
 
-	@Autowired
-	private OSRBuffer osrBuffer;
-
     @Autowired
     private ToteRepository toteRepository;
 	
 	@Override
 	public void process(BasicMessage m) {
-		// TODO Auto-generated method stub
 		Tote t = (Tote) m;
-		//osrBuffer.addToteMessage(t);
-		t.getToteIdentifier().setTote(t);
 		toteRepository.save(t);
 	}
 

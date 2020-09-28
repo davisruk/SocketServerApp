@@ -12,7 +12,7 @@ import lombok.ToString;
 import uk.co.boots.messages.shared.Tote;
 
 @Data
-@ToString(exclude="tote")
+@ToString(exclude="tote") //to stop circular dependency with Tote blowing stack on toString call
 @MappedSuperclass
 public abstract class BasicRecord {
 	@Transient
