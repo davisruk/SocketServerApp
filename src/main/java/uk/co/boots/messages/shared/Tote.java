@@ -1,6 +1,8 @@
 package uk.co.boots.messages.shared;
 
-import java.util.ArrayList;
+import org.springframework.boot.jackson.JsonComponent;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 import uk.co.boots.messages.BasicMessage;
@@ -12,6 +14,7 @@ import uk.co.boots.messages.twelven.OrderPriority;
 import uk.co.boots.messages.twelven.ServiceCentre;
 
 @Data
+@JsonComponent
 public class Tote implements BasicMessage {
 	private Header header;
 	private ToteIdentifier toteIdentifier;
@@ -30,6 +33,7 @@ public class Tote implements BasicMessage {
 	}
 
 	@Override
+	@JsonIgnore
 	public byte[] getResponse() {
 		// TODO Auto-generated method stub
 		return toString().getBytes();

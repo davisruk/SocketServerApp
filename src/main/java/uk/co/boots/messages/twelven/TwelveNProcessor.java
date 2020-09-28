@@ -1,7 +1,11 @@
 package uk.co.boots.messages.twelven;
 
+import java.io.File;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.MessageProcessor;
@@ -13,12 +17,21 @@ public class TwelveNProcessor implements MessageProcessor {
 
 	@Autowired
 	private OSRBuffer osrBuffer;
+
+    @Autowired
+    private ObjectMapper objectMapper;		
 	
 	@Override
 	public void process(BasicMessage m) {
 		// TODO Auto-generated method stub
 		Tote t = (Tote) m;
 		osrBuffer.addToteMessage(t);
+		try {
+		 objectMapper.writeValue(new File("D:/java/12N.json"), t);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
 	}
 
 	@Override
