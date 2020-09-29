@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.messages.Serializer;
 import uk.co.boots.messages.SerializerFactory;
+import uk.co.boots.messages.persistence.ToteRepository;
 import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.Tote;
@@ -31,7 +32,7 @@ public class ToteController {
 	private OSRBuffer osrBuffer;
 	@Autowired
 	private SerializerFactory serializerFactory;
-
+	
 	@Async
 	public void releaseTote(Tote tote, ToteEventHandler handler, SendClientSocketHandler client) {
 		handler.handleToteActivation(tote);

@@ -36,7 +36,7 @@ public class Tote implements BasicMessage {
 	private DepartureTime departureTime;
 	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
 	private ServiceCentre serviceCentre;
-	@Transient
+	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
 	private StartTime startTime;
 	@Transient
 	private EndTime endTime;

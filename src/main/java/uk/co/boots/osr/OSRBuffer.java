@@ -1,18 +1,13 @@
 package uk.co.boots.osr;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
-import uk.co.boots.messages.shared.Tote;
 
 @Component ("osrBuffer")
 public class OSRBuffer {
 
-	@Getter
-	private ConcurrentLinkedDeque<Tote> totes = new ConcurrentLinkedDeque<Tote>();
 	@Getter
 	@Autowired
 	OSRConfig osrConfig;
@@ -34,9 +29,5 @@ public class OSRBuffer {
 		System.out.println(osrConfig);
 		System.out.println("-----------------[OSRBuffer][setOsrConfig][END]-----------------");
 		
-	}
-	
-	public void addToteMessage(Tote msg) {
-		totes.add(msg);
 	}
 }
