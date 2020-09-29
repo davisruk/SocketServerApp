@@ -55,6 +55,10 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb = processBasicRecord(t.getEndTime(), sb);
 		sb = processStatus(t.getStatus(), sb, statusArrayListSerializationControl);
 		sb = processOrderDetail(t.getOrderDetail(), sb, orderLineArrayListSerializationControl);
+
+		// have to process this part of the header here because we don't know the size of the message until now
+		int messageLength = sb.length() + headerSerializationControl.getSizeInfo().getSize();
+		sb.insert(0,String.format(headerSerializationControl.getSizeInfo().getFormat(), messageLength));
 		return sb.toString().getBytes();
 	}
 	
