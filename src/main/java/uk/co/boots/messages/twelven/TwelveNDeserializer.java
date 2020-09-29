@@ -1,5 +1,7 @@
 package uk.co.boots.messages.twelven;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,10 +11,10 @@ import uk.co.boots.messages.Deserializer;
 import uk.co.boots.messages.MessageProcessor;
 import uk.co.boots.messages.shared.Header;
 import uk.co.boots.messages.shared.HeaderSerializationControl;
+import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
-import uk.co.boots.messages.shared.OrderLineArrayList;
-import uk.co.boots.messages.shared.ToteIdentifier;
 import uk.co.boots.messages.shared.Tote;
+import uk.co.boots.messages.shared.ToteIdentifier;
 import uk.co.boots.messages.shared.TransportContainer;
 
 @Service
@@ -78,7 +80,7 @@ public class TwelveNDeserializer implements Deserializer {
 			}
 		}
 		// now read the order lines
-		record.setOrderLines(readOrderLines(messagePayload, currentOffset));
+		record.setOrderDetail(readOrderLines(record, messagePayload, currentOffset));
 		return record;
 	}
 
@@ -95,37 +97,40 @@ public class TwelveNDeserializer implements Deserializer {
 		return h;
 	}
 
-	private OrderLineArrayList readOrderLines (byte[] messagePayload, int offset) {
-		OrderLineArrayList l = new OrderLineArrayList();
+	private OrderDetail readOrderLines (Tote t, byte[] messagePayload, int offset) {
+		OrderDetail od = new OrderDetail();
+		od.setTote(t);
+		List<OrderLine> ol = od.getOrderLines();
 		OrderLineArrayListSerializationControl sc = twelveNSerializationControl.getOrderLineArrayListSerializationControl();
-		l.setNumberOfOrderLines(Integer.parseInt(new String(messagePayload, offset + sc.getNumberOrderLinesInfo().getOffset(),  sc.getNumberOrderLinesInfo().getSize())));
-		l.setOrderLineReferenceNumberLength(Integer.parseInt(new String(messagePayload, offset + sc.getOrderLineRefInfo().getOffset(),  sc.getOrderLineRefInfo().getSize())));
-		l.setOrderLineTypeLength(Integer.parseInt(new String(messagePayload, offset + sc.getOrderLineTypeInfo().getOffset(),  sc.getOrderLineTypeInfo().getSize())));
-		l.setPharmacyIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPharmacyIdInfo().getOffset(),  sc.getPharmacyIdInfo().getSize())));
-		l.setPatientIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPatientIdInfo().getOffset(),  sc.getPatientIdInfo().getSize())));
-		l.setPrescriptionIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPrescriptionIdInfo().getOffset(),  sc.getPrescriptionIdInfo().getSize())));
-		l.setProductIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getProductIdInfo().getOffset(),  sc.getProductIdInfo().getSize())));
-		l.setNumPacksLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPacksInfo().getOffset(),  sc.getNumPacksInfo().getSize())));
-		l.setPacksPickedLength(Integer.parseInt(new String(messagePayload, offset + sc.getPacksPickedInfo().getOffset(),  sc.getPacksPickedInfo().getSize())));
-		l.setNumPillsLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPillsInfo().getOffset(),  sc.getNumPillsInfo().getSize())));
-		l.setRefOrderIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefOrderIdInfo().getOffset(),  sc.getRefOrderIdInfo().getSize())));
-		l.setRefSheetNumLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefSheetNumInfo().getOffset(),  sc.getRefSheetNumInfo().getSize())));
-		for (int i=0, currentOffset = offset + sc.getRefSheetNumInfo().getNextOffset(); i < l.getNumberOfOrderLines(); i++, currentOffset += sc.getNextLineOffset(l) ) {
+		od.setNumberOfOrderLines(Integer.parseInt(new String(messagePayload, offset + sc.getNumberOrderLinesInfo().getOffset(),  sc.getNumberOrderLinesInfo().getSize())));
+		od.setOrderLineReferenceNumberLength(Integer.parseInt(new String(messagePayload, offset + sc.getOrderLineRefInfo().getOffset(),  sc.getOrderLineRefInfo().getSize())));
+		od.setOrderLineTypeLength(Integer.parseInt(new String(messagePayload, offset + sc.getOrderLineTypeInfo().getOffset(),  sc.getOrderLineTypeInfo().getSize())));
+		od.setPharmacyIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPharmacyIdInfo().getOffset(),  sc.getPharmacyIdInfo().getSize())));
+		od.setPatientIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPatientIdInfo().getOffset(),  sc.getPatientIdInfo().getSize())));
+		od.setPrescriptionIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getPrescriptionIdInfo().getOffset(),  sc.getPrescriptionIdInfo().getSize())));
+		od.setProductIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getProductIdInfo().getOffset(),  sc.getProductIdInfo().getSize())));
+		od.setNumPacksLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPacksInfo().getOffset(),  sc.getNumPacksInfo().getSize())));
+		od.setPacksPickedLength(Integer.parseInt(new String(messagePayload, offset + sc.getPacksPickedInfo().getOffset(),  sc.getPacksPickedInfo().getSize())));
+		od.setNumPillsLength(Integer.parseInt(new String(messagePayload, offset + sc.getNumPillsInfo().getOffset(),  sc.getNumPillsInfo().getSize())));
+		od.setRefOrderIdLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefOrderIdInfo().getOffset(),  sc.getRefOrderIdInfo().getSize())));
+		od.setRefSheetNumLength(Integer.parseInt(new String(messagePayload, offset + sc.getRefSheetNumInfo().getOffset(),  sc.getRefSheetNumInfo().getSize())));
+		for (int i=0, currentOffset = offset + sc.getRefSheetNumInfo().getNextOffset(); i < od.getNumberOfOrderLines(); i++, currentOffset += sc.getNextLineOffset(od) ) {
 			OrderLine line = new OrderLine();
-			line.setOrderLineNumber(new String(messagePayload, currentOffset + sc.getOrderLineReferenceNumberOffset(l), l.getOrderLineReferenceNumberLength()));
-			line.setOrderLineType(new String(messagePayload, currentOffset + sc.getOrderLineTypeOffset(l), l.getOrderLineTypeLength()));
-			line.setPharmacyId(new String(messagePayload, currentOffset + sc.getPharmacyIdOffset(l), l.getPharmacyIdLength()));
-			line.setPatientId(new String(messagePayload, currentOffset + sc.getPatientIdOffset(l), l.getPatientIdLength()));
-			line.setPrescriptionId(new String(messagePayload, currentOffset + sc.getPrescriptionIdOffset(l), l.getPrescriptionIdLength()));
-			line.setProductId(new String(messagePayload, currentOffset + sc.getProductIdOffset(l), l.getProductIdLength()));
-			line.setNumberOfPacks(new String(messagePayload, currentOffset + sc.getNumPacksOffset(l), l.getNumPacksLength()));
-			line.setNumberOfPacksPicked(new String(messagePayload, currentOffset + sc.getPacksPickedOffset(l), l.getPacksPickedLength()));
-			line.setNumberOfPills(new String(messagePayload, currentOffset + sc.getNumPillsOffset(l), l.getNumPillsLength()));
-			line.setReferenceOrderId(new String(messagePayload, currentOffset + sc.getRefOrderIdOffset(l), l.getRefOrderIdLength()));
-			line.setReferenceSheetNumber(new String(messagePayload, currentOffset + sc.getRefSheetNumOffset(l), l.getRefSheetNumLength()));
-			l.add(line);
+			line.setOrderLineNumber(new String(messagePayload, currentOffset + sc.getOrderLineReferenceNumberOffset(od), od.getOrderLineReferenceNumberLength()));
+			line.setOrderLineType(new String(messagePayload, currentOffset + sc.getOrderLineTypeOffset(od), od.getOrderLineTypeLength()));
+			line.setPharmacyId(new String(messagePayload, currentOffset + sc.getPharmacyIdOffset(od), od.getPharmacyIdLength()));
+			line.setPatientId(new String(messagePayload, currentOffset + sc.getPatientIdOffset(od), od.getPatientIdLength()));
+			line.setPrescriptionId(new String(messagePayload, currentOffset + sc.getPrescriptionIdOffset(od), od.getPrescriptionIdLength()));
+			line.setProductId(new String(messagePayload, currentOffset + sc.getProductIdOffset(od), od.getProductIdLength()));
+			line.setNumberOfPacks(new String(messagePayload, currentOffset + sc.getNumPacksOffset(od), od.getNumPacksLength()));
+			line.setNumberOfPacksPicked(new String(messagePayload, currentOffset + sc.getPacksPickedOffset(od), od.getPacksPickedLength()));
+			line.setNumberOfPills(new String(messagePayload, currentOffset + sc.getNumPillsOffset(od), od.getNumPillsLength()));
+			line.setReferenceOrderId(new String(messagePayload, currentOffset + sc.getRefOrderIdOffset(od), od.getRefOrderIdLength()));
+			line.setReferenceSheetNumber(new String(messagePayload, currentOffset + sc.getRefSheetNumOffset(od), od.getRefSheetNumLength()));
+			line.setOrderDetail(od);
+			ol.add(line);
 		}
-		return l;
+		return od;
 	}
 	private ToteIdentifier readToteIdentifier(byte[] messagePayload, int offset) {
 		ToteIdentifier ti = new ToteIdentifier();

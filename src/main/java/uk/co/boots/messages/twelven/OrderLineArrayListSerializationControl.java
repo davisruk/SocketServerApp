@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import uk.co.boots.messages.SerialisationControlField;
-import uk.co.boots.messages.shared.OrderLineArrayList;
+import uk.co.boots.messages.shared.OrderDetail;
 
 @Component
 @Getter
@@ -27,52 +27,52 @@ public class OrderLineArrayListSerializationControl {
 	
 	private final int orderLineDataOffset = refSheetNumInfo.getNextOffset();
 
-	public int getOrderLineReferenceNumberOffset(OrderLineArrayList al) {
+	public int getOrderLineReferenceNumberOffset(OrderDetail al) {
 		// we don't count numberOfOrderLines
 		return 0;
 	}
 	
-	public int getOrderLineTypeOffset(OrderLineArrayList al) {
+	public int getOrderLineTypeOffset(OrderDetail al) {
 		return getOrderLineReferenceNumberOffset(al) + al.getOrderLineReferenceNumberLength();
 	}
 	
-	public int getPharmacyIdOffset(OrderLineArrayList al) {
+	public int getPharmacyIdOffset(OrderDetail al) {
 		return getOrderLineTypeOffset(al) + al.getOrderLineTypeLength(); 
 	}
 	
-	public int getPatientIdOffset(OrderLineArrayList al) {
+	public int getPatientIdOffset(OrderDetail al) {
 		return getPharmacyIdOffset(al) + al.getPharmacyIdLength();
 	}
 
-	public int getPrescriptionIdOffset(OrderLineArrayList al) {
+	public int getPrescriptionIdOffset(OrderDetail al) {
 		return getPatientIdOffset(al) + al.getPatientIdLength();
 	}
 	
-	public int getProductIdOffset(OrderLineArrayList al) {
+	public int getProductIdOffset(OrderDetail al) {
 		return getPrescriptionIdOffset(al) + al.getPrescriptionIdLength();
 	}
 	
-	public int getNumPacksOffset(OrderLineArrayList al) {
+	public int getNumPacksOffset(OrderDetail al) {
 		return getProductIdOffset(al) + al.getProductIdLength();
 	}
 	
-	public int getPacksPickedOffset(OrderLineArrayList al) {
+	public int getPacksPickedOffset(OrderDetail al) {
 		return getNumPacksOffset(al) + al.getNumPacksLength();
 	}
 	
-	public int getNumPillsOffset(OrderLineArrayList al) {
+	public int getNumPillsOffset(OrderDetail al) {
 		return getPacksPickedOffset(al) + al.getPacksPickedLength();
 	}
 	
-	public int getRefOrderIdOffset(OrderLineArrayList al) {
+	public int getRefOrderIdOffset(OrderDetail al) {
 		return getNumPillsOffset(al) + al.getNumPillsLength();
 	}
 	
-	public int getRefSheetNumOffset(OrderLineArrayList al) {
+	public int getRefSheetNumOffset(OrderDetail al) {
 		return getRefOrderIdOffset(al) + al.getRefOrderIdLength();
 	}
 		
-	public int getNextLineOffset(OrderLineArrayList al) {
+	public int getNextLineOffset(OrderDetail al) {
 		return getRefSheetNumOffset(al) + al.getRefSheetNumLength();
 	}
 	

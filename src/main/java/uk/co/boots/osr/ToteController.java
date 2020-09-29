@@ -1,6 +1,7 @@
 package uk.co.boots.osr;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -8,7 +9,8 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.messages.Serializer;
 import uk.co.boots.messages.SerializerFactory;
-import uk.co.boots.messages.shared.OrderLineArrayList;
+import uk.co.boots.messages.shared.OrderDetail;
+import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.OperatorArrayList;
@@ -82,9 +84,10 @@ public class ToteController {
 		op.setRoleId("Solution Architect  ");
 		oal.add(op);
 		
-		OrderLineArrayList olal = t.getOrderLines(); 
-		if (olal != null) { 
-			olal.forEach(line -> {
+		OrderDetail od = t.getOrderDetail();
+		if (od != null) {
+			List<OrderLine> ol = od.getOrderLines(); 
+			ol.forEach(line -> {
 				Calendar opc = Calendar.getInstance();
 				opc.setTimeInMillis(start.getTimeInMillis() - end.getTimeInMillis() / 2);
 				// poor encapsulation - refactor

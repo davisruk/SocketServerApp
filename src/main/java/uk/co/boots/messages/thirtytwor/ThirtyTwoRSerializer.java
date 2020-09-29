@@ -1,5 +1,7 @@
 package uk.co.boots.messages.thirtytwor;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -8,8 +10,8 @@ import uk.co.boots.messages.BasicRecord;
 import uk.co.boots.messages.Serializer;
 import uk.co.boots.messages.shared.Header;
 import uk.co.boots.messages.shared.HeaderSerializationControl;
+import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
-import uk.co.boots.messages.shared.OrderLineArrayList;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.shared.ToteIdentifier;
 import uk.co.boots.messages.shared.TransportContainer;
@@ -52,7 +54,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb = processBasicRecord(t.getStartTime(), sb);
 		sb = processBasicRecord(t.getEndTime(), sb);
 		sb = processStatus(t.getStatus(), sb, statusArrayListSerializationControl);
-		sb = processOrderLines(t.getOrderLines(), sb, orderLineArrayListSerializationControl);
+		sb = processOrderDetail(t.getOrderDetail(), sb, orderLineArrayListSerializationControl);
 		return sb.toString().getBytes();
 	}
 	
@@ -83,35 +85,38 @@ public class ThirtyTwoRSerializer implements Serializer {
 		return sb;
 	}
 	
-	private StringBuffer processOrderLines(OrderLineArrayList ola, StringBuffer sb, OrderLineArrayListSerializationControl sc) {
+	private StringBuffer processOrderDetail(OrderDetail od, StringBuffer sb, OrderLineArrayListSerializationControl sc) {
 		OperatorArrayListSerializationControl oc = sc.getOperatorArrayListSerializationControl();
 		
-		if (ola == null) return sb;
+		if (od == null) return sb;
 		// Refactor - These are not set in the 12N, should really get this info from the serialization controller
-		ola.setPlasticBagIdLength(8);
-		ola.setProductBarcodeLength(13);
-		ola.setTimestampLength(17);
-		ola.setRoleIdLength(20);
-		ola.setOperatorIdLength(8);
-		ola.setStatusLength(2);
+		od.setPlasticBagIdLength(8);
+		od.setProductBarcodeLength(13);
+		od.setTimestampLength(17);
+		od.setRoleIdLength(20);
+		od.setOperatorIdLength(8);
+		od.setStatusLength(2);
 		// end of refactor
 		
 		sb.append(orderLineArrayListSerializationControl.getIdentifier());
-		sb.append(String.format(sc.getNumberOrderLinesInfo().getFormat(), ola.getNumberOfOrderLines()));
-		sb.append(String.format(sc.getOrderLineRefInfo().getFormat(), ola.getOrderLineReferenceNumberLength()));
-		sb.append(String.format(sc.getOrderLineTypeInfo().getFormat(), ola.getOrderLineTypeLength()));
-		sb.append(String.format(sc.getPharmacyIdInfo().getFormat(), ola.getPharmacyIdLength()));
-		sb.append(String.format(sc.getPatientIdInfo().getFormat(), ola.getPatientIdLength()));
-		sb.append(String.format(sc.getPrescriptionIdInfo().getFormat(), ola.getPrescriptionIdLength()));
-		sb.append(String.format(sc.getPlasticBagIdInfo().getFormat(), ola.getPlasticBagIdLength()));
-		sb.append(String.format(sc.getProductIdInfo().getFormat(), ola.getProductIdLength()));
-		sb.append(String.format(sc.getNumPacksInfo().getFormat(), ola.getNumPacksLength()));
-		sb.append(String.format(sc.getNumPillsInfo().getFormat(), ola.getNumPillsLength()));
-		sb.append(String.format(sc.getProductBarcodeInfo().getFormat(), ola.getProductBarcodeLength()));
-		sb.append(String.format(oc.getOperatorIdInfo().getFormat(), ola.getOperatorIdLength()));
-		sb.append(String.format(oc.getRoleIdInfo().getFormat(), ola.getRoleIdLength()));
-		sb.append(String.format(oc.getTimestampInfo().getFormat(), ola.getTimestampLength()));
-		sb.append(String.format(sc.getStatusInfo().getFormat(), ola.getStatusLength()));
+		sb.append(String.format(sc.getNumberOrderLinesInfo().getFormat(), od.getNumberOfOrderLines()));
+		sb.append(String.format(sc.getOrderLineRefInfo().getFormat(), od.getOrderLineReferenceNumberLength()));
+		sb.append(String.format(sc.getOrderLineTypeInfo().getFormat(), od.getOrderLineTypeLength()));
+		sb.append(String.format(sc.getPharmacyIdInfo().getFormat(), od.getPharmacyIdLength()));
+		sb.append(String.format(sc.getPatientIdInfo().getFormat(), od.getPatientIdLength()));
+		sb.append(String.format(sc.getPrescriptionIdInfo().getFormat(), od.getPrescriptionIdLength()));
+		sb.append(String.format(sc.getPlasticBagIdInfo().getFormat(), od.getPlasticBagIdLength()));
+		sb.append(String.format(sc.getProductIdInfo().getFormat(), od.getProductIdLength()));
+		sb.append(String.format(sc.getNumPacksInfo().getFormat(), od.getNumPacksLength()));
+		sb.append(String.format(sc.getNumPillsInfo().getFormat(), od.getNumPillsLength()));
+		sb.append(String.format(sc.getProductBarcodeInfo().getFormat(), od.getProductBarcodeLength()));
+		sb.append(String.format(oc.getOperatorIdInfo().getFormat(), od.getOperatorIdLength()));
+		sb.append(String.format(oc.getRoleIdInfo().getFormat(), od.getRoleIdLength()));
+		sb.append(String.format(oc.getTimestampInfo().getFormat(), od.getTimestampLength()));
+		sb.append(String.format(sc.getStatusInfo().getFormat(), od.getStatusLength()));
+		
+		List<OrderLine> ola = od.getOrderLines();  
+		if (ola == null || ola.size() == 0) return sb;
 		ola.forEach(line -> processOrderLine(line, sb));
 		return sb;
 	}

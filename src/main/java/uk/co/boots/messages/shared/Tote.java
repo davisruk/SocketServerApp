@@ -42,8 +42,8 @@ public class Tote implements BasicMessage {
 	private EndTime endTime;
 	@Transient
 	private StatusArrayList status;
-	@Transient
-	private OrderLineArrayList orderLines;
+	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+	private OrderDetail orderDetail;
 
 	@Override
 	@Transient
