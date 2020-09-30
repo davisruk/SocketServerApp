@@ -38,14 +38,12 @@ public class ToteController {
 
 		handler.handleToteActivation(tote);
 		toteService.setupStartTime(Calendar.getInstance(), tote);
-
+		System.out.println(tote.getToteIdentifier().getPayload() + " started Travelling around track");
+		
 		while (timeTravelled <= trackTravelTimeLeft) {
 			try {
-				System.out.println(tote + " started Travelling around track");
 				Thread.sleep(trackTravelTimeLeft);
 				timeTravelled = System.currentTimeMillis() - started;
-				System.out.println(tote + " finished Travelling around track in " + timeTravelled / 1000 + "seconds");
-
 			} catch (InterruptedException ie) {
 				System.out.println("Tote Travel Interrupted");
 				timeTravelled = System.currentTimeMillis() - started;
@@ -54,11 +52,12 @@ public class ToteController {
 				started = System.currentTimeMillis();
 			}
 		}
-
+		
+		System.out.println(tote.getToteIdentifier().getPayload() + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 		toteService.setupEndTime(Calendar.getInstance(), tote);
 		toteService.setupToteStatus(tote, "0030");
 		toteService.setupOperators(tote);
-		handler.persistTote(tote);
+		toteService.save(tote);
 		
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();

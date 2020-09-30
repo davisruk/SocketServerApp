@@ -30,18 +30,14 @@ public class ToteService {
 	ToteRepository toteRepository;
 	
 	public Page<Tote> getTotePage(int pageNumber, int pageSize){
-		Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.asc("id")));
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
 		return toteRepository.findAll(pageable);
 	}
-/*	
-	public Iterable<Tote> findAllTote() {
-		return toteRepository.findAll();
-	}
-
+	
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
 	}
-*/	
+	
 	public Tote setupStartTime (Calendar time, Tote t) {
 		StartTime st = new StartTime();
 		st.setPayload(convertTime(time, "%02d%02d%02d"));
