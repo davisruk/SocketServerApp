@@ -27,12 +27,9 @@ public class ServerConfig {
     @Bean (name = "taskExecutor")
     public Executor taskExecutor() {
     	
-    	// we need a Thread each for ReceiveServer, SendServer, TrackController & ToteController
-    	// we also need a Thread for each tote on the track
-    	int maxThreads = Integer.parseInt(env.getProperty("osr.maxTotesOnTrack")) + 4;
     	final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(maxThreads); //
-        executor.setMaxPoolSize(maxThreads);
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(30);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("SocketThread-");
         executor.initialize();
