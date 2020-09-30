@@ -35,4 +35,9 @@ public class OperatorDetail {
 		operatorList = new ArrayList<OperatorLine>();
 	}
 	
+	public void addOperatorLine(OperatorLine ol) {
+		ol.setOperatorDetail(this);
+		operatorList.add(ol);
+	}
+	
 }

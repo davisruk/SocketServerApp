@@ -46,4 +46,9 @@ public class OrderLine {
 	@OneToOne(cascade={CascadeType.ALL})
 	private OperatorDetail operatorDetail;
 	private String status;
+	
+	public void setOperatorDetail (OperatorDetail od) {
+		operatorDetail = od;
+		od.setOrderLine(this);
+	}
 }

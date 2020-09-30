@@ -1,5 +1,7 @@
 package uk.co.boots.messages.shared;
 
+import java.util.Calendar;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -10,9 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.StartTime;
@@ -64,6 +64,11 @@ public class Tote implements BasicMessage {
 	@OneToOne(cascade={CascadeType.ALL})
 	private OrderDetail orderDetail;
 
+	@Transient
+	Calendar startCal;
+	@Transient
+	Calendar endCal;
+	
 	@Override
 	@Transient
 	public boolean hasResponse() {
@@ -81,4 +86,15 @@ public class Tote implements BasicMessage {
 		endTime = et;
 		et.setTote(this);
 	}
+	
+	public void setStartTime (StartTime st) {
+		startTime = st;
+		st.setTote(this);
+	}
+	
+	public void setStatusDetail (ToteStatusDetail tsd) {
+		statusDetail = tsd;
+		tsd.setTote(this);
+	}
+
 }

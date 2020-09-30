@@ -9,11 +9,10 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.messages.Serializer;
 import uk.co.boots.messages.SerializerFactory;
-import uk.co.boots.messages.persistence.ToteRepository;
+import uk.co.boots.messages.persistence.ToteService;
 import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.Tote;
-import uk.co.boots.messages.shared.TransportContainer;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.OperatorDetail;
 import uk.co.boots.messages.thirtytwor.OperatorLine;
@@ -24,27 +23,22 @@ import uk.co.boots.server.SendClientSocketHandler;
 
 @Component
 public class ToteController {
-	// this class breaks encapsulation in several places
-	// it should not know the format of strings
-	// the tote class should really store native types where possible
-	// and the serializer should convert them to strings when required
-	// areas that should be refactored are marked
 	@Autowired
 	private OSRBuffer osrBuffer;
 	@Autowired
 	private SerializerFactory serializerFactory;
+	@Autowired
+	private ToteService toteService;
 	
 	@Async
 	public void releaseTote(Tote tote, ToteEventHandler handler, SendClientSocketHandler client) {
-		handler.handleToteActivation(tote);
 		long started = System.currentTimeMillis();
-		StartTime st = new StartTime();
-		Calendar startCal = Calendar.getInstance();
-		// poor encapsulation - refactor
-		st.setPayload(convertTime(startCal, "%02d%02d%02d"));
-		tote.setStartTime(st);
 		long trackTravelTimeLeft = osrBuffer.getOsrConfig().getToteTrackTravelTime();
 		long timeTravelled = System.currentTimeMillis() - started;
+
+		handler.handleToteActivation(tote);
+		toteService.setupStartTime(Calendar.getInstance(), tote);
+
 		while (timeTravelled <= trackTravelTimeLeft) {
 			try {
 				System.out.println(tote + " started Travelling around track");
@@ -61,66 +55,17 @@ public class ToteController {
 			}
 		}
 
-		Calendar endCal = Calendar.getInstance();
-		EndTime et = new EndTime();
-		// poor encapsulation - refactor
-		et.setPayload(convertTime(endCal, "%02d%02d%02d"));
-		tote.setEndTime(et);
-		setupToteStatus(tote);
-		setupOperators(tote, startCal, endCal);
+		toteService.setupEndTime(Calendar.getInstance(), tote);
+		toteService.setupToteStatus(tote, "0030");
+		toteService.setupOperators(tote);
+		handler.persistTote(tote);
+		
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
-		// need to get a tote processor to setup data that would be created whilst on
-		// the track
 		System.out.println("Sending message back");
 		client.sendMessage(s.serialize(tote));
-		//Persist Tote
-		handler.persistTote(tote);
 		System.out.println("Finished Sending message back");
+		// signal tote has ended
 		handler.handleToteDeactivation(tote);
 	}
-
-	private void setupOperators(Tote t, Calendar start, Calendar end) {
-		OrderDetail od = t.getOrderDetail();
-		if (od != null) {
-			List<OrderLine> ol = od.getOrderLines(); 
-			ol.forEach(line -> {
-				OperatorDetail opd = new OperatorDetail();
-				opd.setNumberOfLines(1);
-				OperatorLine op = new OperatorLine();
-				op.setOperatorId("RDavis  ");
-				op.setRoleId("Solution Architect  ");
-				op.setOperatorDetail(opd);
-				opd.getOperatorList().add(op);
-				opd.setOrderLine(line);
-				line.setOperatorDetail(opd);
-				Calendar opc = Calendar.getInstance();
-				opc.setTimeInMillis(start.getTimeInMillis() - end.getTimeInMillis() / 2);
-				// poor encapsulation - refactor
-				op.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
-			});
-		}
-	}
-
-	private String convertDate(Calendar c) {
-		return String.format("%02d.%02d.%02d", c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH),
-				c.get(Calendar.YEAR), c.get(Calendar.DAY_OF_MONTH));
-	}
-
-	private String convertTime(Calendar c, String format) {
-		return String.format(format, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
-	}
-
-	private void setupToteStatus(Tote t) {
-		ToteStatusDetail sal = new ToteStatusDetail();
-		sal.setNumberOfLines(1);
-		sal.setStatusLength(4);
-		sal.setTote(t);
-		Status s = new Status();
-		s.setStatus("0030");
-		s.setStatusDetail(sal);
-		sal.getStatusList().add(s);
-		t.setStatusDetail(sal);
-	}
-
 }
