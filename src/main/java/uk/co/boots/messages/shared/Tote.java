@@ -1,6 +1,8 @@
 package uk.co.boots.messages.shared;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
@@ -9,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
@@ -64,10 +67,17 @@ public class Tote implements BasicMessage {
 	@OneToOne(cascade={CascadeType.ALL})
 	private OrderDetail orderDetail;
 
+	@OneToMany(mappedBy="tote",cascade={CascadeType.ALL})
+	private List<RawMessage> messageList;
+	
 	@Transient
 	Calendar startCal;
 	@Transient
 	Calendar endCal;
+	
+	public Tote() {
+		messageList = new ArrayList<RawMessage>();
+	}
 	
 	@Override
 	@Transient
@@ -97,4 +107,11 @@ public class Tote implements BasicMessage {
 		tsd.setTote(this);
 	}
 
+	public void addRawMessage(byte[] bytes, String messageType) {
+		RawMessage rm = new RawMessage();
+		rm.setMessage(new String(bytes));
+		rm.setMessageType(messageType);
+		rm.setTote(this);
+		messageList.add(rm);
+	}
 }

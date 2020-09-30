@@ -41,12 +41,14 @@ public class SendClientSocketHandler {
 		sendMessage ("[32R Long] " + message);
 	}
 	
-	public synchronized void sendMessage (byte[] message) {
+	public synchronized byte[] sendMessage (byte[] message) {
+		byte[] ret = ("\n" + new String(message) + "\r").getBytes();
 		try {
-			out.write(("\n" + new String(message) + "\r").getBytes());
+			out.write(ret);
 		} catch (IOException ioe) {
 			System.out.println(ioe.getMessage());
 		}
+		return ret;
 	}
 	
 	private byte[] addBytesToArray(byte[] toArray, byte[] fromArray, int numBytesToAdd) throws IOException {

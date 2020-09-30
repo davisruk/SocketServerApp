@@ -57,11 +57,13 @@ public class ToteController {
 		toteService.setupEndTime(Calendar.getInstance(), tote);
 		toteService.setupToteStatus(tote, "0030");
 		toteService.setupOperators(tote);
-		toteService.save(tote);
-		
+	
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
 		System.out.println("Sending message back");
+		byte[] messageBytes = s.serialize(tote);
+		tote.addRawMessage(messageBytes, s.getType());
+		toteService.save(tote);
 		client.sendMessage(s.serialize(tote));
 		System.out.println("Finished Sending message back");
 		// signal tote has ended

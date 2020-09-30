@@ -17,6 +17,7 @@ import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.Deserializer;
 import uk.co.boots.messages.DeserializerFactory;
 import uk.co.boots.messages.MessageProcessor;
+import uk.co.boots.messages.persistence.ToteService;
 
 @Component
 public class ReceiveServer implements SocketServer {
@@ -24,9 +25,18 @@ public class ReceiveServer implements SocketServer {
 	@Value("${tcp_receive_port}")
 	private int port;
 
+	@Value("${message_type_offset}")
+	private int messageTypePos;
+	
+	@Value("${message_type_length}")
+	private int messageTypeLength;
+
 	@Autowired
 	private DeserializerFactory deserializerFactory;
 
+	@Autowired
+	ToteService toteService;
+	
 	private static ServerSocket sc;
 	private boolean finished = false;
 	
@@ -72,9 +82,10 @@ public class ReceiveServer implements SocketServer {
 					}
 				}
 				messageBytes = buf.toByteArray();
-				String msgType = new String(messageBytes, 6, 3);
+				String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
 				Deserializer d = deserializerFactory.getDeserializer(msgType).get();
 				BasicMessage m = d.deserialize(messageBytes);
+				m.addRawMessage(messageBytes, msgType);
 				MessageProcessor mp = d.getProcessor();
 				mp.process(m);
 				if (mp.hasResponse()) {

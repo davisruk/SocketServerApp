@@ -163,4 +163,9 @@ public class ThirtyTwoRSerializer implements Serializer {
 		});
 		return sb;
 	}
+
+	@Override
+	public String getType() {
+		return "32R";
+	}
 }
