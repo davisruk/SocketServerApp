@@ -13,6 +13,7 @@ import uk.co.boots.messages.persistence.ToteRepository;
 import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.Tote;
+import uk.co.boots.messages.shared.TransportContainer;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.OperatorArrayList;
 import uk.co.boots.messages.thirtytwor.OperatorLine;
@@ -73,6 +74,10 @@ public class ToteController {
 		// the track
 		System.out.println("Sending message back");
 		client.sendMessage(s.serialize(tote));
+		TransportContainer tc = tote.getTransportContainer();
+		tc.setPayload("Hello");
+		//Persist Tote
+		handler.persistTote(tote);
 		System.out.println("Finished Sending message back");
 		handler.handleToteDeactivation(tote);
 	}

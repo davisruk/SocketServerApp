@@ -1,6 +1,7 @@
 package uk.co.boots.osr;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public class TrackController implements ToteEventHandler {
 	
 	@Getter
 	private int activeTotes;
-
+	
 	@Async
 	public void start(SendClientSocketHandler client) {
 		System.out.println("Track controller started");
@@ -38,7 +39,8 @@ public class TrackController implements ToteEventHandler {
 		while (!config.isReleasing())
 			;			
 
-		Pageable pageable = PageRequest.of(0, 10, Sort.by(Order.asc("id")));
+		// get enough Totes from the database to fit on track
+		Pageable pageable = PageRequest.of(0, config.getMaxTotesOnTrack(), Sort.by(Order.asc("id")));
 		Page<Tote> page = toteRepository.findAll(pageable);
 		int pageIndex = 0;
 		while (page.getNumberOfElements() > 0) {
@@ -60,13 +62,18 @@ public class TrackController implements ToteEventHandler {
 					System.out.println("Max number of totes on track - waiting....");
 				}
 			});
-			pageable = PageRequest.of(++pageIndex, 10, Sort.by(Order.asc("id")));;
+			// get the next set of totes
+			pageable = PageRequest.of(++pageIndex, config.getMaxTotesOnTrack(), Sort.by(Order.asc("id")));;
 			page = toteRepository.findAll(pageable);
 		}
 		// All 32R Shorts have gone
 		System.out.println("Track controller ended");
 	}
 
+	public synchronized void persistTote (Tote t) {
+		toteRepository.save(t);
+	}
+	
 	private synchronized void incrementActiveTotes () {
 		activeTotes++;
 	}

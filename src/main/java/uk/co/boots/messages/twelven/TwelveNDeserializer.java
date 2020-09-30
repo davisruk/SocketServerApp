@@ -48,33 +48,23 @@ public class TwelveNDeserializer implements Deserializer {
 				.getNextRecordOffset()) {
 			switch (messagePayload[currentOffset]) {
 				case 'T': {
-					record.setToteIdentifier(readToteIdentifier(messagePayload, currentOffset));
-					br = record.getToteIdentifier();
-					br.setTote(record);
+					br = setupToteIdentifier(messagePayload, currentOffset, record);
 					break;
 				}
 				case 'C': {
-					record.setTransportContainer(readTransportContainer(messagePayload, currentOffset));
-					br = record.getTransportContainer();
-					br.setTote(record);
+					br = setupTransportContainer(messagePayload, currentOffset, record);
 					break;
 				}
 				case 'U': {
-					record.setOrderPriority(readOrderPriority(messagePayload, currentOffset));
-					br = record.getOrderPriority();
-					br.setTote(record);
+					br = setupOrderPriority(messagePayload, currentOffset, record);
 					break;
 				}
 				case 'E': {
-					record.setServiceCentre(readServiceCentre(messagePayload, currentOffset));
-					br = record.getServiceCentre();
-					br.setTote(record);
+					br = setupServiceCentre(messagePayload, currentOffset, record);
 					break;
 				}
 				case 'e': {
-					record.setDepartureTime(readDepartureTime(messagePayload, currentOffset));
-					br = record.getDepartureTime();
-					br.setTote(record);
+					br = setupDepartureTime(messagePayload, currentOffset, record);
 					break;
 				}
 			}
@@ -132,33 +122,43 @@ public class TwelveNDeserializer implements Deserializer {
 		}
 		return od;
 	}
-	private ToteIdentifier readToteIdentifier(byte[] messagePayload, int offset) {
+	private BasicRecord setupToteIdentifier(byte[] messagePayload, int offset, Tote t) {
 		ToteIdentifier ti = new ToteIdentifier();
 		readBasicPayload(messagePayload, offset, ti);
+		ti.setTote(t);
+		t.setToteIdentifier(ti);
 		return ti;
 	}
 
-	private TransportContainer readTransportContainer(byte[] messagePayload, int offset) {
+	private BasicRecord setupTransportContainer(byte[] messagePayload, int offset, Tote t) {
 		TransportContainer tc = new TransportContainer();
 		readBasicPayload(messagePayload, offset, tc);
+		tc.setTote(t);
+		t.setTransportContainer(tc);
 		return tc;
 	}
 
-	private OrderPriority readOrderPriority(byte[] messagePayload, int offset) {
+	private BasicRecord setupOrderPriority(byte[] messagePayload, int offset, Tote t) {
 		OrderPriority op = new OrderPriority();
 		readBasicPayload(messagePayload, offset, op);
+		op.setTote(t);
+		t.setOrderPriority(op);
 		return op;
 	}
 
-	private ServiceCentre readServiceCentre(byte[] messagePayload, int offset) {
+	private BasicRecord setupServiceCentre(byte[] messagePayload, int offset, Tote t) {
 		ServiceCentre sc = new ServiceCentre();
 		readBasicPayload(messagePayload, offset, sc);
+		sc.setTote(t);
+		t.setServiceCentre(sc);
 		return sc;
 	}
 
-	private DepartureTime readDepartureTime(byte[] messagePayload, int offset) {
+	private BasicRecord setupDepartureTime(byte[] messagePayload, int offset, Tote t) {
 		DepartureTime dt = new DepartureTime();
 		readBasicPayload(messagePayload, offset, dt);
+		dt.setTote(t);
+		t.setDepartureTime(dt);
 		return dt;
 	}
 

@@ -21,7 +21,7 @@ public class OrderLine {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	Long id;
 	
-	@ManyToOne (cascade={CascadeType.ALL})
+	@ManyToOne (cascade={CascadeType.PERSIST,CascadeType.REMOVE})
 	@JoinColumn (name="order_detail_id")
 	private OrderDetail orderDetail;
 	

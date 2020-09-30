@@ -1,15 +1,14 @@
 package uk.co.boots.messages;
 
 import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import lombok.Data;
 import lombok.ToString;
-import uk.co.boots.messages.shared.Tote;
 
 @Data
 @ToString(exclude="tote") //to stop circular dependency with Tote blowing stack on toString call
@@ -22,13 +21,10 @@ public abstract class BasicRecord {
 			identifierInfo.getNextOffset(), 2);
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
     private Long id;
    
-	@OneToOne
-    @MapsId
-    private Tote tote;
-    
     private char identifier;
 	private int payloadLength;
 	private String payload;

@@ -6,10 +6,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.StartTime;
@@ -26,23 +29,38 @@ public class Tote implements BasicMessage {
 	private Long id;
 	@Embedded
     private Header header;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+	
+	@OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "tote_identifier_id", referencedColumnName = "id")
 	private ToteIdentifier toteIdentifier;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+
+    @OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "transport_id", referencedColumnName = "id")
 	private TransportContainer transportContainer;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+	
+    @OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "priority_id", referencedColumnName = "id")
 	private OrderPriority orderPriority;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+	
+    @OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "departure_id", referencedColumnName = "id")
 	private DepartureTime departureTime;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+
+    @OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "service_id", referencedColumnName = "id")
 	private ServiceCentre serviceCentre;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+
+    @OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "start_time_id", referencedColumnName = "id")
 	private StartTime startTime;
-	@Transient
+
+    @OneToOne(cascade={CascadeType.ALL})
+    @JoinColumn(name = "end_time_id", referencedColumnName = "id")
 	private EndTime endTime;
+
 	@Transient
 	private StatusArrayList status;
-	@OneToOne(mappedBy = "tote", cascade = CascadeType.ALL)
+	@OneToOne(mappedBy = "tote", cascade={CascadeType.PERSIST,CascadeType.REMOVE})
 	private OrderDetail orderDetail;
 
 	@Override
@@ -56,5 +74,10 @@ public class Tote implements BasicMessage {
 	public byte[] getResponse() {
 		// TODO Auto-generated method stub
 		return toString().getBytes();
+	}
+	
+	public void setEndTime (EndTime et) {
+		endTime = et;
+		et.setTote(this);
 	}
 }
