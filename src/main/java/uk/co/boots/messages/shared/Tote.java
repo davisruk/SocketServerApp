@@ -16,7 +16,7 @@ import lombok.Setter;
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.StartTime;
-import uk.co.boots.messages.thirtytwor.StatusArrayList;
+import uk.co.boots.messages.thirtytwor.ToteStatusDetail;
 import uk.co.boots.messages.twelven.DepartureTime;
 import uk.co.boots.messages.twelven.OrderPriority;
 import uk.co.boots.messages.twelven.ServiceCentre;
@@ -58,8 +58,10 @@ public class Tote implements BasicMessage {
     @JoinColumn(name = "end_time_id", referencedColumnName = "id")
 	private EndTime endTime;
 
-	@Transient
-	private StatusArrayList status;
+	//@OneToOne(mappedBy = "tote", cascade={CascadeType.PERSIST,CascadeType.REMOVE})
+    @OneToOne(cascade={CascadeType.ALL})
+    private ToteStatusDetail statusDetail;
+	
 	@OneToOne(mappedBy = "tote", cascade={CascadeType.PERSIST,CascadeType.REMOVE})
 	private OrderDetail orderDetail;
 

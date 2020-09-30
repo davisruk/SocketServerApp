@@ -53,7 +53,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 		
 		sb = processBasicRecord(t.getStartTime(), sb);
 		sb = processBasicRecord(t.getEndTime(), sb);
-		sb = processStatus(t.getStatus(), sb, statusArrayListSerializationControl);
+		sb = processStatus(t.getStatusDetail(), sb, statusArrayListSerializationControl);
 		sb = processOrderDetail(t.getOrderDetail(), sb, orderLineArrayListSerializationControl);
 
 		// have to process this part of the header here because we don't know the size of the message until now
@@ -79,13 +79,12 @@ public class ThirtyTwoRSerializer implements Serializer {
 		
 	}
 	
-	private StringBuffer processStatus (StatusArrayList sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
+	private StringBuffer processStatus (ToteStatusDetail sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
 		if (sal == null) return sb;
-		sal.setStatusLength(4);
 		sb.append(sc.getIdentifier());
 		sb.append(String.format(sc.getNumberOfEntries().getFormat(), sal.getNumberOfLines()));
 		sb.append(String.format(sc.getStatusLength().getFormat(), sal.getStatusLength()));
-		sal.forEach(status -> sb.append(status.getStatus()));
+		sal.getStatusList().forEach(status -> sb.append(status.getStatus()));
 		return sb;
 	}
 	

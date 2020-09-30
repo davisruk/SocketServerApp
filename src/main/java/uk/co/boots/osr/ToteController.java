@@ -19,7 +19,7 @@ import uk.co.boots.messages.thirtytwor.OperatorArrayList;
 import uk.co.boots.messages.thirtytwor.OperatorLine;
 import uk.co.boots.messages.thirtytwor.StartTime;
 import uk.co.boots.messages.thirtytwor.Status;
-import uk.co.boots.messages.thirtytwor.StatusArrayList;
+import uk.co.boots.messages.thirtytwor.ToteStatusDetail;
 import uk.co.boots.server.SendClientSocketHandler;
 
 @Component
@@ -74,8 +74,6 @@ public class ToteController {
 		// the track
 		System.out.println("Sending message back");
 		client.sendMessage(s.serialize(tote));
-		TransportContainer tc = tote.getTransportContainer();
-		tc.setPayload("Hello");
 		//Persist Tote
 		handler.persistTote(tote);
 		System.out.println("Finished Sending message back");
@@ -113,10 +111,15 @@ public class ToteController {
 	}
 
 	private void setupToteStatus(Tote t) {
-		StatusArrayList sal = new StatusArrayList();
+		ToteStatusDetail sal = new ToteStatusDetail();
 		sal.setNumberOfLines(1);
-		sal.add(new Status("0030"));
-		t.setStatus(sal);
+		sal.setStatusLength(4);
+		sal.setTote(t);
+		Status s = new Status();
+		s.setStatus("0030");
+		s.setStatusDetail(sal);
+		sal.getStatusList().add(s);
+		t.setStatusDetail(sal);
 	}
 
 }
