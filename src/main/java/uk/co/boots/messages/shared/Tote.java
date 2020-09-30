@@ -58,11 +58,10 @@ public class Tote implements BasicMessage {
     @JoinColumn(name = "end_time_id", referencedColumnName = "id")
 	private EndTime endTime;
 
-	//@OneToOne(mappedBy = "tote", cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     @OneToOne(cascade={CascadeType.ALL})
     private ToteStatusDetail statusDetail;
 	
-	@OneToOne(mappedBy = "tote", cascade={CascadeType.PERSIST,CascadeType.REMOVE})
+	@OneToOne(cascade={CascadeType.ALL})
 	private OrderDetail orderDetail;
 
 	@Override

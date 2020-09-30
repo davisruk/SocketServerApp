@@ -30,7 +30,6 @@ public class ToteStatusDetail {
 	private int numberOfLines;
 	private int statusLength;
 	
-	//@OneToMany(mappedBy="statusDetail",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
 	@OneToMany(mappedBy="statusDetail",cascade={CascadeType.ALL})
 	private List<Status> statusList;
 	

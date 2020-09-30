@@ -7,11 +7,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
+import javax.persistence.OneToOne;
 
 import lombok.Data;
 import lombok.ToString;
-import uk.co.boots.messages.thirtytwor.OperatorArrayList;
+import uk.co.boots.messages.thirtytwor.OperatorDetail;
 
 @Data
 @ToString(exclude="orderDetail")
@@ -21,7 +21,7 @@ public class OrderLine {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	Long id;
 	
-	@ManyToOne (cascade={CascadeType.PERSIST,CascadeType.REMOVE})
+	@ManyToOne (cascade={CascadeType.ALL})
 	@JoinColumn (name="order_detail_id")
 	private OrderDetail orderDetail;
 	
@@ -42,7 +42,8 @@ public class OrderLine {
 	//32R
 	private String plasticBagId;
 	private String productBarcode;
-	@Transient
-	private OperatorArrayList operators;
+
+	@OneToOne(cascade={CascadeType.ALL})
+	private OperatorDetail operatorDetail;
 	private String status;
 }

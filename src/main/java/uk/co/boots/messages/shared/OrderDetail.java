@@ -25,7 +25,7 @@ public class OrderDetail {
 	@OneToOne
     private Tote tote;
 
-	@OneToMany(mappedBy="orderDetail",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
+	@OneToMany(mappedBy="orderDetail",cascade={CascadeType.ALL})
 	private List<OrderLine> orderLines;
 	
 	//representation of a tote orderlist

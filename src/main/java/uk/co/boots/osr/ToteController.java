@@ -15,7 +15,7 @@ import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.shared.TransportContainer;
 import uk.co.boots.messages.thirtytwor.EndTime;
-import uk.co.boots.messages.thirtytwor.OperatorArrayList;
+import uk.co.boots.messages.thirtytwor.OperatorDetail;
 import uk.co.boots.messages.thirtytwor.OperatorLine;
 import uk.co.boots.messages.thirtytwor.StartTime;
 import uk.co.boots.messages.thirtytwor.Status;
@@ -81,22 +81,23 @@ public class ToteController {
 	}
 
 	private void setupOperators(Tote t, Calendar start, Calendar end) {
-		OperatorArrayList oal = new OperatorArrayList();
-		oal.setNumberOfLines(1);
-		OperatorLine op = new OperatorLine();
-		op.setOperatorId("RDavis  ");
-		op.setRoleId("Solution Architect  ");
-		oal.add(op);
-		
 		OrderDetail od = t.getOrderDetail();
 		if (od != null) {
 			List<OrderLine> ol = od.getOrderLines(); 
 			ol.forEach(line -> {
+				OperatorDetail opd = new OperatorDetail();
+				opd.setNumberOfLines(1);
+				OperatorLine op = new OperatorLine();
+				op.setOperatorId("RDavis  ");
+				op.setRoleId("Solution Architect  ");
+				op.setOperatorDetail(opd);
+				opd.getOperatorList().add(op);
+				opd.setOrderLine(line);
+				line.setOperatorDetail(opd);
 				Calendar opc = Calendar.getInstance();
 				opc.setTimeInMillis(start.getTimeInMillis() - end.getTimeInMillis() / 2);
 				// poor encapsulation - refactor
 				op.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
-				line.setOperators(oal);
 			});
 		}
 	}

@@ -27,7 +27,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 	private OrderLineArrayListSerializationControl orderLineArrayListSerializationControl;
 	@Autowired
 	private OperatorArrayListSerializationControl operatorArrayListSerializationControl;
-	
+
 	@Override
 	public boolean canHandle(String messageType) {
 		return "32RLong".equals(messageType);
@@ -41,58 +41,63 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb.append("32R");
 		sb = processHeader(t.getHeader(), sb, headerSerializationControl);
 
-		ToteIdentifier ti = t.getToteIdentifier(); 
-		if (ti != null){
+		ToteIdentifier ti = t.getToteIdentifier();
+		if (ti != null) {
 			sb = processBasicRecord(ti, sb);
 		}
-		
+
 		TransportContainer tc = t.getTransportContainer();
 		if (tc != null) {
 			sb = processBasicRecord(tc, sb);
 		}
-		
+
 		sb = processBasicRecord(t.getStartTime(), sb);
 		sb = processBasicRecord(t.getEndTime(), sb);
 		sb = processStatus(t.getStatusDetail(), sb, statusArrayListSerializationControl);
 		sb = processOrderDetail(t.getOrderDetail(), sb, orderLineArrayListSerializationControl);
 
-		// have to process this part of the header here because we don't know the size of the message until now
+		// have to process this part of the header here because we don't know the size
+		// of the message until now
 		int messageLength = sb.length() + headerSerializationControl.getSizeInfo().getSize();
-		sb.insert(0,String.format(headerSerializationControl.getSizeInfo().getFormat(), messageLength));
+		sb.insert(0, String.format(headerSerializationControl.getSizeInfo().getFormat(), messageLength));
 		return sb.toString().getBytes();
 	}
-	
-	private StringBuffer processHeader (Header h, StringBuffer sb, HeaderSerializationControl sc) {
+
+	private StringBuffer processHeader(Header h, StringBuffer sb, HeaderSerializationControl sc) {
 		sb.append(String.format(sc.getOrderIdInfo().getFormat(), h.getOrderIdLength()));
 		sb.append(String.format(sc.getSheetNumberInfo().getFormat(), h.getSheetNumberLength()));
 		sb.append(h.getOrderId());
 		sb.append(h.getSheetNumber());
 		return sb;
 	}
-	
-	private StringBuffer processBasicRecord (BasicRecord br, StringBuffer sb) {
+
+	private StringBuffer processBasicRecord(BasicRecord br, StringBuffer sb) {
 		br.setPayloadLength(br.getPayload().length());
 		sb.append(br.getIdentifier());
 		sb.append(String.format(BasicRecord.fieldLengthInfo.getFormat(), br.getPayloadLength()));
 		sb.append(br.getPayload());
 		return sb;
-		
+
 	}
-	
-	private StringBuffer processStatus (ToteStatusDetail sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
-		if (sal == null) return sb;
+
+	private StringBuffer processStatus(ToteStatusDetail sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
+		if (sal == null)
+			return sb;
 		sb.append(sc.getIdentifier());
 		sb.append(String.format(sc.getNumberOfEntries().getFormat(), sal.getNumberOfLines()));
 		sb.append(String.format(sc.getStatusLength().getFormat(), sal.getStatusLength()));
 		sal.getStatusList().forEach(status -> sb.append(status.getStatus()));
 		return sb;
 	}
-	
-	private StringBuffer processOrderDetail(OrderDetail od, StringBuffer sb, OrderLineArrayListSerializationControl sc) {
+
+	private StringBuffer processOrderDetail(OrderDetail od, StringBuffer sb,
+			OrderLineArrayListSerializationControl sc) {
 		OperatorArrayListSerializationControl oc = sc.getOperatorArrayListSerializationControl();
-		
-		if (od == null) return sb;
-		// Refactor - These are not set in the 12N, should really get this info from the serialization controller
+
+		if (od == null)
+			return sb;
+		// Refactor - These are not set in the 12N, should really get this info from the
+		// serialization controller
 		od.setPlasticBagIdLength(8);
 		od.setProductBarcodeLength(13);
 		od.setTimestampLength(17);
@@ -100,7 +105,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 		od.setOperatorIdLength(8);
 		od.setStatusLength(2);
 		// end of refactor
-		
+
 		sb.append(orderLineArrayListSerializationControl.getIdentifier());
 		sb.append(String.format(sc.getNumberOrderLinesInfo().getFormat(), od.getNumberOfOrderLines()));
 		sb.append(String.format(sc.getOrderLineRefInfo().getFormat(), od.getOrderLineReferenceNumberLength()));
@@ -117,16 +122,17 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb.append(String.format(oc.getRoleIdInfo().getFormat(), od.getRoleIdLength()));
 		sb.append(String.format(oc.getTimestampInfo().getFormat(), od.getTimestampLength()));
 		sb.append(String.format(sc.getStatusInfo().getFormat(), od.getStatusLength()));
-		
-		List<OrderLine> ola = od.getOrderLines();  
-		if (ola == null || ola.size() == 0) return sb;
+
+		List<OrderLine> ola = od.getOrderLines();
+		if (ola == null || ola.size() == 0)
+			return sb;
 		ola.forEach(line -> processOrderLine(line, sb));
 		return sb;
 	}
 
-	private void processOrderLine (OrderLine ol, StringBuffer sb) {
+	private void processOrderLine(OrderLine ol, StringBuffer sb) {
 		ol.setPlasticBagId("12345678");
-		ol.setProductBarcode("1234567890123");		
+		ol.setProductBarcode("1234567890123");
 		sb.append(ol.getOrderLineNumber());
 		sb.append(ol.getOrderLineType());
 		sb.append(ol.getPharmacyId());
@@ -138,29 +144,23 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb.append(ol.getNumberOfPills());
 		sb.append(ol.getProductBarcode());
 		// FMD here
-		sb = processOperators(ol.getOperators(), sb, operatorArrayListSerializationControl);
+		sb = processOperators(ol.getOperatorDetail(), sb, operatorArrayListSerializationControl);
 		ol.setStatus("30");
 		sb.append(ol.getStatus());
 	}
-	
-	private StringBuffer processOperators (OperatorArrayList oal, StringBuffer sb, OperatorArrayListSerializationControl sc) {
-		if (oal == null) return sb;
-		sb.append(String.format("%02d", oal.getNumberOfLines()));
-		for (int i = 0; i < oal.size(); i++) {
-			OperatorLine ol = oal.get(i);
-			sb.append(ol.getOperatorId());
-			sb.append(ol.getRoleId());
-			sb.append(ol.getTimestamp());
-			
-		}
-/*
-		oal.forEach(line -> {
-			System.out.println(line);
+
+	private StringBuffer processOperators(OperatorDetail od, StringBuffer sb,
+			OperatorArrayListSerializationControl sc) {
+		if (od == null)
+			return sb;
+		sb.append(String.format("%02d", od.getNumberOfLines()));
+		List<OperatorLine> opl = od.getOperatorList();
+		opl.forEach(line -> {
 			sb.append(line.getOperatorId());
 			sb.append(line.getRoleId());
 			sb.append(line.getTimestamp());
+
 		});
-	*/
 		return sb;
 	}
 }
