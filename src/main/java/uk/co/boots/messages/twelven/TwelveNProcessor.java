@@ -5,19 +5,19 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.MessageProcessor;
-import uk.co.boots.messages.persistence.ToteRepository;
+import uk.co.boots.messages.persistence.ToteService;
 import uk.co.boots.messages.shared.Tote;
 
 @Component
 public class TwelveNProcessor implements MessageProcessor {
 
     @Autowired
-    private ToteRepository toteRepository;
+    private ToteService toteService;
 	
 	@Override
 	public void process(BasicMessage m) {
 		Tote t = (Tote) m;
-		toteRepository.save(t);
+		toteService.save(t);
 	}
 
 	@Override
