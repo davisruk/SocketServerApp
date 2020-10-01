@@ -57,18 +57,6 @@ public class ToteService {
 		return t;
 	}
 
-	public ToteStatusDetail setupToteStatus(Tote t, String status) {
-		ToteStatusDetail tsd = new ToteStatusDetail();
-		tsd.setNumberOfLines(1);
-		tsd.setStatusLength(4);
-		Status s = new Status();
-		s.setStatus("0030");
-		s.setStatusDetail(tsd);
-		tsd.getStatusList().add(s);
-		t.setStatusDetail(tsd);
-		return tsd;
-	}
-	
 	public ToteStatusDetail addNewToteStatus (Tote t, String status) {
 		ToteStatusDetail tsd = t.getStatusDetail();
 		if (tsd == null) 
@@ -110,7 +98,7 @@ public class ToteService {
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
 		Date now = new Date();
 		//change tote status to complete
-		tote.getStatusDetail().getStatusList().get(0).setStatus("0004");
+		addNewToteStatus(tote, "0004");
 		byte[] thirtyTwoRMessage = client.sendMessage(s.serialize(tote), s.getResponseProcessor(tote));
 		tote.addRawMessage(thirtyTwoRMessage, s.getType(), now);
 		save(tote);
