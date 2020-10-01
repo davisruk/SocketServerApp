@@ -25,7 +25,7 @@ public class SendClientSocketHandler {
 	}
 	
 	public synchronized byte[] sendMessage (byte[] message, MessageResponseHandler responseHandler) {
-		byte[] ret = ("\n" + new String(message) + "\r").getBytes();
+		byte[] ret = (SocketServer.START_FRAME_CHAR + new String(message) + SocketServer.END_FRAME_CHAR).getBytes();
 		try {
 			responseHandler.setInput(din);
 			out.write(ret);

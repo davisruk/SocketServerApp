@@ -74,12 +74,12 @@ public class ReceiveServer implements SocketServer {
 					if (bytesRead == 1) {
 						// keep checking until we hit frame start 0x0A
 						// some tools will replace 0x0A with a space
-						messageStarted = b == 0x0A || b == 0x20;
+						messageStarted = b == START_FRAME || b == ALTERNATIVE_START_FRAME;
 					}
 					if (messageStarted) {
 						//check for end frame 0x0D
 						buf.write(b);
-						finishedMessage = b == 0x0D;
+						finishedMessage = b == END_FRAME;
 					} else {
 						bytesRead = 0;
 					}

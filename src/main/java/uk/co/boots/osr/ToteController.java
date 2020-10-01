@@ -43,7 +43,7 @@ public class ToteController {
 		System.out.println(tote.getToteIdentifier().getPayload() + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 
 		toteService.setupEndTime(Calendar.getInstance(), tote);
-		toteService.setupToteStatus(tote, "0030");
+		toteService.addNewToteStatus(tote, "0004");
 		toteService.setupOperators(tote);
 		toteService.handleToteFinished(tote, client);
 		// signal tote has ended

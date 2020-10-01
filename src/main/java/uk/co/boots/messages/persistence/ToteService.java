@@ -68,6 +68,23 @@ public class ToteService {
 		t.setStatusDetail(tsd);
 		return tsd;
 	}
+	
+	public ToteStatusDetail addNewToteStatus (Tote t, String status) {
+		ToteStatusDetail tsd = t.getStatusDetail();
+		if (tsd == null) 
+		{
+			tsd = new ToteStatusDetail();
+			t.setStatusDetail(tsd);
+			tsd.setStatusLength(4);
+		}
+		Status s = new Status();
+		s.setStatus(status);
+		s.setStatusDetail(tsd);
+		tsd.getStatusList().add(s);
+		t.setStatusDetail(tsd);
+		tsd.setNumberOfLines(tsd.getStatusList().size());
+		return tsd;
+	}
 
 	public void setupOperators(Tote t) {
 		OrderDetail od = t.getOrderDetail();
@@ -91,8 +108,9 @@ public class ToteService {
 	public void handleToteFinished(Tote tote, SendClientSocketHandler client) {
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
-		System.out.println("Sending message back");
 		Date now = new Date();
+		//change tote status to complete
+		tote.getStatusDetail().getStatusList().get(0).setStatus("0004");
 		byte[] thirtyTwoRMessage = client.sendMessage(s.serialize(tote), s.getResponseProcessor(tote));
 		tote.addRawMessage(thirtyTwoRMessage, s.getType(), now);
 		save(tote);
@@ -110,8 +128,9 @@ public class ToteService {
 	public void notifyClientOrderPersisted(Tote tote, SendClientSocketHandler client) {
 		// TODO Auto-generated method stub
 		Serializer s = serializerFactory.getSerializer("32RShort").get();
-		System.out.println("Sending message back");
 		Date now = new Date();
+		// set tote status to order started
+		addNewToteStatus(tote, "0001");
 		setupStartTime(Calendar.getInstance(), tote);
 		byte[] thirtyTwoRMessage = s.serialize(tote);
 		if (client != null) {
