@@ -167,12 +167,11 @@ public class ThirtyTwoRSerializer implements Serializer {
 
 	@Override
 	public String getType() {
-		return "32R";
+		return "32R-Long";
 	}
 
 	@Override
 	public MessageResponseHandler getResponseProcessor(BasicMessage message) {
-		// TODO Auto-generated method stub
 		Tote t = (Tote) message;
 		return new FortyTwoRProcessor(t);
 	}

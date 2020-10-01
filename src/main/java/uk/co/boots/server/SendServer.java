@@ -29,9 +29,10 @@ public class SendServer implements SocketServer {
 			sc = new ServerSocket(port);
 			System.out.println("Send Server started and listening on port " + port);
 			while (true) {
-				trackController.start(new SendClientSocketHandler(sc.accept()));
+				trackController.handleClientSocketConnection(new SendClientSocketHandler(sc.accept()));
 			}
 		} catch (IOException ioe) {
+			System.out.println(ioe.getMessage());
 		}
 	}
 }

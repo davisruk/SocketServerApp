@@ -107,4 +107,18 @@ public class ToteService {
 		return String.format(format, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
 	}
 
+	public void notifyClientOrderPersisted(Tote tote, SendClientSocketHandler client) {
+		// TODO Auto-generated method stub
+		Serializer s = serializerFactory.getSerializer("32RShort").get();
+		System.out.println("Sending message back");
+		Date now = new Date();
+		setupStartTime(Calendar.getInstance(), tote);
+		byte[] thirtyTwoRMessage = s.serialize(tote);
+		if (client != null) {
+			thirtyTwoRMessage = client.sendMessage(thirtyTwoRMessage, s.getResponseProcessor(tote));
+		}
+		tote.addRawMessage(thirtyTwoRMessage, s.getType(), now);
+		save(tote);
+	}
+
 }

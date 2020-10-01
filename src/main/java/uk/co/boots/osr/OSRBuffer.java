@@ -13,8 +13,8 @@ public class OSRBuffer {
 	OSRConfig osrConfig;
 	
 	public synchronized void setStarted (boolean started) {
-		System.out.println(osrConfig);
 		this.osrConfig.setReleasing(started);
+		System.out.println(osrConfig);
 	}
 	
 	public synchronized void setOsrConfig (OSRConfig newConfig) {

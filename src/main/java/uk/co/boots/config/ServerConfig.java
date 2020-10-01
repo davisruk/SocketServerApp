@@ -23,7 +23,7 @@ public class ServerConfig {
     public OSRConfig osrConfig() {
         return new OSRConfig();
     }
-    
+/*    
     @Bean (name = "taskExecutor")
     public Executor taskExecutor() {
     	
@@ -35,5 +35,5 @@ public class ServerConfig {
         executor.initialize();
         return executor;
     }
-   
+*/ 
 }

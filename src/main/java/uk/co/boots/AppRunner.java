@@ -30,8 +30,8 @@ public class AppRunner implements CommandLineRunner {
 	      for (String beanName : beanNames) {
 	        System.out.println(beanName);
 	      }
-    	
-    	sendServer.startServer();
-        receiveServer.startServer();
+
+	      receiveServer.startServer();
+	      sendServer.startServer();
     }
 }

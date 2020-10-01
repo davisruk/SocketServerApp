@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 import uk.co.boots.messages.persistence.ToteService;
 import uk.co.boots.messages.shared.Tote;
+import uk.co.boots.server.MessageResponseHandler;
 import uk.co.boots.server.SendClientSocketHandler;
 
 @Component
@@ -19,12 +20,16 @@ public class TrackController implements ToteEventHandler {
 	private ToteController toteController;
 	@Autowired
 	private ToteService toteService;
-	
+
 	@Getter
 	private int activeTotes;
 	
+	private SendClientSocketHandler client; 
+	
 	@Async
-	public void start(SendClientSocketHandler client) {
+	public void handleClientSocketConnection(SendClientSocketHandler sendClient) {
+		System.out.println("[Message Sender] Handling client messages");
+		client = sendClient;
 		System.out.println("Track controller started");
 		OSRConfig config = osrBuffer.getOsrConfig(); 
 		int maxTotes = config.getMaxTotesOnTrack();
@@ -59,6 +64,10 @@ public class TrackController implements ToteEventHandler {
 		System.out.println("Track controller ended");
 	}
 
+	public void notifyClientOrderPersisted(Tote t) {
+		toteService.notifyClientOrderPersisted(t, client);
+	}
+	
 	private synchronized void incrementActiveTotes () {
 		activeTotes++;
 	}

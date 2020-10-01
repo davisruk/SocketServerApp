@@ -9,12 +9,15 @@ import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.MessageProcessor;
 import uk.co.boots.messages.persistence.ToteService;
 import uk.co.boots.messages.shared.Tote;
+import uk.co.boots.osr.TrackController;
 
 @Component
 public class TwelveNProcessor implements MessageProcessor {
 
     @Autowired
     private ToteService toteService;
+	@Autowired
+	private TrackController trackController;
 	
 	private final static byte[] fullResponse = ("\n" + "0001022N00" + "\r").getBytes();
     @Override
@@ -22,6 +25,8 @@ public class TwelveNProcessor implements MessageProcessor {
 		Tote t = (Tote) m;
 		m.addRawMessage(fullResponse, "22N", new Date());
 		toteService.save(t);
+		trackController.notifyClientOrderPersisted(t);
+		// must send 32R now but on 
 	}
 
 	@Override

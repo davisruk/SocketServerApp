@@ -62,6 +62,7 @@ public class ReceiveServer implements SocketServer {
 		try {
 			InputStream ins = new BufferedInputStream(client.getInputStream());
 			DataOutputStream out = new DataOutputStream(client.getOutputStream());
+			System.out.println("[Message Receiver] Handling client messages");
 			while (!finished) {
 				byte[] messageBytes;
 				boolean finishedMessage = false;
