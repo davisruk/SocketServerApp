@@ -11,13 +11,19 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+@NoArgsConstructor
 @Data
 @ToString(exclude="tote")
 @Entity
 public class RawMessage {
 
+	public RawMessage (String messageType, String message) {
+		this.message = message;
+		this.messageType = messageType;
+	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;

@@ -61,10 +61,9 @@ public class ToteController {
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
 		System.out.println("Sending message back");
-		byte[] messageBytes = s.serialize(tote);
+		byte[] messageBytes = client.sendMessage(s.serialize(tote), s.getResponseProcessor(tote));
 		tote.addRawMessage(messageBytes, s.getType());
-		toteService.save(tote);
-		client.sendMessage(s.serialize(tote));
+		toteService.save(tote);		
 		System.out.println("Finished Sending message back");
 		// signal tote has ended
 		handler.handleToteDeactivation(tote);

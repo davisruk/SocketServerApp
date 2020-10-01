@@ -15,6 +15,7 @@ import uk.co.boots.messages.shared.OrderLine;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.shared.ToteIdentifier;
 import uk.co.boots.messages.shared.TransportContainer;
+import uk.co.boots.server.MessageResponseHandler;
 
 @Component
 public class ThirtyTwoRSerializer implements Serializer {
@@ -167,5 +168,12 @@ public class ThirtyTwoRSerializer implements Serializer {
 	@Override
 	public String getType() {
 		return "32R";
+	}
+
+	@Override
+	public MessageResponseHandler getResponseProcessor(BasicMessage message) {
+		// TODO Auto-generated method stub
+		Tote t = (Tote) message;
+		return new FortyTwoRProcessor(t);
 	}
 }

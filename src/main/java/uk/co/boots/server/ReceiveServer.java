@@ -70,13 +70,14 @@ public class ReceiveServer implements SocketServer {
 				while (!finishedMessage && (b = ins.read()) > 0) {
 					bytesRead++;
 					if (bytesRead == 1) {
-						// this is the first byte, we want to ensure that it's a 0x0D framing byte
-						// some tools will replace 0x0D with a space
-						messageStarted = b == 0x0D || b == 0x20;
+						// keep checking until we hit frame start 0x0A
+						// some tools will replace 0x0A with a space
+						messageStarted = b == 0x0A || b == 0x20;
 					}
 					if (messageStarted) {
+						//check for end frame 0x0D
 						buf.write(b);
-						finishedMessage = b == 0x0A;
+						finishedMessage = b == 0x0D;
 					} else {
 						bytesRead = 0;
 					}

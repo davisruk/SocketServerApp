@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.co.boots.messages.BasicMessage;
 import uk.co.boots.messages.MessageProcessor;
 import uk.co.boots.messages.persistence.ToteService;
+import uk.co.boots.messages.shared.RawMessage;
 import uk.co.boots.messages.shared.Tote;
 
 @Component
@@ -14,16 +15,17 @@ public class TwelveNProcessor implements MessageProcessor {
     @Autowired
     private ToteService toteService;
 	
-	@Override
+	private final static byte[] fullResponse = ("\n" + "0001022N00" + "\r").getBytes();
+    @Override
 	public void process(BasicMessage m) {
 		Tote t = (Tote) m;
+		m.addRawMessage(fullResponse, "22N");
 		toteService.save(t);
 	}
 
 	@Override
 	public byte[] getResponse(BasicMessage m) {
-		// TODO Get the 22N Serializer and return message
-		return "22N".getBytes();
+		return fullResponse;
 	}
 
 	@Override
