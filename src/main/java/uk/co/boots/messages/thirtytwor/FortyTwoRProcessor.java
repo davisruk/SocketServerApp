@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Properties;
 
 import uk.co.boots.config.PropertiesLoader;
@@ -58,7 +59,7 @@ public class FortyTwoRProcessor implements MessageResponseHandler {
 			}
 			byte[] messageBytes = buf.toByteArray();
 			String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
-			t.addRawMessage(messageBytes, msgType);
+			t.addRawMessage(messageBytes, msgType, new Date());
 		} catch (IOException ioe) {
 			System.out.println(ioe.getMessage());
 		}

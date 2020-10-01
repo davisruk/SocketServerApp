@@ -1,5 +1,7 @@
 package uk.co.boots.messages.shared;
 
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,8 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,10 +23,6 @@ import lombok.ToString;
 @Entity
 public class RawMessage {
 
-	public RawMessage (String messageType, String message) {
-		this.message = message;
-		this.messageType = messageType;
-	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
@@ -34,4 +33,14 @@ public class RawMessage {
 	@ManyToOne (cascade={CascadeType.ALL})
 	@JoinColumn (name="tote_id")
 	private Tote tote;
+	
+    @Temporal(TemporalType.TIMESTAMP)
+    Date creationDateTime;
+    
+	public RawMessage (String messageType, String message, Date creationTime) {
+		this.message = message;
+		this.messageType = messageType;
+		this.creationDateTime = creationTime;
+	}
+    
 }

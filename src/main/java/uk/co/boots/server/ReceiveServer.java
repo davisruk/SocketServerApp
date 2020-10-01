@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,7 +87,7 @@ public class ReceiveServer implements SocketServer {
 				String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
 				Deserializer d = deserializerFactory.getDeserializer(msgType).get();
 				BasicMessage m = d.deserialize(messageBytes);
-				m.addRawMessage(messageBytes, msgType);
+				m.addRawMessage(messageBytes, msgType, new Date());
 				MessageProcessor mp = d.getProcessor();
 				mp.process(m);
 				if (mp.hasResponse()) {

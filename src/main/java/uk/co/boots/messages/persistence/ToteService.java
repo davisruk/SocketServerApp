@@ -1,6 +1,7 @@
 package uk.co.boots.messages.persistence;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
-import uk.co.boots.messages.BasicMessage;
+import uk.co.boots.messages.Serializer;
+import uk.co.boots.messages.SerializerFactory;
 import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
-import uk.co.boots.messages.shared.RawMessage;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.OperatorDetail;
@@ -22,38 +23,40 @@ import uk.co.boots.messages.thirtytwor.OperatorLine;
 import uk.co.boots.messages.thirtytwor.StartTime;
 import uk.co.boots.messages.thirtytwor.Status;
 import uk.co.boots.messages.thirtytwor.ToteStatusDetail;
-
+import uk.co.boots.server.SendClientSocketHandler;
 
 @Service
 public class ToteService {
 	@Autowired
 	ToteRepository toteRepository;
-	
-	public Page<Tote> getTotePage(int pageNumber, int pageSize){
+	@Autowired
+	private SerializerFactory serializerFactory;
+
+	public Page<Tote> getTotePage(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
 		return toteRepository.findAll(pageable);
 	}
-	
+
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
 	}
-	
-	public Tote setupStartTime (Calendar time, Tote t) {
+
+	public Tote setupStartTime(Calendar time, Tote t) {
 		StartTime st = new StartTime();
 		st.setPayload(convertTime(time, "%02d%02d%02d"));
 		t.setStartTime(st);
 		t.setStartCal(time);
 		return t;
 	}
-	
-	public Tote setupEndTime (Calendar time, Tote t) {
+
+	public Tote setupEndTime(Calendar time, Tote t) {
 		EndTime et = new EndTime();
 		et.setPayload(convertTime(time, "%02d%02d%02d"));
 		t.setEndTime(et);
 		t.setEndCal(time);
 		return t;
 	}
-	
+
 	public ToteStatusDetail setupToteStatus(Tote t, String status) {
 		ToteStatusDetail tsd = new ToteStatusDetail();
 		tsd.setNumberOfLines(1);
@@ -65,11 +68,11 @@ public class ToteService {
 		t.setStatusDetail(tsd);
 		return tsd;
 	}
-	
+
 	public void setupOperators(Tote t) {
 		OrderDetail od = t.getOrderDetail();
 		if (od != null) {
-			List<OrderLine> ol = od.getOrderLines(); 
+			List<OrderLine> ol = od.getOrderLines();
 			ol.forEach(line -> {
 				OperatorDetail opd = new OperatorDetail();
 				opd.setNumberOfLines(1);
@@ -84,7 +87,17 @@ public class ToteService {
 			});
 		}
 	}
-	
+
+	public void handleToteFinished(Tote tote, SendClientSocketHandler client) {
+		// tote has travelled track, send back 32R Long
+		Serializer s = serializerFactory.getSerializer("32RLong").get();
+		System.out.println("Sending message back");
+		Date now = new Date();
+		byte[] thirtyTwoRMessage = client.sendMessage(s.serialize(tote), s.getResponseProcessor(tote));
+		tote.addRawMessage(thirtyTwoRMessage, s.getType(), now);
+		save(tote);
+	}
+
 	private String convertDate(Calendar c) {
 		return String.format("%02d.%02d.%02d", c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH),
 				c.get(Calendar.YEAR), c.get(Calendar.DAY_OF_MONTH));
@@ -93,5 +106,5 @@ public class ToteService {
 	private String convertTime(Calendar c, String format) {
 		return String.format(format, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
 	}
-	
+
 }

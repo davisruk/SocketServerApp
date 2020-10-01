@@ -2,6 +2,7 @@ package uk.co.boots.messages.shared;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -107,8 +108,8 @@ public class Tote implements BasicMessage {
 		tsd.setTote(this);
 	}
 
-	public void addRawMessage(byte[] bytes, String messageType) {
-		RawMessage rm = new RawMessage(messageType, new String(bytes));
+	public void addRawMessage(byte[] bytes, String messageType, Date creationTime) {
+		RawMessage rm = new RawMessage(messageType, new String(bytes), creationTime);
 		rm.setTote(this);
 		messageList.add(rm);
 	}
