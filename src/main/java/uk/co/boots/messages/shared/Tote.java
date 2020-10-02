@@ -71,6 +71,8 @@ public class Tote implements BasicMessage {
 	@OneToMany(mappedBy="tote",cascade={CascadeType.ALL})
 	private List<RawMessage> messageList;
 	
+	boolean processed;
+	
 	@Transient
 	Calendar startCal;
 	@Transient
@@ -78,6 +80,7 @@ public class Tote implements BasicMessage {
 	
 	public Tote() {
 		messageList = new ArrayList<RawMessage>();
+		processed = false;
 	}
 	
 	@Override

@@ -25,7 +25,8 @@ public class ToteController {
 
 		handler.handleToteActivation(tote);
 		toteService.setupStartTime(Calendar.getInstance(), tote);
-		System.out.println(tote.getToteIdentifier().getPayload() + " started Travelling around track");
+		String toteName = tote.getHeader().getOrderId() + "_" + tote.getHeader().getSheetNumber();
+		System.out.println(toteName + " started Travelling around track");
 		
 		while (timeTravelled <= trackTravelTimeLeft) {
 			try {
@@ -40,7 +41,7 @@ public class ToteController {
 			}
 		}
 
-		System.out.println(tote.getToteIdentifier().getPayload() + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
+		System.out.println(toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 
 		toteService.setupEndTime(Calendar.getInstance(), tote);
 		toteService.setupOperators(tote);

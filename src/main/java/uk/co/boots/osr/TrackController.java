@@ -24,7 +24,9 @@ public class TrackController implements ToteEventHandler {
 	@Getter
 	private int activeTotes;
 	
-	private SendClientSocketHandler client; 
+	private SendClientSocketHandler client;
+	
+	private boolean stopTrackController = false;
 	
 	@Async
 	public void handleClientSocketConnection(SendClientSocketHandler sendClient) {
@@ -36,32 +38,33 @@ public class TrackController implements ToteEventHandler {
 		System.out.println("osrBuffer Started");
 		// write 32R messages in loop
 		// osrBuffer needs to be releasing totes - wait if not 
-		while (!config.isReleasing())
-			;			
-
+		
+		int pageIndex = 0, totesProcessed = 0;
 		// get enough Totes from the database to fit on track
-		Page<Tote> page = toteService.getTotePage(0, maxTotes);
-		int pageIndex = 0;
-		while (page.getNumberOfElements() > 0) {
-			System.out.println(page.getNumberOfElements());
-			page.forEach(t -> {
-				while (!config.isReleasing())
-					;			
-				// make sure we don't release too many totes at once
-				while(activeTotes == maxTotes);
-				// send 32R short
-				// start tote on track
-				toteController.releaseTote(t, this, client);
-				try {
-					Thread.sleep(config.getToteReleaseInterval());
-				} catch (InterruptedException ie) {
-					System.out.println("This shouldn't happen");
-				}
-			});
-			page = toteService.getTotePage(++pageIndex, maxTotes);
+		while (!stopTrackController) {
+			while (!config.isReleasing())
+				;			
+			Page<Tote> page;
+			if ((page = toteService.getTotePage(pageIndex, 1)).getNumberOfElements() > 0) {
+				System.out.println("Page number:" + pageIndex + " Number of entries: " + page.getNumberOfElements());
+				pageIndex++;
+				page.forEach(t -> {
+					while (!config.isReleasing())
+						;			
+					// make sure we don't release too many totes at once
+					while(activeTotes == maxTotes);
+					// send 32R short
+					// start tote on track
+					toteController.releaseTote(t, this, client);
+					try {
+						Thread.sleep(config.getToteReleaseInterval());
+					} catch (InterruptedException ie) {
+						System.out.println("This shouldn't happen");
+					}
+				});
+				
+			}
 		}
-		// All 32R Shorts have gone
-		System.out.println("Track controller ended");
 	}
 
 	public void notifyClientOrderPersisted(Tote t) {
