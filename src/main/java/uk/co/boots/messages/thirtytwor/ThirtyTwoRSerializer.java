@@ -73,6 +73,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 	}
 
 	private StringBuffer processBasicRecord(BasicRecord br, StringBuffer sb) {
+		if (br == null) return sb;
 		br.setPayloadLength(br.getPayload().length());
 		sb.append(br.getIdentifier());
 		sb.append(String.format(BasicRecord.fieldLengthInfo.getFormat(), br.getPayloadLength()));

@@ -10,6 +10,12 @@ import uk.co.boots.messages.shared.HeaderSerializationControl;
 @Getter
 public class TwelveNSerializationControl {
 
+	public static final char TOTE_ID = 'T';
+	public static final char CONTAINER_ID = 'C';
+	public static final char ORDER_PRIORITY = 'U';
+	public static final char SERVICE_CENTRE = 'E';
+	public static final char DEPARTURE_TIME = 'e';
+	public static final char ORDER_LIST = 'X';
 	@Autowired
 	private HeaderSerializationControl headerSerializationControl;
 	@Autowired

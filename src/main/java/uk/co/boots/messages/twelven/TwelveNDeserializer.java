@@ -38,36 +38,36 @@ public class TwelveNDeserializer implements Deserializer {
 		Tote record = new Tote();
 		record.setHeader(readHeader(messagePayload));
 
-		// now we may get a Tote, Transport, Order Priority, Departure Time or Service
-		// Centre in any order
+		// Tote Id, Container Id, Order Priority, Departure Time or Service Centre
+		// can appear here in any order they are also non mandatory so may not appear
 		// read next byte to determine which record type it is
 		BasicRecord br = null;
 		Header h = record.getHeader();
 		int currentOffset = twelveNSerializationControl.getHeaderSerializationControl().getNextDataOffset(h);
-		for (int i = 0; i < 5; i++, currentOffset += br
-				.getNextRecordOffset()) {
+		while (messagePayload[currentOffset] != TwelveNSerializationControl.ORDER_LIST) {
 			switch (messagePayload[currentOffset]) {
-				case 'T': {
+				case TwelveNSerializationControl.TOTE_ID: {
 					br = setupToteIdentifier(messagePayload, currentOffset, record);
 					break;
 				}
-				case 'C': {
+				case TwelveNSerializationControl.CONTAINER_ID: {
 					br = setupTransportContainer(messagePayload, currentOffset, record);
 					break;
 				}
-				case 'U': {
+				case TwelveNSerializationControl.ORDER_PRIORITY: {
 					br = setupOrderPriority(messagePayload, currentOffset, record);
 					break;
 				}
-				case 'E': {
+				case TwelveNSerializationControl.SERVICE_CENTRE: {
 					br = setupServiceCentre(messagePayload, currentOffset, record);
 					break;
 				}
-				case 'e': {
+				case TwelveNSerializationControl.DEPARTURE_TIME: {
 					br = setupDepartureTime(messagePayload, currentOffset, record);
 					break;
 				}
 			}
+			currentOffset += br.getNextRecordOffset();
 		}
 		// now read the order lines
 		record.setOrderDetail(readOrderLines(record, messagePayload, currentOffset));
