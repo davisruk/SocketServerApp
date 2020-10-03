@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import lombok.Setter;
+import uk.co.boots.osr.DSPCommunicationNotifier;
 import uk.co.boots.osr.TrackController;
 
 @Component
@@ -20,7 +22,11 @@ public class SendServer implements SocketServer {
 
 	@Autowired
 	private TrackController trackController;
-
+	
+	@Autowired
+	@Qualifier("dspCommunicationNotifier")
+	private DSPCommunicationNotifier dspCommunicationNotifier;
+	
 	private static ServerSocket sc;
 
 	@Async
@@ -29,7 +35,9 @@ public class SendServer implements SocketServer {
 			sc = new ServerSocket(port);
 			System.out.println("Send Server started and listening on port " + port);
 			while (true) {
-				trackController.handleClientSocketConnection(new SendClientSocketHandler(sc.accept()));
+				SendClientSocketHandler client = new SendClientSocketHandler(sc.accept());
+				dspCommunicationNotifier.registerDSPCommunicationHandler(client);
+				trackController.start();
 			}
 		} catch (IOException ioe) {
 			System.out.println(ioe.getMessage());

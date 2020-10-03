@@ -3,12 +3,12 @@ package uk.co.boots.osr;
 import java.util.Calendar;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import uk.co.boots.messages.persistence.ToteService;
 import uk.co.boots.messages.shared.Tote;
-import uk.co.boots.server.SendClientSocketHandler;
 
 @Component
 public class ToteController {
@@ -16,15 +16,19 @@ public class ToteController {
 	private OSRBuffer osrBuffer;
 	@Autowired
 	private ToteService toteService;
+	@Autowired
+    @Qualifier("dspEventNotifier")	
+	private DSPEventNotifier dspEventNotifier;
+
 	
 	@Async
-	public void releaseTote(Tote tote, ToteEventHandler handler, SendClientSocketHandler client) {
+	public void releaseTote(Tote tote) {
 		if (tote == null) return;
 		long started = System.currentTimeMillis();
 		long trackTravelTimeLeft = osrBuffer.getToteTravelTime();
 		long timeTravelled = System.currentTimeMillis() - started;
 
-		handler.handleToteActivation(tote);
+		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, tote));
 		toteService.setupStartTime(Calendar.getInstance(), tote);
 		String toteName = tote.getHeader().getOrderId() + "_" + tote.getHeader().getSheetNumber();
 		System.out.println(toteName + " started Travelling around track");
@@ -46,8 +50,8 @@ public class ToteController {
 
 		toteService.setupEndTime(Calendar.getInstance(), tote);
 		toteService.setupOperators(tote);
-		toteService.handleToteFinished(tote, client);
+		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY, tote));
 		// signal tote has ended
-		handler.handleToteDeactivation(tote);
+		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_DEACTIVATED, tote));
 	}
 }

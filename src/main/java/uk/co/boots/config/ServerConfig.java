@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import uk.co.boots.osr.DSPCommunicationNotifier;
 import uk.co.boots.osr.OSRConfig;
 
 @Configuration
@@ -23,7 +24,7 @@ public class ServerConfig {
     public OSRConfig osrConfig() {
         return new OSRConfig();
     }
-/*    
+	
     @Bean (name = "taskExecutor")
     public Executor taskExecutor() {
     	
@@ -35,5 +36,4 @@ public class ServerConfig {
         executor.initialize();
         return executor;
     }
-*/ 
 }

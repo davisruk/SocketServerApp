@@ -16,6 +16,7 @@ import uk.co.boots.messages.Serializer;
 import uk.co.boots.messages.SerializerFactory;
 import uk.co.boots.messages.shared.OrderDetail;
 import uk.co.boots.messages.shared.OrderLine;
+import uk.co.boots.messages.shared.RawMessage;
 import uk.co.boots.messages.shared.Tote;
 import uk.co.boots.messages.thirtytwor.EndTime;
 import uk.co.boots.messages.thirtytwor.OperatorDetail;
@@ -23,7 +24,8 @@ import uk.co.boots.messages.thirtytwor.OperatorLine;
 import uk.co.boots.messages.thirtytwor.StartTime;
 import uk.co.boots.messages.thirtytwor.Status;
 import uk.co.boots.messages.thirtytwor.ToteStatusDetail;
-import uk.co.boots.server.SendClientSocketHandler;
+import uk.co.boots.osr.DSPCommsMessage;
+import uk.co.boots.osr.DSPCommunicationNotifier;
 
 @Service
 public class ToteService {
@@ -99,15 +101,14 @@ public class ToteService {
 		}
 	}
 
-	public void handleToteFinished(Tote tote, SendClientSocketHandler client) {
+	public DSPCommsMessage processToteFinished(Tote tote) {
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
 		Date now = new Date();
 		//change tote status to complete
 		addNewToteStatus(tote, "0004");
-		byte[] thirtyTwoRMessage = client.sendMessage(s.serialize(tote), s.getResponseProcessor(tote));
-		tote.addRawMessage(thirtyTwoRMessage, s.getType(), now);
-		save(tote);
+		RawMessage rm = new RawMessage (s.getType(), new String(s.serialize(tote)),now);
+		return new DSPCommsMessage(rm, s.getResponseProcessor(tote), tote);
 	}
 
 	private String convertDate(Calendar c) {
@@ -119,19 +120,14 @@ public class ToteService {
 		return String.format(format, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
 	}
 
-	public void notifyClientOrderPersisted(Tote tote, SendClientSocketHandler client) {
+	public DSPCommsMessage processClientOrderPersisted(Tote tote) {
 		// TODO Auto-generated method stub
 		Serializer s = serializerFactory.getSerializer("32RShort").get();
 		Date now = new Date();
 		// set tote status to order started
 		addNewToteStatus(tote, "0001");
 		setupStartTime(Calendar.getInstance(), tote);
-		byte[] thirtyTwoRMessage = s.serialize(tote);
-		if (client != null) {
-			thirtyTwoRMessage = client.sendMessage(thirtyTwoRMessage, s.getResponseProcessor(tote));
-		}
-		tote.addRawMessage(thirtyTwoRMessage, s.getType(), now);
-		save(tote);
+		RawMessage rm = new RawMessage (s.getType(), new String(s.serialize(tote)), now);
+		return new DSPCommsMessage(rm, s.getResponseProcessor(tote), tote);
 	}
-
 }

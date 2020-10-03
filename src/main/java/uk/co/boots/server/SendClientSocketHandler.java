@@ -1,15 +1,15 @@
 package uk.co.boots.server;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import lombok.RequiredArgsConstructor;
+import uk.co.boots.osr.DSPCommsMessage;
+import uk.co.boots.osr.DSPCommunicationHandler;
 
-public class SendClientSocketHandler {
+public class SendClientSocketHandler implements DSPCommunicationHandler {
 	private final Socket client;
 	private DataOutputStream out;
 	private DataInputStream din;
@@ -24,7 +24,12 @@ public class SendClientSocketHandler {
 		}
 	}
 	
-	public synchronized byte[] sendMessage (byte[] message, MessageResponseHandler responseHandler) {
+	@Override
+	public byte[] handleCommsForMessage(DSPCommsMessage message) {
+		return handleCommsForMessage (message.getRawMessage().getMessage().getBytes(), message.getResponsehandler());
+	}
+
+	private synchronized byte[] handleCommsForMessage (byte[] message, MessageResponseHandler responseHandler) {
 		byte[] ret = (SocketServer.START_FRAME_CHAR + new String(message) + SocketServer.END_FRAME_CHAR).getBytes();
 		try {
 			responseHandler.setInput(din);
@@ -41,5 +46,10 @@ public class SendClientSocketHandler {
 		out.close();
 		client.close();
 		client.close();
+	}
+
+	@Override
+	public String getTypeExtension() {
+		return "TCP";
 	}
 }

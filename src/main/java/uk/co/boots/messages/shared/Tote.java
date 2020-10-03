@@ -113,7 +113,12 @@ public class Tote implements BasicMessage {
 
 	public void addRawMessage(byte[] bytes, String messageType, Date creationTime) {
 		RawMessage rm = new RawMessage(messageType, new String(bytes), creationTime);
-		rm.setTote(this);
-		messageList.add(rm);
+		addRawMessage(rm);
 	}
+	
+	public void addRawMessage(RawMessage message) {
+		message.setTote(this);
+		messageList.add(message);
+	}
+	
 }
