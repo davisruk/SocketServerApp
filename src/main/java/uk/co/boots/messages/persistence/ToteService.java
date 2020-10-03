@@ -37,6 +37,12 @@ public class ToteService {
 		return toteRepository.findAll(pageable);
 	}
 
+	// allows the Tote table to be queried like a queue
+	public Tote getToteInQueuePosition(int queuePos) {
+		Page<Tote> page = getTotePage(queuePos, 1);
+		return page.getNumberOfElements() > 0 ? page.toList().get(0) : null; 
+	}
+
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
 	}

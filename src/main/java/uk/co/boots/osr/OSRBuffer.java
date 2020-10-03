@@ -8,13 +8,20 @@ import lombok.Getter;
 @Component ("osrBuffer")
 public class OSRBuffer {
 
-	@Getter
 	@Autowired
-	OSRConfig osrConfig;
+	private OSRConfig osrConfig;
 	
 	public synchronized void setStarted (boolean started) {
 		this.osrConfig.setReleasing(started);
 		System.out.println(osrConfig);
+	}
+	
+	public boolean isReleasing () {
+		return osrConfig.isReleasing();
+	}
+	
+	public long getToteTravelTime () {
+		return osrConfig.getToteTrackTravelTime();
 	}
 	
 	public synchronized void setOsrConfig (OSRConfig newConfig) {
@@ -29,5 +36,13 @@ public class OSRBuffer {
 		System.out.println(osrConfig);
 		System.out.println("-----------------[OSRBuffer][setOsrConfig][END]-----------------");
 		
+	}
+
+	public long getToteReleaseInterval() {
+		return osrConfig.getToteReleaseInterval();
+	}
+
+	public int getTrackToteCapacity() {
+		return osrConfig.getMaxTotesOnTrack();
 	}
 }

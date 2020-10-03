@@ -33,36 +33,23 @@ public class TrackController implements ToteEventHandler {
 		System.out.println("[Message Sender] Handling client messages");
 		client = sendClient;
 		System.out.println("Track controller started");
-		OSRConfig config = osrBuffer.getOsrConfig(); 
-		int maxTotes = config.getMaxTotesOnTrack();
+		int maxTotes = osrBuffer.getTrackToteCapacity();
 		System.out.println("osrBuffer Started");
-		// write 32R messages in loop
 		// osrBuffer needs to be releasing totes - wait if not 
-		
-		int pageIndex = 0, totesProcessed = 0;
-		// get enough Totes from the database to fit on track
+		int totesProcessed = 0;
 		while (!stopTrackController) {
-			while (!config.isReleasing())
-				;			
-			Page<Tote> page;
-			if ((page = toteService.getTotePage(pageIndex, 1)).getNumberOfElements() > 0) {
-				System.out.println("Page number:" + pageIndex + " Number of entries: " + page.getNumberOfElements());
-				pageIndex++;
-				page.forEach(t -> {
-					while (!config.isReleasing())
-						;			
-					// make sure we don't release too many totes at once
-					while(activeTotes == maxTotes);
-					// send 32R short
-					// start tote on track
-					toteController.releaseTote(t, this, client);
-					try {
-						Thread.sleep(config.getToteReleaseInterval());
-					} catch (InterruptedException ie) {
-						System.out.println("This shouldn't happen");
-					}
-				});
-				
+			// wait until OSR is releasing and track has availability 
+			while (!osrBuffer.isReleasing() || activeTotes == maxTotes);			
+			// start tote on track
+			Tote t = toteService.getToteInQueuePosition(totesProcessed);
+			if (t != null) {
+				toteController.releaseTote(t, this, client);
+				totesProcessed++;
+			}
+			try {
+				Thread.sleep(osrBuffer.getToteReleaseInterval());
+			} catch (InterruptedException ie) {
+				System.out.println("This shouldn't happen");
 			}
 		}
 	}

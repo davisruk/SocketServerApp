@@ -19,8 +19,9 @@ public class ToteController {
 	
 	@Async
 	public void releaseTote(Tote tote, ToteEventHandler handler, SendClientSocketHandler client) {
+		if (tote == null) return;
 		long started = System.currentTimeMillis();
-		long trackTravelTimeLeft = osrBuffer.getOsrConfig().getToteTrackTravelTime();
+		long trackTravelTimeLeft = osrBuffer.getToteTravelTime();
 		long timeTravelled = System.currentTimeMillis() - started;
 
 		handler.handleToteActivation(tote);
