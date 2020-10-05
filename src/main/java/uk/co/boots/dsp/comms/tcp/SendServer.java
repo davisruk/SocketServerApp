@@ -21,14 +21,13 @@ public class SendServer implements SocketServer {
 	private int port;
 
 	@Autowired
-	private TrackController trackController;
-	
-	@Autowired
 	@Qualifier("dspCommunicationNotifier")
 	private DSPCommunicationNotifier dspCommunicationNotifier;
 	
 	private static ServerSocket sc;
 
+	private SendClientSocketHandler currentClient; 
+	
 	@Async
 	public void startServer() {
 		try {
@@ -36,8 +35,16 @@ public class SendServer implements SocketServer {
 			System.out.println("Send Server started and listening on port " + port);
 			while (true) {
 				SendClientSocketHandler client = new SendClientSocketHandler(sc.accept());
-				dspCommunicationNotifier.registerDSPCommunicationHandler(client);
-				trackController.start();
+				if (currentClient != null) {
+					// we only expect 1 tcp client so replace the current one
+					dspCommunicationNotifier.replaceDSPCommunicationHandler(currentClient, client);
+					// we may have had some failed messages so ask the comms notifier to resend them
+					// with the new handler
+					dspCommunicationNotifier.sendFailedMessages(client);
+				} else {
+					dspCommunicationNotifier.registerDSPCommunicationHandler(client);
+				}
+				currentClient = client;
 			}
 		} catch (IOException ioe) {
 			System.out.println(ioe.getMessage());

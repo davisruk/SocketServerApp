@@ -49,6 +49,10 @@ public class ToteService {
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
 	}
+	
+	public long getToteCount() {
+		return toteRepository.count();
+	}
 
 	public Tote setupStartTime(Calendar time, Tote t) {
 		StartTime st = new StartTime();

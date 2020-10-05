@@ -51,13 +51,18 @@ public class TrackController {
 			// wait until OSR is releasing and track has availability 
 			if (osrBuffer.isReleasing() && activeTotes < maxTotes) {
 				// start tote on track
-				Tote t = toteService.getToteInQueuePosition(totesProcessed);
-				toteController.releaseTote(t);
-				totesProcessed++;
-				try {
-					Thread.sleep(releaseInterval);
-				} catch (InterruptedException ie) {
-					System.out.println("This shouldn't happen");
+				long totesInOSR = toteService.getToteCount();
+				if (totesInOSR > 0 & totesProcessed < totesInOSR) {
+					Tote t = toteService.getToteInQueuePosition(totesProcessed);
+					
+					System.out.println("[TrackController] processing tote " + (totesProcessed + 1) + " of " + totesInOSR);
+					toteController.releaseTote(t);
+					totesProcessed++;
+					try {
+						Thread.sleep(releaseInterval);
+					} catch (InterruptedException ie) {
+						System.out.println("This shouldn't happen");
+					}
 				}
 			}
 		}
@@ -98,9 +103,11 @@ public class TrackController {
 		public void handleEvent(ToteEvent event) {
 			if (event.getEventType() == ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY) {
 				Tote t = event.getTote();
+				System.out.println("[Track Controller] Tote Finished");
 				DSPCommsMessage msg = toteService.processToteFinished(t);
 				dspCommunicationNotifier.notifyCommunicationHandlers(msg);
 				toteService.save(t);
+				System.out.println("[Track Controller] Tote Saved");
 			}
 		}
 	}

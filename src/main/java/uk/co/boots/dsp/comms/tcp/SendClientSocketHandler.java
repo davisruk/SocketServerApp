@@ -9,6 +9,7 @@ import java.net.Socket;
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationHandler;
 import uk.co.boots.dsp.messages.MessageResponseHandler;
+import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 public class SendClientSocketHandler implements DSPCommunicationHandler {
 	private final Socket client;
@@ -24,24 +25,37 @@ public class SendClientSocketHandler implements DSPCommunicationHandler {
 			System.out.println(ioe.getMessage());
 		}
 	}
-	
+
 	@Override
-	public byte[] handleCommsForMessage(DSPCommsMessage message) {
-		return handleCommsForMessage (message.getRawMessage().getMessage().getBytes(), message.getResponsehandler());
+	public byte[] handleCommsForMessage(DSPCommsMessage message) throws DSPMessageException {
+		return handleCommsForMessage(message.getRawMessage().getMessage().getBytes(), message.getResponsehandler());
 	}
 
-	private synchronized byte[] handleCommsForMessage (byte[] message, MessageResponseHandler responseHandler) {
+	private synchronized byte[] handleCommsForMessage(byte[] message, MessageResponseHandler responseHandler)
+			throws DSPMessageException {
 		byte[] ret = (SocketServer.START_FRAME_CHAR + new String(message) + SocketServer.END_FRAME_CHAR).getBytes();
 		try {
-			responseHandler.setInput(din);
 			out.write(ret);
-			responseHandler.processResponse();
 		} catch (IOException ioe) {
-			System.out.println(ioe.getMessage());
+			throw new DSPMessageException("Error writing message");
+		}
+
+		responseHandler.setInput(din);
+		try {
+			responseHandler.processResponse();
+		} catch (Exception dspme) {
+			try {
+				// something went wrong try and close the socket
+				close();
+			} catch (IOException e) {
+				// do nothing we're going to make the caller handle it
+			}
+			// throw exception to caller
+			throw dspme;
 		}
 		return ret;
 	}
-	
+
 	public void close() throws IOException {
 		din.close();
 		out.close();

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.dsp.comms.tcp.ReceiveServer;
 import uk.co.boots.dsp.comms.tcp.SendServer;
+import uk.co.boots.dsp.wcs.TrackController;
 
 @Component
 public class AppRunner implements CommandLineRunner {
@@ -18,9 +19,11 @@ public class AppRunner implements CommandLineRunner {
     
     @Autowired
     SendServer sendServer;
-
     @Autowired
     ReceiveServer receiveServer;
+	@Autowired
+	private TrackController trackController;
+    
 
     @Override
     public void run(String... args) throws Exception {
@@ -33,5 +36,6 @@ public class AppRunner implements CommandLineRunner {
 
 	      receiveServer.startServer();
 	      sendServer.startServer();
+	      trackController.start();
     }
 }
