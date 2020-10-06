@@ -1,3 +1,13 @@
+/*
+ * Receives DSP Messages and sends back their responses
+ * Much simpler class than for sending back messages on other channel
+ * There is limited fault tolerance built in - if the connection
+ * fails when writing back a response then when the client
+ * reconnects the response will be returned again
+ * 
+ * If the client drops the connection during message transmission from
+ * its side then it is expected to re-send the message
+ */
 package uk.co.boots.dsp.comms.tcp;
 
 import java.io.BufferedInputStream;
@@ -14,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import lombok.Data;
 import uk.co.boots.dsp.messages.BasicMessage;
 import uk.co.boots.dsp.messages.Deserializer;
 import uk.co.boots.dsp.messages.DeserializerFactory;
@@ -41,6 +52,9 @@ public class ReceiveServer implements SocketServer {
 	private static ServerSocket sc;
 	private boolean finished = false;
 	
+	private byte[] currentResponse = null;
+	private boolean writingResponse;
+	
 	public synchronized void setFinished (boolean val) {
 		finished = val;
 	}
@@ -51,17 +65,27 @@ public class ReceiveServer implements SocketServer {
 			sc = new ServerSocket(port);
 			System.out.println("Receive Server started and listening on port " + port);
 			while (true) {
-				handleClientSocketConnection(sc.accept());
+				TCPComms comms = new TCPComms(sc.accept());
+				handleOldMessage(comms);
+				handleClientSocketConnection(comms);
 			}
 		} catch (IOException ioe) {
 		}
 	}
 
-	@Async
-	private void handleClientSocketConnection(Socket client) {
+	private synchronized void handleOldMessage (TCPComms comms) {
+		if (currentResponse == null || !writingResponse) return;
 		try {
-			InputStream ins = new BufferedInputStream(client.getInputStream());
-			DataOutputStream out = new DataOutputStream(client.getOutputStream());
+			comms.out.write(currentResponse);
+			setResponseValues(false, null);
+		} catch (IOException ioe) {
+			// do nothing - client will reconnect and we will resend
+		}
+	}
+	
+	@Async
+	private void handleClientSocketConnection(TCPComms comms) {
+		try {
 			System.out.println("[Message Receiver] Handling client messages");
 			while (!finished) {
 				byte[] messageBytes;
@@ -69,7 +93,7 @@ public class ReceiveServer implements SocketServer {
 				boolean messageStarted = false;
 				ByteArrayOutputStream buf = new ByteArrayOutputStream();
 				int b, bytesRead = 0;
-				while (!finishedMessage && (b = ins.read()) > 0) {
+				while (!finishedMessage && (b = comms.in.read()) > 0) {
 					bytesRead++;
 					if (bytesRead == 1) {
 						// keep checking until we hit frame start 0x0A
@@ -84,22 +108,61 @@ public class ReceiveServer implements SocketServer {
 						bytesRead = 0;
 					}
 				}
-				messageBytes = buf.toByteArray();
-				String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
-				Deserializer d = deserializerFactory.getDeserializer(msgType).get();
-				BasicMessage m = d.deserialize(messageBytes);
-				m.addRawMessage(messageBytes, msgType, new Date());
-				MessageProcessor mp = d.getProcessor();
-				mp.process(m);
-				if (mp.hasResponse()) {
-					out.write(mp.getResponse(m));
+				if (finishedMessage) {
+					messageBytes = buf.toByteArray();
+					String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
+					Deserializer d = deserializerFactory.getDeserializer(msgType).get();
+					BasicMessage m = d.deserialize(messageBytes);
+					m.addRawMessage(messageBytes, msgType, new Date());
+					MessageProcessor mp = d.getProcessor();
+					mp.process(m);
+					if (mp.hasResponse()) {
+						setResponseValues(true, mp.getResponse(m));
+						comms.out.write(currentResponse);
+						setResponseValues(false, null);
+					}
+				} else {
+					System.out.println("Message not read correctly - close connection");
+					finished = true;
 				}
 			}
-			ins.close();
-			out.close();
-			client.close();
 		} catch (IOException ioe) {
 			System.out.println(ioe.getMessage());
+		} finally {
+			comms.closeComms();
+		}
+		
+	}
+	
+	private synchronized void setResponseValues (boolean writing, byte[] response) {
+		writingResponse = writing;
+		currentResponse = response;
+	}
+	
+	@Data
+	private class TCPComms {
+		private Socket client;
+		private InputStream in;
+		private DataOutputStream out;
+		
+		public TCPComms (Socket client) {
+			try {
+				this.client = client;
+				in = new BufferedInputStream(client.getInputStream());
+				out = new DataOutputStream(client.getOutputStream());
+			} catch (IOException ioe) {
+				// do nothing
+			}
+		}
+		
+		public void closeComms() {
+			try {
+				in.close();
+				out.close();
+				client.close();
+			}catch(IOException ioe) {
+				// do nothing
+			}
 		}
 	}
 }
