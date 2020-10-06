@@ -51,6 +51,7 @@ public class ToteController {
 		System.out.println(toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 
 		toteService.setupEndTime(Calendar.getInstance(), tote);
+		toteService.setupGSOne(tote);
 		toteService.setupOperators(tote);
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY, tote));
 		// signal tote has ended

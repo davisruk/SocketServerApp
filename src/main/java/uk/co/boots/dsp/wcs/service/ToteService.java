@@ -13,7 +13,6 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import uk.co.boots.dsp.comms.DSPCommsMessage;
-import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.messages.Serializer;
 import uk.co.boots.dsp.messages.SerializerFactory;
 import uk.co.boots.dsp.messages.shared.OrderDetail;
@@ -21,6 +20,8 @@ import uk.co.boots.dsp.messages.shared.OrderLine;
 import uk.co.boots.dsp.messages.shared.RawMessage;
 import uk.co.boots.dsp.messages.shared.Tote;
 import uk.co.boots.dsp.messages.thirtytwor.EndTime;
+import uk.co.boots.dsp.messages.thirtytwor.GsOneDetail;
+import uk.co.boots.dsp.messages.thirtytwor.GsOneLine;
 import uk.co.boots.dsp.messages.thirtytwor.OperatorDetail;
 import uk.co.boots.dsp.messages.thirtytwor.OperatorLine;
 import uk.co.boots.dsp.messages.thirtytwor.StartTime;
@@ -105,6 +106,25 @@ public class ToteService {
 			});
 		}
 	}
+	
+	public void setupGSOne(Tote t) {
+		OrderDetail od = t.getOrderDetail();
+		if (od != null) {
+			List<OrderLine> ol = od.getOrderLines();
+			ol.forEach(orderLine -> {
+				GsOneDetail gsod = new GsOneDetail();
+				gsod.setNumberOfLines(1);
+				GsOneLine line = new GsOneLine();
+				line.setLengthOfGSone("" + 62);
+				line.setSplitIndicator('0');
+				line.setGsOne("GSONEBARCODE12345678901234567890123456789012345678901234567890");
+				gsod.addGsOneLine(line);
+				line.setGsOneDetail(gsod);
+				orderLine.setGSOneDetail(gsod);
+			});
+		}
+	}
+	
 
 	public DSPCommsMessage processToteFinished(Tote tote) {
 		// tote has travelled track, send back 32R Long

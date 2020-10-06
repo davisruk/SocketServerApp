@@ -11,6 +11,7 @@ import javax.persistence.OneToOne;
 
 import lombok.Data;
 import lombok.ToString;
+import uk.co.boots.dsp.messages.thirtytwor.GsOneDetail;
 import uk.co.boots.dsp.messages.thirtytwor.OperatorDetail;
 
 @Data
@@ -42,6 +43,9 @@ public class OrderLine {
 	//32R
 	private String plasticBagId;
 	private String productBarcode;
+
+	@OneToOne(cascade={CascadeType.ALL})
+	private GsOneDetail gSOneDetail;
 
 	@OneToOne(cascade={CascadeType.ALL})
 	private OperatorDetail operatorDetail;

@@ -28,7 +28,10 @@ public class ThirtyTwoRSerializer implements Serializer {
 	private OrderLineArrayListSerializationControl orderLineArrayListSerializationControl;
 	@Autowired
 	private OperatorArrayListSerializationControl operatorArrayListSerializationControl;
+	@Autowired
+	private GsOneArrayListSerializationControl gsOneArrayListSerializationControl;
 
+	
 	@Override
 	public boolean canHandle(String messageType) {
 		return "32RLong".equals(messageType);
@@ -145,7 +148,13 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb.append(ol.getNumberOfPacks());
 		sb.append(ol.getNumberOfPills());
 		sb.append(ol.getProductBarcode());
+		
 		// FMD here
+		sb = processGsOne(ol.getGSOneDetail(), sb, gsOneArrayListSerializationControl);
+		
+		
+		
+		
 		sb = processOperators(ol.getOperatorDetail(), sb, operatorArrayListSerializationControl);
 		ol.setStatus("30");
 		sb.append(ol.getStatus());
@@ -165,6 +174,21 @@ public class ThirtyTwoRSerializer implements Serializer {
 		});
 		return sb;
 	}
+	
+	private StringBuffer processGsOne(GsOneDetail gsod, StringBuffer sb,
+			GsOneArrayListSerializationControl sc) {
+		if (gsod == null)
+			return sb;
+		sb.append(String.format("%02d", gsod.getNumberOfLines()));
+		List<GsOneLine> l = gsod.getGsOneLines();
+		l.forEach(line -> {
+			sb.append(line.getLengthOfGSone());
+			sb.append(line.getGsOne());
+			sb.append(line.getSplitIndicator());
+		});
+		return sb;
+	}
+	
 
 	@Override
 	public String getType() {
