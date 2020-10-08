@@ -16,7 +16,7 @@ public class OSRBuffer {
 		System.out.println(osrConfig);
 	}
 	
-	public boolean isReleasing () {
+	public synchronized boolean isReleasing () {
 		return osrConfig.isReleasing();
 	}
 	
@@ -44,5 +44,9 @@ public class OSRBuffer {
 
 	public int getTrackToteCapacity() {
 		return osrConfig.getMaxTotesOnTrack();
+	}
+	
+	public boolean processingFMD () {
+		return osrConfig.isIncludeFMD();
 	}
 }

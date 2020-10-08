@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import lombok.Getter;
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.events.DSPEventHandler;
@@ -30,7 +29,6 @@ public class TrackController {
 	@Qualifier("dspCommunicationNotifier")
 	private DSPCommunicationNotifier dspCommunicationNotifier;
 
-	@Getter
 	private int activeTotes;
 	
 	private boolean stopTrackController = false;
@@ -48,8 +46,10 @@ public class TrackController {
 		// osrBuffer needs to be releasing totes - wait if not 
 		int totesProcessed = 0;
 		while (!stopTrackController) {
+			// System.out.println("stopTrackController: " + stopTrackController + " Active Totes: " + activeTotes + " Max Totes: " + maxTotes);
 			// wait until OSR is releasing and track has availability 
-			if (osrBuffer.isReleasing() && activeTotes < maxTotes) {
+			if (osrBuffer.isReleasing() && getActiveTotes() < maxTotes) {
+				//System.out.println("[TrackController] OSR is releasing");
 				// start tote on track
 				long totesInOSR = toteService.getToteCount();
 				if (totesInOSR > 0 & totesProcessed < totesInOSR) {
@@ -110,6 +110,10 @@ public class TrackController {
 				System.out.println("[Track Controller] Tote Saved");
 			}
 		}
+	}
+	
+	private synchronized int getActiveTotes() {
+		return activeTotes;
 	}
 	
 	private synchronized void incrementActiveTotes () {

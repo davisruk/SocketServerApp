@@ -8,4 +8,5 @@ public class OSRConfig {
 	private long toteTrackTravelTime;
 	private int maxTotesOnTrack;
 	private boolean releasing;
+	private boolean includeFMD;
 }

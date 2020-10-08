@@ -16,6 +16,7 @@ import uk.co.boots.dsp.messages.shared.OrderLine;
 import uk.co.boots.dsp.messages.shared.Tote;
 import uk.co.boots.dsp.messages.shared.ToteIdentifier;
 import uk.co.boots.dsp.messages.shared.TransportContainer;
+import uk.co.boots.dsp.wcs.OSRBuffer;
 
 @Component
 public class ThirtyTwoRSerializer implements Serializer {
@@ -30,7 +31,8 @@ public class ThirtyTwoRSerializer implements Serializer {
 	private OperatorArrayListSerializationControl operatorArrayListSerializationControl;
 	@Autowired
 	private GsOneArrayListSerializationControl gsOneArrayListSerializationControl;
-
+	@Autowired
+	private OSRBuffer osrBuffer;
 	
 	@Override
 	public boolean canHandle(String messageType) {
@@ -150,7 +152,8 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb.append(ol.getProductBarcode());
 		
 		// FMD here
-		sb = processGsOne(ol.getGSOneDetail(), sb, gsOneArrayListSerializationControl);
+		if (osrBuffer.processingFMD())
+			sb = processGsOne(ol.getGSOneDetail(), sb, gsOneArrayListSerializationControl);
 		
 		
 		

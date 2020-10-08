@@ -19,6 +19,7 @@ import uk.co.boots.dsp.messages.shared.OrderDetail;
 import uk.co.boots.dsp.messages.shared.OrderLine;
 import uk.co.boots.dsp.messages.shared.RawMessage;
 import uk.co.boots.dsp.messages.shared.Tote;
+import uk.co.boots.dsp.messages.shared.ToteIdentifier;
 import uk.co.boots.dsp.messages.thirtytwor.EndTime;
 import uk.co.boots.dsp.messages.thirtytwor.GsOneDetail;
 import uk.co.boots.dsp.messages.thirtytwor.GsOneLine;
@@ -44,13 +45,13 @@ public class ToteService {
 	// allows the Tote table to be queried like a queue
 	public Tote getToteInQueuePosition(int queuePos) {
 		Page<Tote> page = getTotePage(queuePos, 1);
-		return page.getNumberOfElements() > 0 ? page.toList().get(0) : null; 
+		return page.getNumberOfElements() > 0 ? page.toList().get(0) : null;
 	}
 
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
 	}
-	
+
 	public long getToteCount() {
 		return toteRepository.count();
 	}
@@ -71,10 +72,9 @@ public class ToteService {
 		return t;
 	}
 
-	public ToteStatusDetail addNewToteStatus (Tote t, String status) {
+	public ToteStatusDetail addNewToteStatus(Tote t, String status) {
 		ToteStatusDetail tsd = t.getStatusDetail();
-		if (tsd == null) 
-		{
+		if (tsd == null) {
 			tsd = new ToteStatusDetail();
 			t.setStatusDetail(tsd);
 			tsd.setStatusLength(4);
@@ -88,51 +88,80 @@ public class ToteService {
 		return tsd;
 	}
 
-	public void setupOperators(Tote t) {
-		OrderDetail od = t.getOrderDetail();
+	public void setupOrderLines(Tote tote) {
+		OrderDetail od = tote.getOrderDetail();
 		if (od != null) {
-			List<OrderLine> ol = od.getOrderLines();
-			ol.forEach(line -> {
-				OperatorDetail opd = new OperatorDetail();
-				opd.setNumberOfLines(1);
-				OperatorLine opl = new OperatorLine();
-				opl.setOperatorId("RDavis  ");
-				opl.setRoleId("Solution Architect  ");
-				opd.addOperatorLine(opl);
-				line.setOperatorDetail(opd);
-				Calendar opc = Calendar.getInstance();
-				opc.setTimeInMillis(t.getStartCal().getTimeInMillis() - t.getEndCal().getTimeInMillis() / 2);
-				opl.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
+			List<OrderLine> orderLines = od.getOrderLines();
+			orderLines.forEach(line -> {
+				setupOperators(line);
+				setupGSOne(line);
+				setupPickedValues (line, tote.getToteIdentifier().getPayload());
 			});
 		}
 	}
 	
-	public void setupGSOne(Tote t) {
-		OrderDetail od = t.getOrderDetail();
-		if (od != null) {
-			List<OrderLine> ol = od.getOrderLines();
-			ol.forEach(orderLine -> {
-				GsOneDetail gsod = new GsOneDetail();
-				gsod.setNumberOfLines(1);
-				GsOneLine line = new GsOneLine();
-				line.setLengthOfGSone("" + 62);
-				line.setSplitIndicator('0');
-				line.setGsOne("GSONEBARCODE12345678901234567890123456789012345678901234567890");
-				gsod.addGsOneLine(line);
-				line.setGsOneDetail(gsod);
-				orderLine.setGSOneDetail(gsod);
-			});
+	private OrderLine findOrderLineInTote(Tote tote, String orderLineNumber) {
+		return tote.getOrderDetail().getOrderLines()
+			.stream()
+			.filter(line -> line.getOrderLineNumber().equals(orderLineNumber))
+			.findAny()
+			.orElse(null);
+	}
+
+	public void setupPickedValues(OrderLine orderLine, String toteIdentifier) {
+		if (ToteIdentifier.EMPTY_TOTE.equals(toteIdentifier) || ToteIdentifier.ASSOCIATED_TOTE.equals(toteIdentifier)){
+			Tote t = getRelatedToteForOrder(orderLine.getOrderLineNumber(), ToteIdentifier.ADAPTED_TOTE);
+			if (t != null) {
+				OrderLine relatedLine = findOrderLineInTote(t, orderLine.getOrderLineNumber());
+				// finish this off tomorrow
+				if (relatedLine != null) {
+					orderLine.setNumberOfPills(relatedLine.getNumberOfPills());
+				}
+			} else {
+				t = getRelatedToteForOrder(orderLine.getOrderLineNumber(), ToteIdentifier.MANUAL_TOTE);
+				if (t != null) {
+					OrderLine relatedLine = findOrderLineInTote(t, orderLine.getOrderLineNumber());
+					orderLine.setNumberOfPacks(relatedLine.getNumberOfPacks());
+				}
+			}			
 		}
 	}
-	
+
+	public void setupOperators(OrderLine orderLine) {
+		OperatorDetail opd = new OperatorDetail();
+		opd.setNumberOfLines(1);
+		opd.setOrderLine(orderLine);
+		OperatorLine opl = new OperatorLine();
+		opl.setOperatorId("RDavis  ");
+		opl.setRoleId("Solution Architect  ");
+		opd.addOperatorLine(opl);
+		orderLine.setOperatorDetail(opd);
+		Calendar opc = Calendar.getInstance();
+		// opc.setTimeInMillis(t.getStartCal().getTimeInMillis() - t.getEndCal().getTimeInMillis() / 2);
+		opc.setTimeInMillis(opc.getTimeInMillis());
+		opl.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
+	}
+
+	public void setupGSOne(OrderLine orderLine) {
+		GsOneDetail gsod = new GsOneDetail();
+		gsod.setNumberOfLines(1);
+		GsOneLine line = new GsOneLine();
+		line.setLengthOfGSone("" + 62);
+		line.setSplitIndicator('0');
+		line.setGsOne("GSONEBARCODE12345678901234567890123456789012345678901234567890");
+		gsod.addGsOneLine(line);
+		line.setGsOneDetail(gsod);
+		orderLine.setGSOneDetail(gsod);
+		gsod.setOrderLine(orderLine);
+	}
 
 	public DSPCommsMessage processToteFinished(Tote tote) {
 		// tote has travelled track, send back 32R Long
 		Serializer s = serializerFactory.getSerializer("32RLong").get();
 		Date now = new Date();
-		//change tote status to complete
+		// change tote status to complete
 		addNewToteStatus(tote, "0004");
-		RawMessage rm = new RawMessage (s.getType(), new String(s.serialize(tote)),now);
+		RawMessage rm = new RawMessage(s.getType(), new String(s.serialize(tote)), now);
 		return new DSPCommsMessage(rm, s.getResponseProcessor(tote), tote);
 	}
 
@@ -152,7 +181,22 @@ public class ToteService {
 		// set tote status to order started
 		addNewToteStatus(tote, "0001");
 		setupStartTime(Calendar.getInstance(), tote);
-		RawMessage rm = new RawMessage (s.getType(), new String(s.serialize(tote)), now);
+		RawMessage rm = new RawMessage(s.getType(), new String(s.serialize(tote)), now);
 		return new DSPCommsMessage(rm, s.getResponseProcessor(tote), tote);
 	}
+
+	public Tote getRelatedToteForOrder(String orderReference, String toteOrderType) {
+		List<Tote> tl = toteRepository.findRelatedToteForOrderLine(orderReference, toteOrderType);
+		if (tl == null || tl.size() == 0)
+			return null;
+		return tl.get(0);
+	}
+	
+	public OrderLine getRelatedOrderLineForOrderLineNumber(String orderLineReference, String toteOrderType) {
+		List<OrderLine> olList = toteRepository.findRelatedOrderLineByOrderLineNumber(orderLineReference, toteOrderType);
+		if (olList == null || olList.size() == 0)
+			return null;
+		return olList.get(0);
+	}
+
 }

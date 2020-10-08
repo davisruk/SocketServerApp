@@ -3,7 +3,6 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
  	id "io.freefair.lombok" version "5.2.1"
  	id 'com.palantir.docker' version '0.25.0'
-	id 'com.palantir.docker-run' version '0.25.0'
 	id 'java'
 }
 
@@ -27,18 +26,9 @@ dependencies {
 }
 
 docker {
-	name "davisruk/${project.name.toLowerCase()}:${version}"
+	name "davisruk/cpas-stub:${version}"
 	buildArgs([JAR_FILE: "build/libs/${project.name}-${version}.jar"])
 	copySpec.from("build").into("build")
-}
-
-def server_port=7777
-def messages_to_exchange=1000
-dockerRun {
-    name = "tcp-server"
-    image = "davisruk/${project.name.toLowerCase()}:${version}"
-    ports("9401:${server_port}")
-    env 'tcp_port': "${server_port}", 'num_messages':"${messages_to_exchange}"
 }
 
 test {
