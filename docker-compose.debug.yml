@@ -1,0 +1,30 @@
+version: '3'
+services:
+    message-store:
+        image: postgres:13
+        container_name: cpas-stub-db
+        environment:
+          - POSTGRES_USER=${postgres_user}
+          - POSTGRES_PASSWORD=${postgres_password}
+          - POSTGRES_DB=${postgres_db_name}
+        ports:
+        - 5432:5432
+    cpas-server:
+        depends_on:
+        - message-store
+        image: davisruk/cpas-stub:${app_version}-DEBUG
+        container_name: cpas-stub-container
+        command: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000 -jar app.jar
+        ports:
+          - 9803:${server_receive_port}
+          - 9804:${server_send_port}
+          - 8080:8080
+          - 8000:8000
+        environment:
+            - tcp_send_port=${server_send_port}
+            - tcp_receive_port=${server_receive_port}
+            - database.service=cpas-stub-db
+            - database.name=msgstore
+            - spring.datasource.username=${postgres_user}
+            - spring.datasource.password=${postgres_password}
+

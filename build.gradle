@@ -7,7 +7,12 @@ plugins {
 }
 
 group = 'uk.co.boots'
-version = '0.0.1-SNAPSHOT'
+def version_number = '0.0.1'
+def image_version = "${version_number}-DEBUG"
+version = "${version_number}-SNAPSHOT"
+//def image_version = "${version}"
+
+
 
 sourceCompatibility = '14'
 
@@ -26,9 +31,11 @@ dependencies {
 }
 
 docker {
-	name "davisruk/cpas-stub:${version}"
+	name "davisruk/cpas-stub:${image_version}"
 	buildArgs([JAR_FILE: "build/libs/${project.name}-${version}.jar"])
 	copySpec.from("build").into("build")
+	//dockerfile file('Dockerfile') 
+	dockerfile file('Dockerfile.debug')
 }
 
 test {
