@@ -16,6 +16,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import uk.co.boots.dsp.messages.BasicMessage;
 import uk.co.boots.dsp.messages.thirtytwor.EndTime;
@@ -27,6 +31,7 @@ import uk.co.boots.dsp.messages.twelven.ServiceCentre;
 
 @Data
 @Entity
+@JsonInclude(Include.NON_NULL)
 public class Tote implements BasicMessage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -68,13 +73,17 @@ public class Tote implements BasicMessage {
 	@OneToOne(cascade={CascadeType.ALL})
 	private OrderDetail orderDetail;
 
+	@JsonIgnore
 	@OneToMany(mappedBy="tote",cascade={CascadeType.ALL})
 	private List<RawMessage> messageList;
 	
+	@JsonIgnore
 	boolean processed;
 	
+	@JsonIgnore
 	@Transient
 	Calendar startCal;
+	@JsonIgnore
 	@Transient
 	Calendar endCal;
 	
@@ -85,12 +94,14 @@ public class Tote implements BasicMessage {
 	
 	@Override
 	@Transient
+	@JsonIgnore
 	public boolean hasResponse() {
 		return true;
 	}
 
 	@Override
 	@Transient
+	@JsonIgnore
 	public byte[] getResponse() {
 		// TODO Auto-generated method stub
 		return toString().getBytes();

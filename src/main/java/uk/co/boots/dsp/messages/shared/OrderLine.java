@@ -9,6 +9,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.ToString;
 import uk.co.boots.dsp.messages.thirtytwor.GsOneDetail;
@@ -17,11 +21,13 @@ import uk.co.boots.dsp.messages.thirtytwor.OperatorDetail;
 @Data
 @ToString(exclude="orderDetail")
 @Entity
+@JsonInclude(Include.NON_NULL)
 public class OrderLine {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	Long id;
 	
+	@JsonIgnore
 	@ManyToOne (cascade={CascadeType.ALL})
 	@JoinColumn (name="order_detail_id")
 	private OrderDetail orderDetail;

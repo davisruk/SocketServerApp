@@ -13,6 +13,7 @@ import uk.co.boots.dsp.messages.shared.Header;
 import uk.co.boots.dsp.messages.shared.HeaderSerializationControl;
 import uk.co.boots.dsp.messages.shared.OrderDetail;
 import uk.co.boots.dsp.messages.shared.OrderLine;
+import uk.co.boots.dsp.messages.shared.SerializationControlIdentifiers;
 import uk.co.boots.dsp.messages.shared.Tote;
 import uk.co.boots.dsp.messages.shared.ToteIdentifier;
 import uk.co.boots.dsp.messages.shared.TransportContainer;
@@ -90,7 +91,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 	private StringBuffer processStatus(ToteStatusDetail sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
 		if (sal == null)
 			return sb;
-		sb.append(sc.getIdentifier());
+		sb.append(SerializationControlIdentifiers.STATUS);
 		sb.append(String.format(sc.getNumberOfEntries().getFormat(), sal.getNumberOfLines()));
 		sb.append(String.format(sc.getStatusLength().getFormat(), sal.getStatusLength()));
 		sal.getStatusList().forEach(status -> sb.append(status.getStatus()));
@@ -99,21 +100,20 @@ public class ThirtyTwoRSerializer implements Serializer {
 
 	private StringBuffer processOrderDetail(OrderDetail od, StringBuffer sb,
 			OrderLineArrayListSerializationControl sc) {
-		OperatorArrayListSerializationControl oc = sc.getOperatorArrayListSerializationControl();
+		OperatorArrayListSerializationControl oc = operatorArrayListSerializationControl;
 
 		if (od == null)
 			return sb;
-		// Refactor - These are not set in the 12N, should really get this info from the
-		// serialization controller
+
 		od.setPlasticBagIdLength(8);
 		od.setProductBarcodeLength(13);
 		od.setTimestampLength(17);
 		od.setRoleIdLength(20);
 		od.setOperatorIdLength(8);
 		od.setStatusLength(2);
-		// end of refactor
 
-		sb.append(orderLineArrayListSerializationControl.getIdentifier());
+
+		sb.append(SerializationControlIdentifiers.ORDER_LIST_32R);
 		sb.append(String.format(sc.getNumberOrderLinesInfo().getFormat(), od.getNumberOfOrderLines()));
 		sb.append(String.format(sc.getOrderLineRefInfo().getFormat(), od.getOrderLineReferenceNumberLength()));
 		sb.append(String.format(sc.getOrderLineTypeInfo().getFormat(), od.getOrderLineTypeLength()));
@@ -125,9 +125,9 @@ public class ThirtyTwoRSerializer implements Serializer {
 		sb.append(String.format(sc.getNumPacksInfo().getFormat(), od.getNumPacksLength()));
 		sb.append(String.format(sc.getNumPillsInfo().getFormat(), od.getNumPillsLength()));
 		sb.append(String.format(sc.getProductBarcodeInfo().getFormat(), od.getProductBarcodeLength()));
-		sb.append(String.format(oc.getOperatorIdInfo().getFormat(), od.getOperatorIdLength()));
-		sb.append(String.format(oc.getRoleIdInfo().getFormat(), od.getRoleIdLength()));
-		sb.append(String.format(oc.getTimestampInfo().getFormat(), od.getTimestampLength()));
+		sb.append(String.format(sc.getOperatorIdInfo().getFormat(), od.getOperatorIdLength()));
+		sb.append(String.format(sc.getRoleIdInfo().getFormat(), od.getRoleIdLength()));
+		sb.append(String.format(sc.getTimestampInfo().getFormat(), od.getTimestampLength()));
 		sb.append(String.format(sc.getStatusInfo().getFormat(), od.getStatusLength()));
 
 		List<OrderLine> ola = od.getOrderLines();

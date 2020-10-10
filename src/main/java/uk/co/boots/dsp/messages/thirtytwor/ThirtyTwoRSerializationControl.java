@@ -1,4 +1,4 @@
-package uk.co.boots.dsp.messages.twelven;
+package uk.co.boots.dsp.messages.thirtytwor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,13 +8,10 @@ import uk.co.boots.dsp.messages.shared.HeaderSerializationControl;
 
 @Component
 @Getter
-public class TwelveNSerializationControl {
-
+public class ThirtyTwoRSerializationControl {
 	@Autowired
 	private HeaderSerializationControl headerSerializationControl;
 	@Autowired
-	private OrderLineArrayListSerializationControl orderLineArrayListSerializationControl;
-
-	
+	private OrderLineArrayListSerializationControl thirtyTwoROrderLineArrayListSerializationControl;
 
 }

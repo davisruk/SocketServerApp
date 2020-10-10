@@ -4,6 +4,10 @@ import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.ToString;
 import uk.co.boots.dsp.messages.BasicRecord;
@@ -11,6 +15,7 @@ import uk.co.boots.dsp.messages.BasicRecord;
 @Entity
 @Data
 @ToString(exclude="tote")
+@JsonInclude(Include.NON_NULL)
 public class ToteIdentifier extends BasicRecord {
 
 	@Transient
@@ -24,6 +29,7 @@ public class ToteIdentifier extends BasicRecord {
 	@Transient
 	public static String FULLPACK_TOTE = "05"; // CPF (Central Pharmacy Fully Automated)
 
+	@JsonIgnore
 	@OneToOne(mappedBy = "toteIdentifier")
     private Tote tote;
 	

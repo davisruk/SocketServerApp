@@ -13,6 +13,7 @@ import uk.co.boots.dsp.messages.shared.Header;
 import uk.co.boots.dsp.messages.shared.HeaderSerializationControl;
 import uk.co.boots.dsp.messages.shared.OrderDetail;
 import uk.co.boots.dsp.messages.shared.OrderLine;
+import uk.co.boots.dsp.messages.shared.SerializationControlIdentifiers;
 import uk.co.boots.dsp.messages.shared.Tote;
 import uk.co.boots.dsp.messages.shared.ToteIdentifier;
 import uk.co.boots.dsp.messages.shared.TransportContainer;
@@ -44,25 +45,25 @@ public class TwelveNDeserializer implements Deserializer {
 		BasicRecord br = null;
 		Header h = record.getHeader();
 		int currentOffset = twelveNSerializationControl.getHeaderSerializationControl().getNextDataOffset(h);
-		while (messagePayload[currentOffset] != TwelveNSerializationControl.ORDER_LIST) {
+		while (messagePayload[currentOffset] != SerializationControlIdentifiers.ORDER_LIST_12N) {
 			switch (messagePayload[currentOffset]) {
-				case TwelveNSerializationControl.TOTE_ID: {
+				case SerializationControlIdentifiers.TOTE_ID: {
 					br = setupToteIdentifier(messagePayload, currentOffset, record);
 					break;
 				}
-				case TwelveNSerializationControl.CONTAINER_ID: {
+				case SerializationControlIdentifiers.CONTAINER_ID: {
 					br = setupTransportContainer(messagePayload, currentOffset, record);
 					break;
 				}
-				case TwelveNSerializationControl.ORDER_PRIORITY: {
+				case SerializationControlIdentifiers.ORDER_PRIORITY: {
 					br = setupOrderPriority(messagePayload, currentOffset, record);
 					break;
 				}
-				case TwelveNSerializationControl.SERVICE_CENTRE: {
+				case SerializationControlIdentifiers.SERVICE_CENTRE: {
 					br = setupServiceCentre(messagePayload, currentOffset, record);
 					break;
 				}
-				case TwelveNSerializationControl.DEPARTURE_TIME: {
+				case SerializationControlIdentifiers.DEPARTURE_TIME: {
 					br = setupDepartureTime(messagePayload, currentOffset, record);
 					break;
 				}

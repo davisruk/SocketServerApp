@@ -7,12 +7,17 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.ToString;
 
 @Data
 @ToString(exclude="tote") //to stop circular dependency with Tote blowing stack on toString call
 @MappedSuperclass
+@JsonInclude(Include.NON_NULL)
 public abstract class BasicRecord {
 	@Transient
 	public static final SerialisationControlField identifierInfo = new SerialisationControlField("%c", 0, 1);
@@ -30,11 +35,13 @@ public abstract class BasicRecord {
 	private String payload;
 
 	@Transient
+	@JsonIgnore
 	public int getPayloadDataOffset() {
 		return fieldLengthInfo.getNextOffset();
 	}
 
 	@Transient
+	@JsonIgnore
 	public int getNextRecordOffset() {
 		return getPayloadDataOffset() + getPayloadLength();
 	}

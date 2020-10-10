@@ -1,5 +1,6 @@
 package uk.co.boots.dsp.wcs.service;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -58,7 +59,7 @@ public class ToteService {
 
 	public Tote setupStartTime(Calendar time, Tote t) {
 		StartTime st = new StartTime();
-		st.setPayload(convertTime(time, "%02d%02d%02d"));
+		st.setPayload(convertTime(time, "HHmmss"));
 		t.setStartTime(st);
 		t.setStartCal(time);
 		return t;
@@ -66,7 +67,7 @@ public class ToteService {
 
 	public Tote setupEndTime(Calendar time, Tote t) {
 		EndTime et = new EndTime();
-		et.setPayload(convertTime(time, "%02d%02d%02d"));
+		et.setPayload(convertTime(time, "HHmmss"));
 		t.setEndTime(et);
 		t.setEndCal(time);
 		return t;
@@ -137,9 +138,9 @@ public class ToteService {
 		opd.addOperatorLine(opl);
 		orderLine.setOperatorDetail(opd);
 		Calendar opc = Calendar.getInstance();
-		// opc.setTimeInMillis(t.getStartCal().getTimeInMillis() - t.getEndCal().getTimeInMillis() / 2);
 		opc.setTimeInMillis(opc.getTimeInMillis());
-		opl.setTimestamp(convertDate(opc) + " " + convertTime(opc, "%02d.%02d.%02d"));
+		String timeStamp = new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(opc.getTime());
+		opl.setTimestamp(timeStamp);
 	}
 
 	public void setupGSOne(OrderLine orderLine) {
@@ -165,13 +166,8 @@ public class ToteService {
 		return new DSPCommsMessage(rm, s.getResponseProcessor(tote), tote);
 	}
 
-	private String convertDate(Calendar c) {
-		return String.format("%02d.%02d.%02d", c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH),
-				c.get(Calendar.YEAR), c.get(Calendar.DAY_OF_MONTH));
-	}
-
 	private String convertTime(Calendar c, String format) {
-		return String.format(format, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
+		return new SimpleDateFormat(format).format(c.getTime());
 	}
 
 	public DSPCommsMessage processClientOrderPersisted(Tote tote) {

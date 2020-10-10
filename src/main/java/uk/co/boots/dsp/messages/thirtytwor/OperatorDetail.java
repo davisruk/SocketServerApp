@@ -11,6 +11,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.ToString;
 import uk.co.boots.dsp.messages.shared.OrderLine;
@@ -18,11 +22,13 @@ import uk.co.boots.dsp.messages.shared.OrderLine;
 @Data
 @ToString(exclude="orderLine")
 @Entity
+@JsonInclude(Include.NON_NULL)
 public class OperatorDetail {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 	
+	@JsonIgnore
 	@OneToOne
     private OrderLine orderLine;
 		

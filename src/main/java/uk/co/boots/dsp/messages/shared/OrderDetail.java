@@ -11,17 +11,23 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.ToString;
 
 @Data
 @ToString(exclude="tote")
 @Entity
+@JsonInclude(Include.NON_DEFAULT)
 public class OrderDetail {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 	
+	@JsonIgnore
 	@OneToOne
     private Tote tote;
 

@@ -9,6 +9,7 @@ import uk.co.boots.dsp.messages.MessageResponseHandler;
 import uk.co.boots.dsp.messages.Serializer;
 import uk.co.boots.dsp.messages.shared.Header;
 import uk.co.boots.dsp.messages.shared.HeaderSerializationControl;
+import uk.co.boots.dsp.messages.shared.SerializationControlIdentifiers;
 import uk.co.boots.dsp.messages.shared.Tote;
 
 @Component
@@ -71,7 +72,7 @@ public class ThirtyTwoRShortSerializer implements Serializer{
 	private StringBuffer processStatus(ToteStatusDetail sal, StringBuffer sb, StatusArrayListSerializationControl sc) {
 		if (sal == null)
 			return sb;
-		sb.append(sc.getIdentifier());
+		sb.append(SerializationControlIdentifiers.STATUS);
 		sb.append(String.format(sc.getNumberOfEntries().getFormat(), sal.getNumberOfLines()));
 		sb.append(String.format(sc.getStatusLength().getFormat(), sal.getStatusLength()));
 		sal.getStatusList().forEach(status -> sb.append(status.getStatus()));

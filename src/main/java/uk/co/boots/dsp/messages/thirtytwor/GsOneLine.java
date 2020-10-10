@@ -8,19 +8,24 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Data;
 import lombok.ToString;
 
 @Entity
 @Data
 @ToString(exclude="gsOneDetail")
-
+@JsonInclude(Include.NON_NULL)
 public class GsOneLine {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	Long id;
 	
+	@JsonIgnore
 	@ManyToOne (cascade={CascadeType.ALL})
 	@JoinColumn (name="gsone_detail_id")
 	private GsOneDetail gsOneDetail;
