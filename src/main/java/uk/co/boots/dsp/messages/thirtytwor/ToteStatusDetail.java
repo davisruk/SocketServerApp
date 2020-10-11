@@ -13,6 +13,7 @@ import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.Data;
@@ -24,6 +25,7 @@ import uk.co.boots.dsp.messages.shared.Tote;
 @ToString(exclude="tote")
 @Entity
 @JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder({ "id", "identifier", "numberOfLines", "statusLength", "statusList" })
 public class ToteStatusDetail {
 
 	@Id
@@ -45,7 +47,7 @@ public class ToteStatusDetail {
 		statusList = new ArrayList<Status>();
 	}
 	
-
+	@JsonIgnore
 	public int getStatusOffset() {
 		// we don't count numberOfLines
 		return 0;

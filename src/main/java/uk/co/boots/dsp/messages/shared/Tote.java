@@ -18,6 +18,7 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.Data;
@@ -32,6 +33,7 @@ import uk.co.boots.dsp.messages.twelven.ServiceCentre;
 @Data
 @Entity
 @JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder({ "id", "header", "toteIdentifier", "transportContainer", "orderPriority", "departureTime", "serviceCentre", "startTime", "endTime", "statusDetail", "orderDetail" })
 public class Tote implements BasicMessage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

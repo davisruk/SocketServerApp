@@ -13,6 +13,7 @@ import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.Data;
@@ -31,9 +32,6 @@ public class OrderDetail {
 	@OneToOne
     private Tote tote;
 
-	@OneToMany(mappedBy="orderDetail",cascade={CascadeType.ALL})
-	private List<OrderLine> orderLines;
-	
 	//representation of a tote orderlist
 	//some fields are provided by 12N messages
 	//some are provided by 32R messages
@@ -62,6 +60,9 @@ public class OrderDetail {
 	private int timestampLength;
 	private int statusLength;
 	
+	@OneToMany(mappedBy="orderDetail",cascade={CascadeType.ALL})
+	private List<OrderLine> orderLines;
+
 	public OrderDetail() {
 		orderLines = new ArrayList<OrderLine>();
 	}

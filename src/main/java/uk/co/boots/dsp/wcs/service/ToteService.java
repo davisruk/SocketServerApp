@@ -137,9 +137,7 @@ public class ToteService {
 		opl.setRoleId("Solution Architect  ");
 		opd.addOperatorLine(opl);
 		orderLine.setOperatorDetail(opd);
-		Calendar opc = Calendar.getInstance();
-		opc.setTimeInMillis(opc.getTimeInMillis());
-		String timeStamp = new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(opc.getTime());
+		String timeStamp = new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(Calendar.getInstance().getTime());
 		opl.setTimestamp(timeStamp);
 	}
 

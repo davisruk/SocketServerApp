@@ -34,15 +34,15 @@ public class DSPUtilsController {
 	@PostMapping("/prettify")
     public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
 		byte[] messageBytes = file.getBytes();
+		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		if (messageBytes[0] != 0x0A) {
-			ByteArrayOutputStream buf = new ByteArrayOutputStream();
 			buf.write(0x0A);
-			messageBytes[messageBytes.length - 2] = 0x0D;
-			buf.write(messageBytes, 0, messageBytes.length - 2);
-			buf.write(0x0A);
-			messageBytes = buf.toByteArray();
 		}
-		
+		buf.write(messageBytes, 0, messageBytes.length - 1);
+		if (messageBytes[messageBytes.length-1] != 0x0D) {
+			buf.write(0x0D);
+		}
+		messageBytes = buf.toByteArray();		
 		String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
 		Deserializer d = deserializerFactory.getDeserializer(msgType).get();
 		return (Tote) d.deserialize(messageBytes);
