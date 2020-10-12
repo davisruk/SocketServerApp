@@ -32,6 +32,8 @@ import uk.co.boots.dsp.messages.thirtytwor.Status;
 import uk.co.boots.dsp.messages.thirtytwor.ToteStatusDetail;
 import uk.co.boots.dsp.wcs.repository.ToteRepository;
 import uk.co.boots.dsp.wcs.rules.RuleParameters;
+import uk.co.boots.dsp.wcs.rules.RuleProcessor;
+import uk.co.boots.dsp.wcs.rules.RuleProcessorFactory;
 
 @Service
 public class ToteService {
@@ -41,6 +43,8 @@ public class ToteService {
 	private SerializerFactory serializerFactory;
 	@Autowired
 	private MasterDataService masterDataService;
+	@Autowired
+	private RuleProcessorFactory ruleProcessorFactory;
 	
 	public Page<Tote> getTotePage(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
@@ -98,6 +102,7 @@ public class ToteService {
 		if (od != null) {
 			List<OrderLine> orderLines = od.getOrderLines();
 			orderLines.forEach(line -> {
+				// check the rules data to see if this line should be changed
 				setupBarcode(line);
 				setupOperators(line);
 				setupGSOne(line);
@@ -130,10 +135,9 @@ public class ToteService {
 					orderLine.setNumberOfPacks(relatedLine.getNumberOfPacks());
 				}
 			}
-			
-			// check the rules data to see if this line should be changed
-			masterDataService.getRulesForProduct(orderLine.getProductId()).ifPresent(l -> {processRules(l, orderLine);});
 		}
+		// check the rules data to see if this line should be changed
+		masterDataService.getRulesForProduct(orderLine.getProductId()).ifPresent(l -> processRules(l, orderLine));
 	}
 
 	public void setupOperators(OrderLine orderLine) {
@@ -211,6 +215,10 @@ public class ToteService {
 	}
 
 	private void processRules(List<RuleParameters> rules, OrderLine line) {
-		// 
+		rules.forEach(rule -> {
+			ruleProcessorFactory.getProcessor(rule.getRuleType()).ifPresent(rp -> {
+				rp.process(line);
+			});
+		});
 	}
 }

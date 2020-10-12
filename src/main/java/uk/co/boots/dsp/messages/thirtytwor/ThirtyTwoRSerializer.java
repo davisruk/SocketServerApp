@@ -158,7 +158,9 @@ public class ThirtyTwoRSerializer implements Serializer {
 		
 		
 		sb = processOperators(ol.getOperatorDetail(), sb, operatorArrayListSerializationControl);
-		ol.setStatus("30");
+		if (ol.getStatus() == null || ol.getStatus().length() == 0) {
+			ol.setStatus("30");
+		}
 		sb.append(ol.getStatus());
 	}
 

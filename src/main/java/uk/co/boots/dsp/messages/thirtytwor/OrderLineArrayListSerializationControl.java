@@ -57,6 +57,14 @@ public class OrderLineArrayListSerializationControl {
 		return new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(time);
 	}
 
+	public static String formatNumPacks(int packs) {
+		return String.format("%04d", packs);
+	}
+	
+	public static String formatNumPills(int pills) {
+		return String.format("%04d", pills);
+	}
+
 	public int getOrderLineReferenceNumberOffset(OrderDetail al) {
 		// we don't count numberOfOrderLines
 		return 0;
