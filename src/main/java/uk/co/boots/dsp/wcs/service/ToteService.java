@@ -31,6 +31,7 @@ import uk.co.boots.dsp.messages.thirtytwor.StartTime;
 import uk.co.boots.dsp.messages.thirtytwor.Status;
 import uk.co.boots.dsp.messages.thirtytwor.ToteStatusDetail;
 import uk.co.boots.dsp.wcs.repository.ToteRepository;
+import uk.co.boots.dsp.wcs.rules.RuleParameters;
 
 @Service
 public class ToteService {
@@ -128,7 +129,10 @@ public class ToteService {
 					OrderLine relatedLine = findOrderLineInTote(t, orderLine.getOrderLineNumber());
 					orderLine.setNumberOfPacks(relatedLine.getNumberOfPacks());
 				}
-			}			
+			}
+			
+			// check the rules data to see if this line should be changed
+			masterDataService.getRulesForProduct(orderLine.getProductId()).ifPresent(l -> {processRules(l, orderLine);});
 		}
 	}
 
@@ -199,11 +203,14 @@ public class ToteService {
 	private void setupBarcode(OrderLine line) {
 		OrderDetail od = line.getOrderDetail();
 		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
-		masterDataService.getBarcodeForProduct(line.getProductId()).ifPresentOrElse(barcodeAssociation ->
-										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(barcodeAssociation.getBarcode())),
+		masterDataService.getBarcodeForProduct(line.getProductId()).ifPresentOrElse(product ->
+										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(product.getEanBarcode())),
 									() -> 
 										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("No Barcode"))
 									);
 	}
 
+	private void processRules(List<RuleParameters> rules, OrderLine line) {
+		// 
+	}
 }

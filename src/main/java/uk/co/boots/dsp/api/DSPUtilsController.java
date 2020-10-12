@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.co.boots.dsp.messages.Deserializer;
 import uk.co.boots.dsp.messages.DeserializerFactory;
 import uk.co.boots.dsp.messages.shared.Tote;
-import uk.co.boots.dsp.wcs.masterdata.BarcodeAssociationList;
+import uk.co.boots.dsp.wcs.masterdata.ProductMasterDataList;
 import uk.co.boots.dsp.wcs.rules.RuleParameterList;
 import uk.co.boots.dsp.wcs.service.MasterDataService;
 
@@ -57,7 +57,7 @@ public class DSPUtilsController {
 	
 	@RequestMapping (path="/uploadBarcodes",  method=RequestMethod.POST, consumes = {"multipart/form-data"})
 	public ResponseEntity<String> uploadBarcodes(@RequestParam("file") MultipartFile file) throws IOException{
-		BarcodeAssociationList l = masterDataService.translateBarcodes(file);
+		ProductMasterDataList l = masterDataService.translateBarcodes(file);
 		masterDataService.saveBarcodes(l);
 		return new ResponseEntity<>("File received and persisted", HttpStatus.OK);
 	}
@@ -71,7 +71,7 @@ public class DSPUtilsController {
 
 	@PostMapping(value="/uploadMasterData", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadMasterData(@RequestParam("files") MultipartFile[] files) throws IOException{
-		BarcodeAssociationList bcl = null;
+		ProductMasterDataList bcl = null;
 		RuleParameterList rpl = null;
 		
 		for(MultipartFile file: files) {

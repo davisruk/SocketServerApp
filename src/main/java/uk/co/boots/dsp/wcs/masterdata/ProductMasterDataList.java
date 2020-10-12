@@ -6,6 +6,6 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class BarcodeAssociationList {
-	private List<BarcodeAssociation> lines = new ArrayList<BarcodeAssociation>();
+public class ProductMasterDataList {
+	private List<ProductMasterData> lines = new ArrayList<ProductMasterData>();
 }
