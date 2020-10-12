@@ -9,4 +9,5 @@ public class OSRConfig {
 	private int maxTotesOnTrack;
 	private boolean releasing;
 	private boolean includeFMD;
+	private boolean sendThirtyTwoRShort;
 }

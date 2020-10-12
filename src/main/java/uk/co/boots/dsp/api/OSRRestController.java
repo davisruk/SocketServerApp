@@ -24,4 +24,10 @@ public class OSRRestController {
 	void setOSRConfig (@RequestBody OSRConfig newConfig) {
 		osrBuffer.setOsrConfig(newConfig);
 	}
+	
+	@PostMapping("/thirtyTwoRShort")
+	void set32RSendStart(@RequestBody SendThirtyTwoRParams params) {
+		osrBuffer.setSendThirtyTwoRShort(params.send);
+	}
+	
 }

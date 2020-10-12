@@ -87,13 +87,12 @@ public class TrackController {
 	
 	private class OrderPersistedHandler implements DSPEventHandler {
 		public void handleEvent(ToteEvent event) {
-			// TODO Auto-generated method stub
+			if (! osrBuffer.sendThirtyTwoRShort()) return;
 			if (event.getEventType() == ToteEvent.EventType.TOTE_ORDER_PERSISTED) {
 				Tote t = event.getTote();
 				DSPCommsMessage msg = toteService.processClientOrderPersisted(t);
 				dspCommunicationNotifier.notifyCommunicationHandlers(msg);
 				toteService.save(t);
-				
 			}
 		}
 	}

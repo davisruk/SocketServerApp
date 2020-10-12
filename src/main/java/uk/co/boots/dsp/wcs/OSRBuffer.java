@@ -49,4 +49,13 @@ public class OSRBuffer {
 	public boolean processingFMD () {
 		return osrConfig.isIncludeFMD();
 	}
+	
+	public boolean sendThirtyTwoRShort() {
+		return osrConfig.isSendThirtyTwoRShort();
+	}
+	
+	public void setSendThirtyTwoRShort(boolean val) {
+		osrConfig.setSendThirtyTwoRShort(val);
+	}
+	
 }
