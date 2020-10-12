@@ -1,6 +1,7 @@
 package uk.co.boots.dsp.wcs.service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.co.boots.dsp.wcs.masterdata.BarcodeAssociation;
 import uk.co.boots.dsp.wcs.masterdata.BarcodeAssociationList;
 import uk.co.boots.dsp.wcs.repository.BarcodeMasterDataRepository;
 import uk.co.boots.dsp.wcs.repository.TestRuleMasterDataRepository;
@@ -45,6 +47,11 @@ public class MasterDataService {
 	public RuleParameterList translateRules (MultipartFile file) throws IOException {
         //read json file and convert to barcode associations
         return new ObjectMapper().readValue(file.getInputStream(), RuleParameterList.class);
+	}
+	
+	public Optional<BarcodeAssociation> getBarcodeForProduct (String productId) {
+		BarcodeAssociation ba = barcodeMasterDataRepository.findByProductId(productId.trim());
+		return Optional.ofNullable(ba); 
 	}
 	
 }

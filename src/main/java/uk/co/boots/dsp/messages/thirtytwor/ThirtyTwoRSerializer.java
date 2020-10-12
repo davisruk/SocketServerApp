@@ -105,12 +105,12 @@ public class ThirtyTwoRSerializer implements Serializer {
 		if (od == null)
 			return sb;
 
-		od.setPlasticBagIdLength(8);
-		od.setProductBarcodeLength(13);
-		od.setTimestampLength(17);
-		od.setRoleIdLength(20);
-		od.setOperatorIdLength(8);
-		od.setStatusLength(2);
+		od.setPlasticBagIdLength(OrderLineArrayListSerializationControl.PLASTIC_BAG_ID_DATA_LENGTH);
+		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
+		od.setTimestampLength(OrderLineArrayListSerializationControl.TIMESTAMP_DATA_LENGTH);
+		od.setRoleIdLength(OrderLineArrayListSerializationControl.ROLE_ID_DATA_LENGTH);
+		od.setOperatorIdLength(OrderLineArrayListSerializationControl.OPERATOR_ID_DATA_LENGTH);
+		od.setStatusLength(OrderLineArrayListSerializationControl.STATUS_DATA_LENGTH);
 
 
 		sb.append(SerializationControlIdentifiers.ORDER_LIST_32R);
@@ -139,7 +139,6 @@ public class ThirtyTwoRSerializer implements Serializer {
 
 	private void processOrderLine(OrderLine ol, StringBuffer sb) {
 		ol.setPlasticBagId("12345678");
-		ol.setProductBarcode("1234567890123");
 		sb.append(ol.getOrderLineNumber());
 		sb.append(ol.getOrderLineType());
 		sb.append(ol.getPharmacyId());

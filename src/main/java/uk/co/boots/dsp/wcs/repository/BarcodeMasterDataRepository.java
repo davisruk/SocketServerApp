@@ -7,5 +7,5 @@ import uk.co.boots.dsp.wcs.masterdata.BarcodeAssociation;
 
 @Repository
 public interface BarcodeMasterDataRepository extends CrudRepository<BarcodeAssociation, Long>{
-
+	public BarcodeAssociation findByProductId(String productId);
 }

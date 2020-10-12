@@ -1,5 +1,9 @@
 package uk.co.boots.dsp.messages.thirtytwor;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +17,13 @@ import uk.co.boots.dsp.messages.shared.OrderLine;
 public class OrderLineArrayListSerializationControl {
 	@Autowired
 	private OperatorArrayListSerializationControl oalsc;
+	
+	public static final int BARCODE_DATA_LENGTH = 13;
+	public static final int PLASTIC_BAG_ID_DATA_LENGTH = 8;
+	public static final int TIMESTAMP_DATA_LENGTH = 17;
+	public static final int ROLE_ID_DATA_LENGTH = 20;
+	public static final int OPERATOR_ID_DATA_LENGTH = 8;
+	public static final int STATUS_DATA_LENGTH = 2;
 	
 	private final SerialisationControlField identifierInfo = new SerialisationControlField ("%c", 0, 1);
 	private final SerialisationControlField numberOrderLinesInfo = new SerialisationControlField ("%03d", identifierInfo.getNextOffset(), 3);
@@ -30,6 +41,21 @@ public class OrderLineArrayListSerializationControl {
 	private final SerialisationControlField roleIdInfo = new SerialisationControlField ("%2d", operatorIdInfo.getNextOffset(), 2);
 	private final SerialisationControlField timestampInfo = new SerialisationControlField ("%2d", roleIdInfo.getNextOffset(), 2);
 	private SerialisationControlField statusInfo = new SerialisationControlField ("%02d", timestampInfo.getNextOffset(), 2);;
+
+	public static String formatProductBarcode (String barcode) {
+		return String.format("%1$" + BARCODE_DATA_LENGTH + "s", barcode);
+	}
+	
+	public static String formatOperatorId(String op) {
+		return String.format("%1$" + OPERATOR_ID_DATA_LENGTH + "s", op);
+	}
+
+	public static String formatRoleId(String role) {
+		return String.format("%1$" + ROLE_ID_DATA_LENGTH + "s", role);	}
+
+	public static String formatTimeStamp(Date time) {
+		return new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(time);
+	}
 
 	public int getOrderLineReferenceNumberOffset(OrderDetail al) {
 		// we don't count numberOfOrderLines
@@ -81,6 +107,4 @@ public class OrderLineArrayListSerializationControl {
 		int size = oalsc.getNumberOperatorLinesInfo().getSize() + (operator.getNumberOfLines() * (order.getRoleIdLength() + order.getTimestampLength() + order.getOperatorIdLength()));
 		return size; 
 	}
-
-	
 }

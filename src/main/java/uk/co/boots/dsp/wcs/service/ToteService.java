@@ -26,6 +26,7 @@ import uk.co.boots.dsp.messages.thirtytwor.GsOneDetail;
 import uk.co.boots.dsp.messages.thirtytwor.GsOneLine;
 import uk.co.boots.dsp.messages.thirtytwor.OperatorDetail;
 import uk.co.boots.dsp.messages.thirtytwor.OperatorLine;
+import uk.co.boots.dsp.messages.thirtytwor.OrderLineArrayListSerializationControl;
 import uk.co.boots.dsp.messages.thirtytwor.StartTime;
 import uk.co.boots.dsp.messages.thirtytwor.Status;
 import uk.co.boots.dsp.messages.thirtytwor.ToteStatusDetail;
@@ -37,7 +38,9 @@ public class ToteService {
 	ToteRepository toteRepository;
 	@Autowired
 	private SerializerFactory serializerFactory;
-
+	@Autowired
+	private MasterDataService masterDataService;
+	
 	public Page<Tote> getTotePage(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
 		return toteRepository.findAll(pageable);
@@ -94,6 +97,7 @@ public class ToteService {
 		if (od != null) {
 			List<OrderLine> orderLines = od.getOrderLines();
 			orderLines.forEach(line -> {
+				setupBarcode(line);
 				setupOperators(line);
 				setupGSOne(line);
 				setupPickedValues (line, tote.getToteIdentifier().getPayload());
@@ -133,12 +137,11 @@ public class ToteService {
 		opd.setNumberOfLines(1);
 		opd.setOrderLine(orderLine);
 		OperatorLine opl = new OperatorLine();
-		opl.setOperatorId("RDavis  ");
-		opl.setRoleId("Solution Architect  ");
+		opl.setOperatorId(OrderLineArrayListSerializationControl.formatOperatorId("RDavis"));
+		opl.setRoleId(OrderLineArrayListSerializationControl.formatRoleId("Solution Architect"));
 		opd.addOperatorLine(opl);
 		orderLine.setOperatorDetail(opd);
-		String timeStamp = new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(Calendar.getInstance().getTime());
-		opl.setTimestamp(timeStamp);
+		opl.setTimestamp(OrderLineArrayListSerializationControl.formatTimeStamp(Calendar.getInstance().getTime()));
 	}
 
 	public void setupGSOne(OrderLine orderLine) {
@@ -191,6 +194,16 @@ public class ToteService {
 		if (olList == null || olList.size() == 0)
 			return null;
 		return olList.get(0);
+	}
+	
+	private void setupBarcode(OrderLine line) {
+		OrderDetail od = line.getOrderDetail();
+		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
+		masterDataService.getBarcodeForProduct(line.getProductId()).ifPresentOrElse(barcodeAssociation ->
+										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(barcodeAssociation.getBarcode())),
+									() -> 
+										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("No Barcode"))
+									);
 	}
 
 }
