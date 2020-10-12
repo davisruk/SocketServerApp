@@ -76,9 +76,9 @@ public class DSPUtilsController {
 		
 		for(MultipartFile file: files) {
 			String fileName = file.getOriginalFilename();
-			if ("barcodes.txt".equals(fileName))
+			if (fileName.toLowerCase().contains("products"))
 				bcl = masterDataService.translateBarcodes(file);
-			if ("rules.txt".equals(fileName))
+			if (fileName.toLowerCase().contains("rules"))
 				rpl = masterDataService.translateRules(file);
 		}
 		
