@@ -2,21 +2,25 @@ package uk.co.boots.dsp.api;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import lombok.Data;
 import uk.co.boots.dsp.messages.Deserializer;
 import uk.co.boots.dsp.messages.DeserializerFactory;
 import uk.co.boots.dsp.messages.shared.Tote;
+import uk.co.boots.dsp.wcs.masterdata.BarcodeAssociationList;
+import uk.co.boots.dsp.wcs.rules.RuleParameterList;
+import uk.co.boots.dsp.wcs.service.MasterDataService;
 
 @RestController
 @RequestMapping("/utils")
@@ -30,6 +34,9 @@ public class DSPUtilsController {
 	
 	@Autowired
 	private DeserializerFactory deserializerFactory;
+	
+	@Autowired
+	MasterDataService masterDataService;
 
 	@PostMapping("/prettify")
     public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
@@ -48,10 +55,38 @@ public class DSPUtilsController {
 		return (Tote) d.deserialize(messageBytes);
     }
 	
-	@Data
-	private class PrettifyParams {
-		private boolean hasStartFrame;
-		private boolean hasEndFrame;
-		private int repositionEndFrameBytesFromEnd;
+	@RequestMapping (path="/uploadBarcodes",  method=RequestMethod.POST, consumes = {"multipart/form-data"})
+	public ResponseEntity<String> uploadBarcodes(@RequestParam("file") MultipartFile file) throws IOException{
+		BarcodeAssociationList l = masterDataService.translateBarcodes(file);
+		masterDataService.saveBarcodes(l);
+		return new ResponseEntity<>("File received and persisted", HttpStatus.OK);
 	}
+	
+	@RequestMapping (path="/uploadRules",  method=RequestMethod.POST, consumes = {"multipart/form-data"})
+	public ResponseEntity<String> uploadRules(@RequestParam("file") MultipartFile file) throws IOException{
+		RuleParameterList l = masterDataService.translateRules(file);
+		masterDataService.saveRules(l);
+		return new ResponseEntity<>("File received and persisted", HttpStatus.OK);
+	}
+
+	@PostMapping(value="/uploadMasterData", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadMasterData(@RequestParam("files") MultipartFile[] files) throws IOException{
+		BarcodeAssociationList bcl = null;
+		RuleParameterList rpl = null;
+		
+		for(MultipartFile file: files) {
+			String fileName = file.getOriginalFilename();
+			if ("barcodes.txt".equals(fileName))
+				bcl = masterDataService.translateBarcodes(file);
+			if ("rules.txt".equals(fileName))
+				rpl = masterDataService.translateRules(file);
+		}
+		
+		masterDataService.saveBarcodes(bcl);
+		masterDataService.saveRules(rpl);
+		
+		return new ResponseEntity<>("Files received and persisted", HttpStatus.OK);
+	}
+	
+
 }
