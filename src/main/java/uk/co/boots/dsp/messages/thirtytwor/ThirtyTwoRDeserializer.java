@@ -47,7 +47,7 @@ public class ThirtyTwoRDeserializer implements Deserializer{
 		Header h = record.getHeader();
 		int currentOffset = thirtyTwoRSerializationControl.getHeaderSerializationControl().getNextDataOffset(h);
 		int nextOffset = 0;
-		while (messagePayload[currentOffset] != SerializationControlIdentifiers.ORDER_LIST_32R) {
+		while (currentOffset < messagePayload.length && messagePayload[currentOffset] != SerializationControlIdentifiers.ORDER_LIST_32R) {
 			switch (messagePayload[currentOffset]) {
 				
 				case SerializationControlIdentifiers.TOTE_ID: {
@@ -73,8 +73,11 @@ public class ThirtyTwoRDeserializer implements Deserializer{
 			}
 			currentOffset += nextOffset;
 		}
-		// now read the order lines
-		record.setOrderDetail(readOrderLines(record, messagePayload, currentOffset));
+		// check that order lines exist - 32R short doesn't have any
+		if (currentOffset < messagePayload.length) {
+			// now read the order lines
+			record.setOrderDetail(readOrderLines(record, messagePayload, currentOffset));
+		}
 		return record;
 	}
 
