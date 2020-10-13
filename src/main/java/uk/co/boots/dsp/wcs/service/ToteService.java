@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,6 @@ import uk.co.boots.dsp.messages.thirtytwor.Status;
 import uk.co.boots.dsp.messages.thirtytwor.ToteStatusDetail;
 import uk.co.boots.dsp.wcs.repository.ToteRepository;
 import uk.co.boots.dsp.wcs.rules.RuleParameters;
-import uk.co.boots.dsp.wcs.rules.RuleProcessor;
 import uk.co.boots.dsp.wcs.rules.RuleProcessorFactory;
 
 @Service
@@ -59,6 +59,10 @@ public class ToteService {
 
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
+	}
+	
+	public void deleteAll() {
+		toteRepository.deleteAll();
 	}
 
 	public long getToteCount() {
@@ -101,12 +105,13 @@ public class ToteService {
 		OrderDetail od = tote.getOrderDetail();
 		if (od != null) {
 			List<OrderLine> orderLines = od.getOrderLines();
-			orderLines.forEach(line -> {
-				// check the rules data to see if this line should be changed
-				setupBarcode(line);
-				setupOperators(line);
-				setupGSOne(line);
-				setupPickedValues (line, tote.getToteIdentifier().getPayload());
+			
+			IntStream.range(0, orderLines.size()).forEach(idx -> {
+				OrderLine ol = orderLines.get(idx);
+				setupBarcode(ol);
+				setupOperators(ol);
+				setupGSOne(ol);
+				setupPickedValues (ol, tote.getToteIdentifier().getPayload(), idx);
 			});
 		}
 	}
@@ -119,7 +124,7 @@ public class ToteService {
 			.orElse(null);
 	}
 
-	public void setupPickedValues(OrderLine orderLine, String toteIdentifier) {
+	public void setupPickedValues(OrderLine orderLine, String toteIdentifier, int orderLineIndex) {
 		if (ToteIdentifier.EMPTY_TOTE.equals(toteIdentifier) || ToteIdentifier.ASSOCIATED_TOTE.equals(toteIdentifier)){
 			Tote t = getRelatedToteForOrder(orderLine.getOrderLineNumber(), ToteIdentifier.ADAPTED_TOTE);
 			if (t != null) {
@@ -137,7 +142,7 @@ public class ToteService {
 			}
 		}
 		// check the rules data to see if this line should be changed
-		masterDataService.getRulesForProduct(orderLine.getProductId()).ifPresent(l -> processRules(l, orderLine));
+		masterDataService.getRulesForProduct(orderLine.getProductId()).ifPresent(l -> processRules(l, orderLine, orderLineIndex));
 	}
 
 	public void setupOperators(OrderLine orderLine) {
@@ -157,7 +162,11 @@ public class ToteService {
 		gsod.setNumberOfLines(1);
 		GsOneLine line = new GsOneLine();
 		line.setLengthOfGSone("" + 62);
-		line.setSplitIndicator('0');
+		if (orderLine.getOrderLineType().equals(ToteIdentifier.ADAPTED_TOTE)) {
+			line.setSplitIndicator('1');
+		} else {
+			line.setSplitIndicator('0');
+		}
 		line.setGsOne("GSONEBARCODE12345678901234567890123456789012345678901234567890");
 		gsod.addGsOneLine(line);
 		line.setGsOneDetail(gsod);
@@ -214,10 +223,10 @@ public class ToteService {
 									);
 	}
 
-	private void processRules(List<RuleParameters> rules, OrderLine line) {
+	private void processRules(List<RuleParameters> rules, OrderLine line, int orderLineIndex) {
 		rules.forEach(rule -> {
 			ruleProcessorFactory.getProcessor(rule.getRuleType()).ifPresent(rp -> {
-				rp.process(line);
+				rp.process(line, orderLineIndex);
 			});
 		});
 	}

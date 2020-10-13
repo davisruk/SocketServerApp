@@ -15,7 +15,7 @@ public class NotSuppliedProcessor implements RuleProcessor {
 		return messageType.equals(RuleParameters.NOT_SUPPLIED);
 	}
 
-	public void process (OrderLine line) {
+	public void process (OrderLine line, int index) {
 		System.out.println("Setting not supplied on line - " + line.getId());
 		line.setStatus(RuleParameters.NOT_SUPPLIED_STATUS);
 		line.setNumberOfPacks(OrderLineArrayListSerializationControl.formatNumPacks(0));

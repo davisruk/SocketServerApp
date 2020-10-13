@@ -12,7 +12,7 @@ public class IndeterminateProcessor implements RuleProcessor {
 		return messageType.equals(RuleParameters.INDETERMINATE);
 	}
 
-	public void process (OrderLine line) {
+	public void process (OrderLine line, int index) {
 		line.setStatus(RuleParameters.INDETERMINATE_STATUS);
 		line.setNumberOfPacks(OrderLineArrayListSerializationControl.formatNumPacks(0));
 		line.setNumberOfPills(OrderLineArrayListSerializationControl.formatNumPills(0));

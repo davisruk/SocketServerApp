@@ -87,6 +87,7 @@ public class ReceiveServer implements SocketServer {
 	private void handleClientSocketConnection(TCPComms comms) {
 		try {
 			System.out.println("[Message Receiver] Handling client messages");
+			setFinished(false);
 			while (!finished) {
 				byte[] messageBytes;
 				boolean finishedMessage = false;

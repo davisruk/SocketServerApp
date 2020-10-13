@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import uk.co.boots.dsp.comms.tcp.SocketServer;
 import uk.co.boots.dsp.messages.Deserializer;
 import uk.co.boots.dsp.messages.DeserializerFactory;
 import uk.co.boots.dsp.messages.shared.Tote;
@@ -42,11 +43,11 @@ public class DSPUtilsController {
     public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
 		byte[] messageBytes = file.getBytes();
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		if (messageBytes[0] != 0x0A) {
+		if (messageBytes[0] != SocketServer.START_FRAME) {
 			buf.write(0x0A);
 		}
 		buf.write(messageBytes, 0, messageBytes.length - 1);
-		if (messageBytes[messageBytes.length-1] != 0x0D) {
+		if (messageBytes[messageBytes.length-1] != SocketServer.END_FRAME) {
 			buf.write(0x0D);
 		}
 		messageBytes = buf.toByteArray();		
