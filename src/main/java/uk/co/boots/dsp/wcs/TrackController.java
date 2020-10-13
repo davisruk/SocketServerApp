@@ -9,6 +9,7 @@ import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.events.DSPEventHandler;
 import uk.co.boots.dsp.events.DSPEventNotifier;
+import uk.co.boots.dsp.events.EventLogger;
 import uk.co.boots.dsp.messages.shared.Tote;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
 import uk.co.boots.dsp.wcs.service.ToteService;
@@ -28,6 +29,8 @@ public class TrackController {
 	@Autowired
 	@Qualifier("dspCommunicationNotifier")
 	private DSPCommunicationNotifier dspCommunicationNotifier;
+	@Autowired
+	private EventLogger eventLogger;
 
 	private int activeTotes;
 	
@@ -41,6 +44,7 @@ public class TrackController {
 		adjustTotesProcessed(true, false);
 		adjustActiveTotes(true, false);
 		dspEventNotifier.resetHandlers();		
+		dspEventNotifier.registerEventHandler(eventLogger);
 		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
 		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
 		dspEventNotifier.registerEventHandler(new OrderPersistedHandler());
