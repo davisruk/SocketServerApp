@@ -51,7 +51,7 @@ public class MasterDataService {
         return new ObjectMapper().readValue(file.getInputStream(), RuleParameterList.class);
 	}
 	
-	public Optional<ProductMasterData> getBarcodeForProduct (String productId) {
+	public Optional<ProductMasterData> getInfoForProduct (String productId) {
 		Long dppId = Long.valueOf(productId.trim());
 		ProductMasterData ba = barcodeMasterDataRepository.findFirstByDppId(dppId);
 		return Optional.ofNullable(ba); 

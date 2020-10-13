@@ -32,6 +32,8 @@ public class OSRBuffer {
 		osrConfig.setMaxTotesOnTrack(newConfig.getMaxTotesOnTrack());
 		osrConfig.setToteReleaseInterval(newConfig.getToteReleaseInterval());
 		osrConfig.setReleasing(newConfig.isReleasing());
+		osrConfig.setIncludeFMD(newConfig.isIncludeFMD());
+		osrConfig.setSendThirtyTwoRShort(newConfig.isSendThirtyTwoRShort());
 		System.out.println("-----------------New Config-----------------");
 		System.out.println(osrConfig);
 		System.out.println("-----------------[OSRBuffer][setOsrConfig][END]-----------------");

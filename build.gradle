@@ -8,9 +8,9 @@ plugins {
 
 group = 'uk.co.boots'
 def version_number = '0.0.1'
-def image_version = "${version_number}-DEBUG"
+//def image_version = "${version_number}-DEBUG"
 version = "${version_number}-SNAPSHOT"
-// def image_version = "${version}"
+def image_version = "${version}"
 
 
 
@@ -34,8 +34,8 @@ docker {
 	name "davisruk/cpas-stub:${image_version}"
 	buildArgs([JAR_FILE: "build/libs/${project.name}-${version}.jar"])
 	copySpec.from("build").into("build")
-	//dockerfile file('Dockerfile') 
-	dockerfile file('Dockerfile.debug')
+	dockerfile file('Dockerfile') 
+	//dockerfile file('Dockerfile.debug')
 }
 
 test {

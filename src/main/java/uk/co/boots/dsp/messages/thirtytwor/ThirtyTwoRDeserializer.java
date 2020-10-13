@@ -17,6 +17,7 @@ import uk.co.boots.dsp.messages.shared.SerializationControlIdentifiers;
 import uk.co.boots.dsp.messages.shared.Tote;
 import uk.co.boots.dsp.messages.shared.ToteIdentifier;
 import uk.co.boots.dsp.messages.shared.TransportContainer;
+import uk.co.boots.dsp.wcs.OSRBuffer;
 
 @Service
 public class ThirtyTwoRDeserializer implements Deserializer{
@@ -29,6 +30,9 @@ public class ThirtyTwoRDeserializer implements Deserializer{
 
 	@Autowired
 	private StatusArrayListSerializationControl statusArrayListSerializationControl;
+	
+	@Autowired
+	private OSRBuffer osrBuffer;
 	
 	@Override
 	public boolean canHandle(String messageType) {
@@ -190,13 +194,47 @@ public class ThirtyTwoRDeserializer implements Deserializer{
 			line.setNumberOfPacks(new String(messagePayload, currentOffset + sc.getNumPacksOffset(od), od.getNumPacksLength()));
 			line.setNumberOfPills(new String(messagePayload, currentOffset + sc.getNumPillsOffset(od), od.getNumPillsLength()));
 			line.setProductBarcode(new String(messagePayload, currentOffset + sc.getProductBarcodeOffset(od), od.getProductBarcodeLength()));
-			line.setOperatorDetail(readOperatorDetail(line, messagePayload, currentOffset + sc.getNumberOperatorLinesOffset(od)));
-			line.setStatus(new String(messagePayload, currentOffset + sc.getNumberOperatorLinesOffset(od) + sc.getOperatorsSize(line), od.getStatusLength()));
-
+			if (osrBuffer.processingFMD()) {
+				int fmdBytes = processFMD(messagePayload, currentOffset, line);
+				line.setOperatorDetail(readOperatorDetail(line, messagePayload, currentOffset + sc.getNumberOperatorLinesOffsetWithFMD(od, fmdBytes)));
+				line.setStatus(new String(messagePayload, currentOffset + sc.getNumberOperatorLinesOffsetWithFMD(od, fmdBytes) + sc.getOperatorsSize(line), od.getStatusLength()));
+				currentOffset += sc.getNumberOperatorLinesOffsetWithFMD(od, fmdBytes) + sc.getOperatorsSize(line) + od.getStatusLength();
+			} else {
+				line.setOperatorDetail(readOperatorDetail(line, messagePayload, currentOffset + sc.getNumberOperatorLinesOffset(od)));
+				line.setStatus(new String(messagePayload, currentOffset + sc.getNumberOperatorLinesOffset(od) + sc.getOperatorsSize(line), od.getStatusLength()));
+				currentOffset += sc.getNumberOperatorLinesOffset(od) + sc.getOperatorsSize(line) + od.getStatusLength();				
+			}
 			ol.add(line);
-			currentOffset += + sc.getNumberOperatorLinesOffset(od) + sc.getOperatorsSize(line) + od.getStatusLength();
+			
 		}
 		return od;
+	}
+	
+	// this is not a great implementation but ran out of time and 32R deserialization is not a real requirement, only used for dev and testing 
+	private int processFMD (byte[] messagePayload, int offset, OrderLine line) {
+		OrderLineArrayListSerializationControl sc = thirtyTwoRSerializationControl.getThirtyTwoROrderLineArrayListSerializationControl();
+		OrderDetail od = line.getOrderDetail();
+		int bytesProcessed = 0;
+		GsOneDetail gsod = new GsOneDetail();
+		line.setGsOneDetail(gsod);
+		gsod.setOrderLine(line);
+		int fmdOffset = offset + sc.getFMDOffset(od);
+		int numberOfLines = Integer.parseInt(new String(messagePayload, fmdOffset, OrderLineArrayListSerializationControl.FMD_NUMBER_OF_LINES_LENGTH));
+		gsod.setNumberOfLines(numberOfLines);
+		bytesProcessed+=OrderLineArrayListSerializationControl.FMD_NUMBER_OF_LINES_LENGTH;
+		for (int i = 0; i < numberOfLines; i++) {
+			GsOneLine gsol = new GsOneLine();
+			gsol.setLengthOfGSone(new String(messagePayload, fmdOffset + bytesProcessed, OrderLineArrayListSerializationControl.FMD_GSONE_LENGTH));
+			bytesProcessed += OrderLineArrayListSerializationControl.FMD_GSONE_LENGTH;
+			int gsOneLen = Integer.parseInt(gsol.getLengthOfGSone());
+			gsol.setGsOne(new String(messagePayload, fmdOffset + bytesProcessed, gsOneLen));
+			bytesProcessed+=gsOneLen;
+			gsol.setSplitIndicator((char)messagePayload[fmdOffset + bytesProcessed]);
+			bytesProcessed ++;
+			gsol.setGsOneDetail(gsod);
+			gsod.addGsOneLine(gsol);
+		}
+		return bytesProcessed;
 	}
 	
 	OperatorDetail readOperatorDetail (OrderLine ol, byte[] messagePayload, int offset) {

@@ -159,20 +159,28 @@ public class ToteService {
 	}
 
 	public void setupGSOne(OrderLine orderLine) {
+		char FNC = '\u001D';
 		GsOneDetail gsod = new GsOneDetail();
-		gsod.setNumberOfLines(1);
-		GsOneLine line = new GsOneLine();
-		line.setLengthOfGSone("" + 62);
-		if (orderLine.getOrderLineType().equals(ToteIdentifier.ADAPTED_TOTE)) {
-			line.setSplitIndicator('1');
-		} else {
-			line.setSplitIndicator('0');
-		}
-		line.setGsOne("GSONEBARCODE12345678901234567890123456789012345678901234567890");
-		gsod.addGsOneLine(line);
-		line.setGsOneDetail(gsod);
-		orderLine.setGSOneDetail(gsod);
-		gsod.setOrderLine(orderLine);
+		gsod.setNumberOfLines(0);
+		masterDataService.getInfoForProduct(orderLine.getProductId()).ifPresent(product -> {
+				String gtin = product.getGtin();
+				if (gtin != null && gtin.length() > 0) {
+					gsod.setNumberOfLines(1);
+					GsOneLine line = new GsOneLine();
+					if (orderLine.getOrderLineType().equals(ToteIdentifier.ADAPTED_TOTE)) {
+						line.setSplitIndicator('1');
+					} else {
+						line.setSplitIndicator('0');
+					}
+					String gsOne = "01" + gtin + "21" + "SERIALNUMBER01234567" + FNC + "10ABATCHCODE12345" + FNC + "17191201";
+					line.setGsOne(gsOne);
+					line.setLengthOfGSone(String.format("%2d", gsOne.length()));
+					gsod.addGsOneLine(line);
+					line.setGsOneDetail(gsod);
+					gsod.setOrderLine(orderLine);
+				}
+			});
+		orderLine.setGsOneDetail(gsod);		
 	}
 
 	public DSPCommsMessage processToteFinished(Tote tote) {
@@ -217,7 +225,7 @@ public class ToteService {
 	private void setupBarcode(OrderLine line) {
 		OrderDetail od = line.getOrderDetail();
 		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
-		masterDataService.getBarcodeForProduct(line.getProductId()).ifPresentOrElse(product ->
+		masterDataService.getInfoForProduct(line.getProductId()).ifPresentOrElse(product ->
 										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(product.getEanBarcode())),
 									() -> 
 										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("No Barcode"))

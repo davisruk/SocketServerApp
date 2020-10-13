@@ -151,7 +151,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 		
 		// FMD here
 		if (osrBuffer.processingFMD())
-			sb = processGsOne(ol.getGSOneDetail(), sb, gsOneArrayListSerializationControl);
+			sb = processGsOne(ol.getGsOneDetail(), sb, gsOneArrayListSerializationControl);
 		
 		
 		

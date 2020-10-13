@@ -24,6 +24,8 @@ public class OrderLineArrayListSerializationControl {
 	public static final int ROLE_ID_DATA_LENGTH = 20;
 	public static final int OPERATOR_ID_DATA_LENGTH = 8;
 	public static final int STATUS_DATA_LENGTH = 2;
+	public static final int FMD_GSONE_LENGTH = 2;
+	public static final int FMD_NUMBER_OF_LINES_LENGTH = 2;
 	
 	private final SerialisationControlField identifierInfo = new SerialisationControlField ("%c", 0, 1);
 	private final SerialisationControlField numberOrderLinesInfo = new SerialisationControlField ("%03d", identifierInfo.getNextOffset(), 3);
@@ -107,6 +109,14 @@ public class OrderLineArrayListSerializationControl {
 	
 	public int getNumberOperatorLinesOffset(OrderDetail al) {
 		return getProductBarcodeOffset(al) + al.getProductBarcodeLength();
+	}
+	public int getNumberOperatorLinesOffsetWithFMD(OrderDetail al, int fmdBytes) {
+		//change this
+		return getProductBarcodeOffset(al) + al.getProductBarcodeLength() + fmdBytes;
+	}
+	
+	public int getFMDOffset(OrderDetail od) {
+		return getProductBarcodeOffset(od) + od.getProductBarcodeLength();		
 	}
 	
 	public int getOperatorsSize(OrderLine ol) {
