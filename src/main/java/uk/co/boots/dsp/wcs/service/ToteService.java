@@ -108,6 +108,7 @@ public class ToteService {
 			
 			IntStream.range(0, orderLines.size()).forEach(idx -> {
 				OrderLine ol = orderLines.get(idx);
+				ol.setPlasticBagId("12345678");
 				setupBarcode(ol);
 				setupOperators(ol);
 				setupGSOne(ol);

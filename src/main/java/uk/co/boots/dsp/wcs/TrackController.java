@@ -32,20 +32,24 @@ public class TrackController {
 	private int activeTotes;
 	
 	private boolean stopTrackController = false;
+	private int totesProcessed = 0;
+	
 	
 	@Async
 	public void start() {
+		setStopTrackController(false);
+		adjustTotesProcessed(true, false);
+		adjustActiveTotes(true, false);
+		dspEventNotifier.resetHandlers();		
 		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
 		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
 		dspEventNotifier.registerEventHandler(new OrderPersistedHandler());
 		System.out.println("[Message Sender] Handling client messages");
-		System.out.println("Track controller started");
 		int maxTotes = osrBuffer.getTrackToteCapacity();
 		long releaseInterval = osrBuffer.getToteReleaseInterval();
-		System.out.println("osrBuffer Started");
+		System.out.println("Track Controller Started");
 		// osrBuffer needs to be releasing totes - wait if not 
-		int totesProcessed = 0;
-		while (!stopTrackController) {
+		while (!isStopTrackController()) {
 			// System.out.println("stopTrackController: " + stopTrackController + " Active Totes: " + activeTotes + " Max Totes: " + maxTotes);
 			// wait until OSR is releasing and track has availability 
 			if (osrBuffer.isReleasing() && getActiveTotes() < maxTotes) {
@@ -57,7 +61,7 @@ public class TrackController {
 					
 					System.out.println("[TrackController] processing tote " + (totesProcessed + 1) + " of " + totesInOSR);
 					toteController.releaseTote(t);
-					totesProcessed++;
+					adjustTotesProcessed(false, true);
 					try {
 						Thread.sleep(releaseInterval);
 					} catch (InterruptedException ie) {
@@ -74,10 +78,10 @@ public class TrackController {
 			// TODO Auto-generated method stub
 			switch (event.getEventType()) {
 				case TOTE_ACTIVATED:
-					incrementActiveTotes();
+					adjustActiveTotes(false,  true);
 					break;
 				case TOTE_DEACTIVATED:
-					decrementActiveTotes();
+					adjustActiveTotes(false,  false);
 					break;
 				default:
 					break;
@@ -115,14 +119,30 @@ public class TrackController {
 		return activeTotes;
 	}
 	
-	private synchronized void incrementActiveTotes () {
-		activeTotes++;
-		System.out.println("[Tote Activated] Active Totes: " + activeTotes);
+	private synchronized void adjustActiveTotes(boolean reset, boolean increment) {
+		if (reset) activeTotes = 0;
+		else if (increment) activeTotes ++;
+		else activeTotes --;
+		System.out.println("[TrackController::adjustActiveTotes] Active Totes: " + activeTotes);		
 	}
 	
-	private synchronized void decrementActiveTotes () {
-		activeTotes--;
-		System.out.println("[Tote De-Activated] Active Totes: " + activeTotes);		
+	public synchronized void adjustTotesProcessed (boolean reset, boolean increment) {
+		if (reset) totesProcessed = 0;
+		else if (increment) totesProcessed ++;
+		else totesProcessed --;
+		System.out.println("[TrackController::adjustTotesProcessed] totesProcessed: " + totesProcessed);		
+	}
+	
+	public synchronized void resetTrackController () {
+		setStopTrackController(true);
+	}
+	
+	private synchronized void setStopTrackController (boolean val) {
+		stopTrackController = val;
 	}
 
+	private synchronized boolean isStopTrackController () {
+		return stopTrackController;
+	}
+	
 }

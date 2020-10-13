@@ -19,4 +19,9 @@ public class DSPEventNotifierImpl implements DSPEventNotifier {
 	public void notifyEventHandlers (ToteEvent evt ) {
 		eventHandlers.forEach(handler -> handler.handleEvent(evt));
 	}
+
+	@Override
+	public void resetHandlers() {
+		eventHandlers = new ArrayList<DSPEventHandler>();
+	}
 }

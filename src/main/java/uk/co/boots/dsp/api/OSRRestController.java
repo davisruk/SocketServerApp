@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.co.boots.dsp.wcs.OSRBuffer;
 import uk.co.boots.dsp.wcs.OSRConfig;
+import uk.co.boots.dsp.wcs.TrackController;
 import uk.co.boots.dsp.wcs.service.ToteService;
 
 @RestController
@@ -18,6 +19,9 @@ public class OSRRestController {
 	@Autowired
 	private OSRBuffer osrBuffer;
 
+	@Autowired
+	private TrackController trackController;
+	
 	@Autowired
 	private ToteService toteService;
 	
@@ -40,7 +44,9 @@ public class OSRRestController {
 	@PostMapping("/resetRun")
 	public ResponseEntity<String> resetRun() {
 		osrBuffer.setStarted(false);
+		trackController.resetTrackController();
 		toteService.deleteAll();
+		trackController.start();
 		return new ResponseEntity<>("Run has been reset.", HttpStatus.OK);		
 	}
 	

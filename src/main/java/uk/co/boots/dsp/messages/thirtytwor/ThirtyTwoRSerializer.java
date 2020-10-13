@@ -138,7 +138,6 @@ public class ThirtyTwoRSerializer implements Serializer {
 	}
 
 	private void processOrderLine(OrderLine ol, StringBuffer sb) {
-		ol.setPlasticBagId("12345678");
 		sb.append(ol.getOrderLineNumber());
 		sb.append(ol.getOrderLineType());
 		sb.append(ol.getPharmacyId());

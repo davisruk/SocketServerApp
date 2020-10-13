@@ -8,4 +8,5 @@ import uk.co.boots.dsp.wcs.events.ToteEvent;
 public interface DSPEventNotifier {
 	public void notifyEventHandlers (ToteEvent event);
 	public void registerEventHandler (DSPEventHandler handler);
+	public void resetHandlers();
 }
