@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import uk.co.boots.dsp.comms.tcp.SocketServer;
-import uk.co.boots.dsp.events.DSPEventNotifier;
-import uk.co.boots.dsp.messages.BasicMessage;
 import uk.co.boots.dsp.messages.MessageProcessor;
-import uk.co.boots.dsp.messages.shared.Tote;
+import uk.co.boots.dsp.messages.base.entity.Tote;
+import uk.co.boots.dsp.messages.framework.entity.BasicMessage;
+import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
 import uk.co.boots.dsp.wcs.service.ToteService;
 

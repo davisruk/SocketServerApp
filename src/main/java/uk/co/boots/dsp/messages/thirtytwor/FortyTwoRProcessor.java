@@ -10,7 +10,7 @@ import java.util.Properties;
 
 import uk.co.boots.dsp.config.PropertiesLoader;
 import uk.co.boots.dsp.messages.MessageResponseHandler;
-import uk.co.boots.dsp.messages.shared.Tote;
+import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 public class FortyTwoRProcessor implements MessageResponseHandler {

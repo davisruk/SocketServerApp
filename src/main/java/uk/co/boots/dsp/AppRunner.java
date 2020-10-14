@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.dsp.comms.tcp.ReceiveServer;
 import uk.co.boots.dsp.comms.tcp.SendServer;
-import uk.co.boots.dsp.events.DSPEventNotifier;
-import uk.co.boots.dsp.events.EventLogger;
-import uk.co.boots.dsp.wcs.TrackController;
+import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
+import uk.co.boots.dsp.wcs.events.EventLogger;
+import uk.co.boots.dsp.wcs.track.TrackController;
 
 @Component
 public class AppRunner implements CommandLineRunner {

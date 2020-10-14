@@ -2,7 +2,7 @@ package uk.co.boots.dsp.wcs.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import uk.co.boots.dsp.messages.shared.Tote;
+import uk.co.boots.dsp.messages.base.entity.Tote;
 
 @Data
 @AllArgsConstructor

@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import uk.co.boots.dsp.comms.tcp.SocketServer;
-import uk.co.boots.dsp.messages.Deserializer;
-import uk.co.boots.dsp.messages.DeserializerFactory;
-import uk.co.boots.dsp.messages.shared.Tote;
-import uk.co.boots.dsp.wcs.masterdata.ProductMasterDataList;
+import uk.co.boots.dsp.messages.base.entity.Tote;
+import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
+import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
+import uk.co.boots.dsp.wcs.masterdata.entity.ProductMasterDataList;
+import uk.co.boots.dsp.wcs.masterdata.service.MasterDataService;
 import uk.co.boots.dsp.wcs.rules.RuleParameterList;
-import uk.co.boots.dsp.wcs.service.MasterDataService;
 
 @RestController
 @RequestMapping("/utils")

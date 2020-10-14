@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.co.boots.dsp.wcs.OSRBuffer;
-import uk.co.boots.dsp.wcs.OSRConfig;
-import uk.co.boots.dsp.wcs.TrackController;
+import uk.co.boots.dsp.wcs.osr.OSRBuffer;
+import uk.co.boots.dsp.wcs.osr.OSRConfig;
 import uk.co.boots.dsp.wcs.service.ToteService;
+import uk.co.boots.dsp.wcs.track.TrackController;
 
 @RestController
 @RequestMapping("/osr")

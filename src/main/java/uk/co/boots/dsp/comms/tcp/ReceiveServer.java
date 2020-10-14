@@ -25,10 +25,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
-import uk.co.boots.dsp.messages.BasicMessage;
-import uk.co.boots.dsp.messages.Deserializer;
-import uk.co.boots.dsp.messages.DeserializerFactory;
 import uk.co.boots.dsp.messages.MessageProcessor;
+import uk.co.boots.dsp.messages.framework.entity.BasicMessage;
+import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
+import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
 import uk.co.boots.dsp.wcs.service.ToteService;
 
 @Component

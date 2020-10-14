@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.Setter;
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
-import uk.co.boots.dsp.wcs.TrackController;
+import uk.co.boots.dsp.wcs.track.TrackController;
 
 @Component
 @Setter

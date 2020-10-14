@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import uk.co.boots.dsp.messages.shared.OrderLine;
-import uk.co.boots.dsp.messages.shared.Tote;
+import uk.co.boots.dsp.messages.base.entity.OrderLine;
+import uk.co.boots.dsp.messages.base.entity.Tote;
 
 public interface ToteRepository extends PagingAndSortingRepository<Tote, Long> {
 	@Query(

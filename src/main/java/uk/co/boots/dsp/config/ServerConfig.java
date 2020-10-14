@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
-import uk.co.boots.dsp.wcs.OSRConfig;
+import uk.co.boots.dsp.wcs.osr.OSRConfig;
 
 @Configuration
 @EnableAsync ( proxyTargetClass=true)
