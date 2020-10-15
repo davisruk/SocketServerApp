@@ -34,15 +34,8 @@ public class AppRunner implements CommandLineRunner {
 	
     @Override
     public void run(String... args) throws Exception {
-
-	      String[] beanNames = appContext.getBeanDefinitionNames();
-	      Arrays.sort(beanNames);
-	      for (String beanName : beanNames) {
-	        System.out.println(beanName);
-	      }
-	      dspEventNotifier.registerEventHandler(eventLogger);
-	      receiveServer.startServer();
-	      sendServer.startServer();
-	      trackController.start();
+	  trackController.start();
+	  receiveServer.startServer();
+	  sendServer.startServer();
     }
 }

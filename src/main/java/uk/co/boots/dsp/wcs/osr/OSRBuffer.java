@@ -1,9 +1,12 @@
 package uk.co.boots.dsp.wcs.osr;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import uk.co.boots.dsp.wcs.events.EventLogger;
 
 @Component ("osrBuffer")
 public class OSRBuffer {
@@ -11,9 +14,10 @@ public class OSRBuffer {
 	@Autowired
 	private OSRConfig osrConfig;
 	
+	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+	
 	public synchronized void setStarted (boolean started) {
 		this.osrConfig.setReleasing(started);
-		System.out.println(osrConfig);
 	}
 	
 	public synchronized boolean isReleasing () {
@@ -25,19 +29,14 @@ public class OSRBuffer {
 	}
 	
 	public synchronized void setOsrConfig (OSRConfig newConfig) {
-		System.out.println("-----------------[OSRBuffer][setOsrConfig][START]-----------------");
-		System.out.println("-----------------Old Config-----------------");
-		System.out.println(osrConfig);
+		
 		osrConfig.setToteTrackTravelTime(newConfig.getToteTrackTravelTime());
 		osrConfig.setMaxTotesOnTrack(newConfig.getMaxTotesOnTrack());
 		osrConfig.setToteReleaseInterval(newConfig.getToteReleaseInterval());
 		osrConfig.setReleasing(newConfig.isReleasing());
 		osrConfig.setIncludeFMD(newConfig.isIncludeFMD());
 		osrConfig.setSendThirtyTwoRShort(newConfig.isSendThirtyTwoRShort());
-		System.out.println("-----------------New Config-----------------");
-		System.out.println(osrConfig);
-		System.out.println("-----------------[OSRBuffer][setOsrConfig][END]-----------------");
-		
+		logger.info("[OSRBuffer::setOsrConfig] New OSR Config : " + osrConfig);
 	}
 
 	public long getToteReleaseInterval() {

@@ -2,6 +2,8 @@ package uk.co.boots.dsp.wcs.track;
 
 import java.util.Calendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
+import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
 import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 import uk.co.boots.dsp.wcs.service.ToteService;
@@ -23,6 +26,7 @@ public class ToteController {
     @Qualifier("dspEventNotifier")	
 	private DSPEventNotifier dspEventNotifier;
 
+	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	
 	@Async
 	public void releaseTote(Tote tote) {
@@ -34,14 +38,14 @@ public class ToteController {
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, tote));
 		toteService.setupStartTime(Calendar.getInstance(), tote);
 		String toteName = tote.getHeader().getOrderId() + "_" + tote.getHeader().getSheetNumber();
-		System.out.println(toteName + " started Travelling around track");
+		logger.info("[ToteController::releaseTote] " + toteName + " started Travelling around track");
 		
 		while (timeTravelled <= trackTravelTimeLeft) {
 			try {
 				Thread.sleep(trackTravelTimeLeft);
 				timeTravelled = System.currentTimeMillis() - started;
 			} catch (InterruptedException ie) {
-				System.out.println("Tote Travel Interrupted");
+				logger.info("[ToteController::releaseTote] Tote Travel Interrupted");
 				timeTravelled = System.currentTimeMillis() - started;
 				trackTravelTimeLeft -= timeTravelled;
 				timeTravelled = 0L;
@@ -49,7 +53,7 @@ public class ToteController {
 			}
 		}
 
-		System.out.println(toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
+		logger.info("[ToteController::releaseTote] " + toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 
 		toteService.setupEndTime(Calendar.getInstance(), tote);
 		toteService.setupOrderLines(tote);

@@ -8,9 +8,13 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.co.boots.dsp.config.PropertiesLoader;
 import uk.co.boots.dsp.messages.MessageResponseHandler;
 import uk.co.boots.dsp.messages.base.entity.Tote;
+import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 public class FortyTwoRProcessor implements MessageResponseHandler {
@@ -19,7 +23,8 @@ public class FortyTwoRProcessor implements MessageResponseHandler {
 
 	private DataInputStream din;
 	private Tote t;
-
+	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+	
 	public FortyTwoRProcessor(Tote tote) {
 		this.t = tote;
 		try {
@@ -27,7 +32,7 @@ public class FortyTwoRProcessor implements MessageResponseHandler {
 			messageTypePos = Integer.parseInt(config.getProperty("message_type_offset"));
 			messageTypeLength = Integer.parseInt(config.getProperty("message_type_length"));
 		} catch (IOException ioe) {
-			System.out.println("Failed to load properties");
+			logger.error("Failed to load properties");
 		}
 	}
 		
@@ -41,7 +46,7 @@ public class FortyTwoRProcessor implements MessageResponseHandler {
 	public void processResponse() throws DSPMessageException{
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		InputStream ins = new BufferedInputStream(din);
-		System.out.println("[42R Processor] - Processing on thread " + Thread.currentThread().getName());
+		logger.info("[FortyTwoRProcessor::processResponse] processing on thread " + Thread.currentThread().getName());
 		boolean finishedMessage = false, messageStarted = false;
 		int b = -1, bytesRead = 0;
 		try {
@@ -64,8 +69,8 @@ public class FortyTwoRProcessor implements MessageResponseHandler {
 		
 		byte[] messageBytes = buf.toByteArray();
 		if (messageBytes.length == 0) {
-			System.out.println("[42R Processor] received 0 length response");
-			throw new DSPMessageException("[42R Processor] received 0 length response");
+			logger.info("[FortyTwoRProcessor::processResponse] received 0 length response");
+			throw new DSPMessageException("[FortyTwoRProcessor::processResponse] received 0 length response");
 		}
 		
 		String msgType = new String(messageBytes, messageTypePos, messageTypeLength);

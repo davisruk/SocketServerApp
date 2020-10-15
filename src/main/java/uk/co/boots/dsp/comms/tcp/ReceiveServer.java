@@ -19,6 +19,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -29,6 +31,7 @@ import uk.co.boots.dsp.messages.MessageProcessor;
 import uk.co.boots.dsp.messages.framework.entity.BasicMessage;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
 import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
+import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.service.ToteService;
 
 @Component
@@ -55,6 +58,8 @@ public class ReceiveServer implements SocketServer {
 	private byte[] currentResponse = null;
 	private boolean writingResponse;
 	
+	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+	
 	public synchronized void setFinished (boolean val) {
 		finished = val;
 	}
@@ -63,7 +68,7 @@ public class ReceiveServer implements SocketServer {
 	public void startServer() {
 		try {
 			sc = new ServerSocket(port);
-			System.out.println("Receive Server started and listening on port " + port);
+			logger.info("[ReceiveServer::startServer] TCP socket server started and listening on port " + port);
 			while (true) {
 				TCPComms comms = new TCPComms(sc.accept());
 				handleOldMessage(comms);
@@ -86,7 +91,7 @@ public class ReceiveServer implements SocketServer {
 	@Async
 	private void handleClientSocketConnection(TCPComms comms) {
 		try {
-			System.out.println("[Message Receiver] Handling client messages");
+			logger.info("[ReceiveServer::handleClientSocketConnection] Handling client messages");
 			setFinished(false);
 			while (!finished) {
 				byte[] messageBytes;
@@ -123,12 +128,12 @@ public class ReceiveServer implements SocketServer {
 						setResponseValues(false, null);
 					}
 				} else {
-					System.out.println("Message not read correctly - close connection");
+					logger.info("[ReceiveServer::handleClientSocketConnection] Message not read correctly - close connection");
 					finished = true;
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.println(ioe.getMessage());
+			logger.error("[ReceiveServer::handleClientSocketConnection] " + ioe.getMessage());
 		} finally {
 			comms.closeComms();
 		}

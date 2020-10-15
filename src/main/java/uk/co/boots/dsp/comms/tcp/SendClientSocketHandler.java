@@ -6,23 +6,28 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationHandler;
 import uk.co.boots.dsp.messages.MessageResponseHandler;
+import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 public class SendClientSocketHandler implements DSPCommunicationHandler {
 	private final Socket client;
 	private DataOutputStream out;
 	private DataInputStream din;
-
+	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+	
 	public SendClientSocketHandler(Socket client) {
 		this.client = client;
 		try {
 			out = new DataOutputStream(client.getOutputStream());
 			din = new DataInputStream(new BufferedInputStream(client.getInputStream()));
 		} catch (IOException ioe) {
-			System.out.println(ioe.getMessage());
+			logger.error("[SendClientSocketHandler::SendClientSocketHandler] " + ioe.getMessage());
 		}
 	}
 
