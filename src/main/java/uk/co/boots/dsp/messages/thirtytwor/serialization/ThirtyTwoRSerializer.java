@@ -1,4 +1,4 @@
-package uk.co.boots.dsp.messages.thirtytwor.entity;
+package uk.co.boots.dsp.messages.thirtytwor.serialization;
 
 import java.util.List;
 
@@ -18,10 +18,11 @@ import uk.co.boots.dsp.messages.framework.entity.BasicRecord;
 import uk.co.boots.dsp.messages.framework.serialization.SerializationControlIdentifiers;
 import uk.co.boots.dsp.messages.framework.serialization.Serializer;
 import uk.co.boots.dsp.messages.thirtytwor.FortyTwoRProcessor;
-import uk.co.boots.dsp.messages.thirtytwor.serialization.GsOneArrayListSerializationControl;
-import uk.co.boots.dsp.messages.thirtytwor.serialization.OperatorArrayListSerializationControl;
-import uk.co.boots.dsp.messages.thirtytwor.serialization.OrderLineArrayListSerializationControl;
-import uk.co.boots.dsp.messages.thirtytwor.serialization.StatusArrayListSerializationControl;
+import uk.co.boots.dsp.messages.thirtytwor.entity.GsOneDetail;
+import uk.co.boots.dsp.messages.thirtytwor.entity.GsOneLine;
+import uk.co.boots.dsp.messages.thirtytwor.entity.OperatorDetail;
+import uk.co.boots.dsp.messages.thirtytwor.entity.OperatorLine;
+import uk.co.boots.dsp.messages.thirtytwor.entity.ToteStatusDetail;
 import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 
 @Component
