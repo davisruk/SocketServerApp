@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import uk.co.boots.dsp.messages.base.entity.OrderLine;
 import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.messages.base.entity.ToteIdentifier;
+import uk.co.boots.dsp.messages.base.entity.TransportContainer;
 import uk.co.boots.dsp.messages.framework.serialization.Serializer;
 import uk.co.boots.dsp.messages.framework.serialization.SerializerFactory;
 import uk.co.boots.dsp.messages.thirtytwor.entity.EndTime;
@@ -89,6 +91,31 @@ public class ToteService {
 		return t;
 	}
 
+	public Tote setupTransportContainer(Tote tote) {
+		if (tote.getTransportContainer() == null) {
+			TransportContainer tc = new TransportContainer();
+			String payload = generateRandomAlphaNumericString(TransportContainer.FIELD_LENGTH_DATA);
+			tc.setPayload(payload);
+			tc.setPayloadLength(TransportContainer.FIELD_LENGTH_DATA);
+			tote.setTransportContainer(tc);
+			tc.setTote(tote);
+		}
+		return tote;
+	}
+	
+	private String generateRandomAlphaNumericString(int targetStringLength) {
+		int leftLimit = 48; // numeral '0'
+	    int rightLimit = 122; // letter 'z'
+	    Random random = new Random();
+	 
+	    String generatedString = random.ints(leftLimit, rightLimit + 1)
+	      .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+	      .limit(targetStringLength)
+	      .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+	      .toString();
+	    return generatedString;
+	}
+	
 	public ToteStatusDetail addNewToteStatus(Tote t, String status) {
 		ToteStatusDetail tsd = t.getStatusDetail();
 		if (tsd == null) {

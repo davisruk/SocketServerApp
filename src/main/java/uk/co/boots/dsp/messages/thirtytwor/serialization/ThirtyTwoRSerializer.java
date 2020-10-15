@@ -60,10 +60,14 @@ public class ThirtyTwoRSerializer implements Serializer {
 		}
 
 		// don't include transport container for split / adapted totes
-		if (ti != null && !ti.getPayload().equals(ToteIdentifier.ADAPTED_TOTE)) {
-			TransportContainer tc = t.getTransportContainer();
-			if (tc != null) {
-				sb = processBasicRecord(tc, sb);
+		 
+		if (ti != null) {
+			String toteIdentifier = ti.getPayload();
+			if (!(toteIdentifier.equals(ToteIdentifier.ADAPTED_TOTE) || toteIdentifier.equals(ToteIdentifier.MANUAL_TOTE))) {
+				TransportContainer tc = t.getTransportContainer();
+				if (tc != null) {
+					sb = processBasicRecord(tc, sb);
+				}
 			}
 		}
 		

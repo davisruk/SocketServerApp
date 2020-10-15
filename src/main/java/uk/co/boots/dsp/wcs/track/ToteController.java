@@ -55,6 +55,7 @@ public class ToteController {
 
 		logger.info("[ToteController::releaseTote] " + toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 
+		toteService.setupTransportContainer(tote);
 		toteService.setupEndTime(Calendar.getInstance(), tote);
 		toteService.setupOrderLines(tote);
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY, tote));

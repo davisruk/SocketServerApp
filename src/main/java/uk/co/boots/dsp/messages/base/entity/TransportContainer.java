@@ -2,6 +2,7 @@ package uk.co.boots.dsp.messages.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,7 +16,10 @@ import uk.co.boots.dsp.messages.framework.entity.BasicRecord;
 @ToString(exclude="tote")
 @JsonInclude(Include.NON_NULL)
 public class TransportContainer extends BasicRecord {
-
+	@JsonIgnore
+	@Transient
+	public static int FIELD_LENGTH_DATA = 8;
+	
 	@JsonIgnore
 	@OneToOne(mappedBy = "transportContainer")
     private Tote tote;
