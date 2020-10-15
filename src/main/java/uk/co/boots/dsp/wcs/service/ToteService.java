@@ -32,6 +32,7 @@ import uk.co.boots.dsp.messages.thirtytwor.entity.Status;
 import uk.co.boots.dsp.messages.thirtytwor.entity.ToteStatusDetail;
 import uk.co.boots.dsp.messages.thirtytwor.serialization.OrderLineArrayListSerializationControl;
 import uk.co.boots.dsp.wcs.masterdata.service.MasterDataService;
+import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 import uk.co.boots.dsp.wcs.repository.ToteRepository;
 import uk.co.boots.dsp.wcs.rules.RuleParameters;
 import uk.co.boots.dsp.wcs.rules.RuleProcessorFactory;
@@ -46,6 +47,8 @@ public class ToteService {
 	private MasterDataService masterDataService;
 	@Autowired
 	private RuleProcessorFactory ruleProcessorFactory;
+	@Autowired
+	private OSRBuffer osrBuffer;
 	
 	public Page<Tote> getTotePage(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
@@ -225,11 +228,12 @@ public class ToteService {
 	
 	private void setupBarcode(OrderLine line) {
 		OrderDetail od = line.getOrderDetail();
-		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
+		boolean fmdSupport = osrBuffer.processingFMD();
+		od.setProductBarcodeLength(fmdSupport ? OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH_BEFORE_FMD : OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
 		masterDataService.getInfoForProduct(line.getProductId()).ifPresentOrElse(product ->
-										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(product.getEanBarcode())),
+										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(product.getEanBarcode(), fmdSupport)),
 									() -> 
-										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("No Barcode"))
+										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("No Barcode", fmdSupport))
 									);
 	}
 

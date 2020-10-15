@@ -20,6 +20,7 @@ public class OrderLineArrayListSerializationControl {
 	private OperatorArrayListSerializationControl oalsc;
 	
 	public static final int BARCODE_DATA_LENGTH = 13;
+	public static final int BARCODE_DATA_LENGTH_BEFORE_FMD = 20;
 	public static final int PLASTIC_BAG_ID_DATA_LENGTH = 8;
 	public static final int TIMESTAMP_DATA_LENGTH = 17;
 	public static final int ROLE_ID_DATA_LENGTH = 20;
@@ -45,8 +46,12 @@ public class OrderLineArrayListSerializationControl {
 	private final SerialisationControlField timestampInfo = new SerialisationControlField ("%2d", roleIdInfo.getNextOffset(), 2);
 	private SerialisationControlField statusInfo = new SerialisationControlField ("%02d", timestampInfo.getNextOffset(), 2);;
 
-	public static String formatProductBarcode (String barcode) {
-		return String.format("%1$" + BARCODE_DATA_LENGTH + "s", barcode);
+	public static int getBarcodeDataLength(boolean fmdSupport) {
+		return fmdSupport ? BARCODE_DATA_LENGTH : BARCODE_DATA_LENGTH_BEFORE_FMD;
+	}
+	public static String formatProductBarcode (String barcode, boolean fmdSupport) {
+		int len = getBarcodeDataLength(fmdSupport);
+		return String.format("%1$" + len + "s", barcode);
 	}
 	
 	public static String formatOperatorId(String op) {

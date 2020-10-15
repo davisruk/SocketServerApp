@@ -59,11 +59,14 @@ public class ThirtyTwoRSerializer implements Serializer {
 			sb = processBasicRecord(ti, sb);
 		}
 
-		TransportContainer tc = t.getTransportContainer();
-		if (tc != null) {
-			sb = processBasicRecord(tc, sb);
+		// don't include transport container for split / adapted totes
+		if (ti != null && !ti.getPayload().equals(ToteIdentifier.ADAPTED_TOTE)) {
+			TransportContainer tc = t.getTransportContainer();
+			if (tc != null) {
+				sb = processBasicRecord(tc, sb);
+			}
 		}
-
+		
 		sb = processBasicRecord(t.getStartTime(), sb);
 		sb = processBasicRecord(t.getEndTime(), sb);
 		sb = processStatus(t.getStatusDetail(), sb, statusArrayListSerializationControl);
@@ -112,7 +115,7 @@ public class ThirtyTwoRSerializer implements Serializer {
 			return sb;
 
 		od.setPlasticBagIdLength(OrderLineArrayListSerializationControl.PLASTIC_BAG_ID_DATA_LENGTH);
-		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.BARCODE_DATA_LENGTH);
+		od.setProductBarcodeLength(OrderLineArrayListSerializationControl.getBarcodeDataLength(osrBuffer.processingFMD()));
 		od.setTimestampLength(OrderLineArrayListSerializationControl.TIMESTAMP_DATA_LENGTH);
 		od.setRoleIdLength(OrderLineArrayListSerializationControl.ROLE_ID_DATA_LENGTH);
 		od.setOperatorIdLength(OrderLineArrayListSerializationControl.OPERATOR_ID_DATA_LENGTH);
