@@ -32,8 +32,9 @@ public class OSRRestController {
 	}
 	
 	@PostMapping("/newConfig")
-	void setOSRConfig (@RequestBody OSRConfig newConfig) {
+	ResponseEntity<OSRConfig> setOSRConfig (@RequestBody OSRConfig newConfig) {
 		osrBuffer.setOsrConfig(newConfig);
+		return ResponseEntity.ok().body(newConfig);
 	}
 	
 	@PostMapping("/thirtyTwoRShortState")
