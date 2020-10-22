@@ -59,4 +59,7 @@ public class OSRBuffer {
 		osrConfig.setSendThirtyTwoRShort(val);
 	}
 	
+	public OSRConfig getOSRConfig() {
+		return osrConfig;
+	}
 }

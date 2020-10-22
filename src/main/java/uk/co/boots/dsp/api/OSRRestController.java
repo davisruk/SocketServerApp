@@ -3,6 +3,7 @@ package uk.co.boots.dsp.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,8 +28,9 @@ public class OSRRestController {
 	
 	
 	@PostMapping("/releaseState")
-	void setOSRReleaseState(@RequestBody StartParams params) {
+	ResponseEntity<OSRConfig> setOSRReleaseState(@RequestBody StartParams params) {
 		osrBuffer.setStarted (params.start);
+		return ResponseEntity.ok().body(osrBuffer.getOSRConfig());
 	}
 	
 	@PostMapping("/newConfig")
@@ -38,7 +40,7 @@ public class OSRRestController {
 	}
 	
 	@PostMapping("/thirtyTwoRShortState")
-	void set32RSendStart(@RequestBody SendThirtyTwoRParams params) {
+	void set32RSendState(@RequestBody SendThirtyTwoRParams params) {
 		osrBuffer.setSendThirtyTwoRShort(params.send);
 	}
 	
@@ -51,5 +53,9 @@ public class OSRRestController {
 		return new ResponseEntity<>("Run has been reset.", HttpStatus.OK);		
 	}
 	
+	@GetMapping("/config")
+	ResponseEntity<OSRConfig> getOSRConfig () {
+		return ResponseEntity.ok().body(osrBuffer.getOSRConfig());
+	}	
 	
 }
