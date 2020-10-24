@@ -13,6 +13,7 @@ import uk.co.boots.dsp.messages.framework.entity.BasicMessage;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
 import uk.co.boots.dsp.wcs.service.ToteService;
+import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @Component
 public class TwelveNProcessor implements MessageProcessor {
@@ -22,6 +23,8 @@ public class TwelveNProcessor implements MessageProcessor {
 	@Autowired
 	@Qualifier("dspEventNotifier")	
 	private DSPEventNotifier dspEventNotifier;
+	@Autowired
+	TrackStatus trackStatus;
 	
 	private final static byte[] fullResponse = (SocketServer.START_FRAME_CHAR + "0001022N00" + SocketServer.END_FRAME_CHAR).getBytes();
     @Override
@@ -29,6 +32,7 @@ public class TwelveNProcessor implements MessageProcessor {
 		Tote t = (Tote) m;
 		m.addRawMessage(fullResponse, "22N", new Date());
 		toteService.save(t);
+		trackStatus.adjustTotalTotes(false, true);
 		// send 32R short on other channel
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ORDER_PERSISTED, t));
 	}

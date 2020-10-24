@@ -25,6 +25,8 @@ public class ToteController {
 	@Autowired
     @Qualifier("dspEventNotifier")	
 	private DSPEventNotifier dspEventNotifier;
+	@Autowired
+	TrackStatus trackStatus;
 
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	

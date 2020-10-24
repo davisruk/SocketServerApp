@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
+import uk.co.boots.dsp.comms.websocket.WebSocketController;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.wcs.events.DSPEventHandler;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
@@ -34,37 +35,39 @@ public class TrackController {
 	private DSPCommunicationNotifier dspCommunicationNotifier;
 	@Autowired
 	private EventLogger eventLogger;
+	@Autowired
+	TrackStatus trackStatus;
+	@Autowired
+	WebSocketController webSocketController; // re-factor this out
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
-	private int activeTotes;
 	private boolean stopTrackController = false;
-	private int totesProcessed = 0;
-	
-	
+
 	@Async
 	public void start() {
 		setStopTrackController(false);
-		adjustTotesProcessed(true, false);
-		adjustActiveTotes(true, false);
+		trackStatus.adjustTotesProcessed(true, false);
+		trackStatus.adjustActiveTotes(true, false);
 		dspEventNotifier.resetHandlers();		
 		dspEventNotifier.registerEventHandler(eventLogger);
 		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
 		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
 		dspEventNotifier.registerEventHandler(new OrderPersistedHandler());
+		dspEventNotifier.registerEventHandler(webSocketController);
 		int maxTotes = osrBuffer.getTrackToteCapacity();
 		long releaseInterval = osrBuffer.getToteReleaseInterval();
 		logger.info("[TrackController::start] Track Controller Started");
 		// osrBuffer needs to be releasing totes - wait if not 
 		while (!isStopTrackController()) {
 			// wait until OSR is releasing and track has availability 
-			if (osrBuffer.isReleasing() && getActiveTotes() < maxTotes) {
+			if (osrBuffer.isReleasing() && trackStatus.getActiveTotes() < maxTotes) {
 				// start tote on track
-				long totesInOSR = toteService.getToteCount();
+				int totesInOSR = trackStatus.getTotalTotes();
+				int totesProcessed = trackStatus.getTotesProcessed();
 				if (totesInOSR > 0 & totesProcessed < totesInOSR) {
 					Tote t = toteService.getToteInQueuePosition(totesProcessed);
-					
 					logger.info("[TrackController::start] processing tote " + (totesProcessed + 1) + " of " + totesInOSR);
 					toteController.releaseTote(t);
-					adjustTotesProcessed(false, true);
+					trackStatus.adjustTotesProcessed(false, true);
 					try {
 						Thread.sleep(releaseInterval);
 					} catch (InterruptedException ie) {
@@ -81,10 +84,10 @@ public class TrackController {
 			// TODO Auto-generated method stub
 			switch (event.getEventType()) {
 				case TOTE_ACTIVATED:
-					adjustActiveTotes(false,  true);
+					trackStatus.adjustActiveTotes(false,  true);
 					break;
 				case TOTE_DEACTIVATED:
-					adjustActiveTotes(false,  false);
+					trackStatus.adjustActiveTotes(false,  false);
 					break;
 				default:
 					break;
@@ -116,24 +119,6 @@ public class TrackController {
 				logger.info("[ToteFinishedHandler::handleEvent] Tote Saved");
 			}
 		}
-	}
-	
-	private synchronized int getActiveTotes() {
-		return activeTotes;
-	}
-	
-	private synchronized void adjustActiveTotes(boolean reset, boolean increment) {
-		if (reset) activeTotes = 0;
-		else if (increment) activeTotes ++;
-		else activeTotes --;
-		logger.info("[TrackController::adjustActiveTotes] Active Totes: " + activeTotes);		
-	}
-	
-	public synchronized void adjustTotesProcessed (boolean reset, boolean increment) {
-		if (reset) totesProcessed = 0;
-		else if (increment) totesProcessed ++;
-		else totesProcessed --;
-		logger.info("[TrackController::adjustTotesProcessed] totesProcessed: " + totesProcessed);		
 	}
 	
 	public synchronized void resetTrackController () {
