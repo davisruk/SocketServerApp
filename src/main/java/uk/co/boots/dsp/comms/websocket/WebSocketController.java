@@ -40,6 +40,18 @@ public class WebSocketController implements DSPEventHandler {
 		} catch (MessagingException me) {
 			me.printStackTrace();
 		}
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return "WebSocketController";
+	}
+
+	@Override
+	public void setName(String name) {
+		// TODO Auto-generated method stub
+		
 	}	
 
 }

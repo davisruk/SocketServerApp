@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
+import lombok.Setter;
 import uk.co.boots.dsp.wcs.events.EventLogger;
 
 @Component
@@ -15,6 +16,11 @@ public class TrackStatus {
 	private int activeTotes;
 	private int totalTotes;
 	private int totesProcessed;
+	@Setter
+	private String receiveChannelClient;
+	@Setter
+	private String sendChannelClient;
+	
 	@JsonIgnore
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	@JsonIgnore
@@ -42,5 +48,6 @@ public class TrackStatus {
 		else totalTotes --;
 		logger.info("[TrackStatus::adjustTotalTotes] totesProcessed: " + totesProcessed);		
 	}
+	
 
 }

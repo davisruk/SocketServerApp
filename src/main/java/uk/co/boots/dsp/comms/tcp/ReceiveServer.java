@@ -22,6 +22,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -31,8 +32,11 @@ import uk.co.boots.dsp.messages.MessageProcessor;
 import uk.co.boots.dsp.messages.framework.entity.BasicMessage;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
 import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
+import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
 import uk.co.boots.dsp.wcs.events.EventLogger;
+import uk.co.boots.dsp.wcs.events.ToteEvent;
 import uk.co.boots.dsp.wcs.service.ToteService;
+import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @Component
 public class ReceiveServer implements SocketServer {
@@ -52,6 +56,13 @@ public class ReceiveServer implements SocketServer {
 	@Autowired
 	ToteService toteService;
 	
+	@Autowired
+	TrackStatus trackStatus;
+
+	@Autowired
+	@Qualifier("dspEventNotifier")	
+	private DSPEventNotifier dspEventNotifier;
+
 	private static ServerSocket sc;
 	private boolean finished = false;
 	
@@ -93,6 +104,8 @@ public class ReceiveServer implements SocketServer {
 		try {
 			logger.info("[ReceiveServer::handleClientSocketConnection] Handling client messages");
 			setFinished(false);
+			trackStatus.setReceiveChannelClient(comms.client.getInetAddress().getHostAddress() + ":" + comms.client.getPort());
+			dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.RECEIVE_CHANNEL_CHANGE, null));
 			while (!finished) {
 				byte[] messageBytes;
 				boolean finishedMessage = false;
@@ -130,10 +143,13 @@ public class ReceiveServer implements SocketServer {
 				} else {
 					logger.info("[ReceiveServer::handleClientSocketConnection] Message not read correctly - close connection");
 					finished = true;
+					dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.RECEIVE_CHANNEL_CHANGE, null));
 				}
 			}
 		} catch (IOException ioe) {
 			logger.error("[ReceiveServer::handleClientSocketConnection] " + ioe.getMessage());
+			trackStatus.setReceiveChannelClient("Disconnected by Client");
+			dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.RECEIVE_CHANNEL_CHANGE, null));
 		} finally {
 			comms.closeComms();
 		}

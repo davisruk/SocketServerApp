@@ -11,7 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EventLogger implements DSPEventHandler {
+public class EventLogger extends DSPEventHandlerAdapter {
+
+	public EventLogger() {
+		super("EventLogger");
+		// TODO Auto-generated constructor stub
+	}
 
 	Logger logger = LoggerFactory.getLogger(EventLogger.class);
 

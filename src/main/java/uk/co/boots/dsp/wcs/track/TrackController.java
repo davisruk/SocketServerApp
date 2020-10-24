@@ -12,6 +12,7 @@ import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.comms.websocket.WebSocketController;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.wcs.events.DSPEventHandler;
+import uk.co.boots.dsp.wcs.events.DSPEventHandlerAdapter;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
 import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
@@ -47,19 +48,16 @@ public class TrackController {
 		setStopTrackController(false);
 		trackStatus.adjustTotesProcessed(true, false);
 		trackStatus.adjustActiveTotes(true, false);
-		dspEventNotifier.resetHandlers();		
+		// dspEventNotifier.resetHandlers();		
 		dspEventNotifier.registerEventHandler(eventLogger);
 		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
 		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
 		dspEventNotifier.registerEventHandler(new OrderPersistedHandler());
-		dspEventNotifier.registerEventHandler(webSocketController);
-		int maxTotes = osrBuffer.getTrackToteCapacity();
-		long releaseInterval = osrBuffer.getToteReleaseInterval();
 		logger.info("[TrackController::start] Track Controller Started");
 		// osrBuffer needs to be releasing totes - wait if not 
 		while (!isStopTrackController()) {
 			// wait until OSR is releasing and track has availability 
-			if (osrBuffer.isReleasing() && trackStatus.getActiveTotes() < maxTotes) {
+			if (osrBuffer.isReleasing() && trackStatus.getActiveTotes() < osrBuffer.getTrackToteCapacity()) {
 				// start tote on track
 				int totesInOSR = trackStatus.getTotalTotes();
 				int totesProcessed = trackStatus.getTotesProcessed();
@@ -69,7 +67,7 @@ public class TrackController {
 					toteController.releaseTote(t);
 					trackStatus.adjustTotesProcessed(false, true);
 					try {
-						Thread.sleep(releaseInterval);
+						Thread.sleep(osrBuffer.getToteReleaseInterval());
 					} catch (InterruptedException ie) {
 						logger.info("[Track Controller::start] Interrupted - resuming");
 					}
@@ -78,7 +76,11 @@ public class TrackController {
 		}
 	}
 
-	private class ToteActivationHandler implements DSPEventHandler {
+	private class ToteActivationHandler extends DSPEventHandlerAdapter {
+		public ToteActivationHandler() {
+			super("ToteActivationHandler");
+		}
+
 		@Override
 		public void handleEvent(ToteEvent event) {
 			// TODO Auto-generated method stub
@@ -93,9 +95,18 @@ public class TrackController {
 					break;
 			}
 		}
+
+		@Override
+		public void setName(String name) {
+						
+		}
 	}
 	
-	private class OrderPersistedHandler implements DSPEventHandler {
+	private class OrderPersistedHandler extends DSPEventHandlerAdapter {
+		public OrderPersistedHandler() {
+			super("OrderPersistedHandler");
+		}
+		
 		public void handleEvent(ToteEvent event) {
 			if (! osrBuffer.sendThirtyTwoRShort()) return;
 			if (event.getEventType() == ToteEvent.EventType.TOTE_ORDER_PERSISTED) {
@@ -107,7 +118,10 @@ public class TrackController {
 		}
 	}
 	
-	private class ToteFinishedHandler implements DSPEventHandler {
+	private class ToteFinishedHandler extends DSPEventHandlerAdapter {
+		public ToteFinishedHandler() {
+			super("ToteFinishedHandler");
+		} 
 		@Override
 		public void handleEvent(ToteEvent event) {
 			if (event.getEventType() == ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY) {
