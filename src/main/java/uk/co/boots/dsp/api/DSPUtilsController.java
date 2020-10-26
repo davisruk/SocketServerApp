@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import uk.co.boots.dsp.api.dto.PageRequestDetail;
+import uk.co.boots.dsp.api.dto.ToteDTOService;
+import uk.co.boots.dsp.api.dto.ToteSummaryPage;
 import uk.co.boots.dsp.comms.tcp.SocketServer;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
@@ -37,7 +42,9 @@ public class DSPUtilsController {
 	private DeserializerFactory deserializerFactory;
 	
 	@Autowired
-	MasterDataService masterDataService;
+	private MasterDataService masterDataService;
+	@Autowired
+	private ToteDTOService toteDTOService;
 
 	@PostMapping("/prettify")
     public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
@@ -89,5 +96,10 @@ public class DSPUtilsController {
 		return new ResponseEntity<>("Files received and persisted", HttpStatus.OK);
 	}
 	
+	@GetMapping(path = "/tote/page")
+	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam int pageNumber, @RequestParam int pageSize) {
+		ToteSummaryPage result = toteDTOService.getSummaryDTOsForPage(new PageRequestDetail(pageNumber, pageSize));
+		return ResponseEntity.ok().body(result);
+	  }
 
 }
