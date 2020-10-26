@@ -37,7 +37,7 @@ public class MasterDataService {
 	public void saveRules (RuleParameterList list) {
 		if (list != null) {
 			testRuleMasterDataRepository.deleteAll();
-			list.getLines().forEach(rule -> testRuleMasterDataRepository.save(rule));
+			testRuleMasterDataRepository.saveAll(list.getLines());
 		}
 	}
 	
