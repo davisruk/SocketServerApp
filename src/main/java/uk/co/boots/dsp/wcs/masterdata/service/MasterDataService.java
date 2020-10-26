@@ -30,7 +30,7 @@ public class MasterDataService {
 	public void saveBarcodes (ProductMasterDataList list) {
 		if (list != null) {
 			barcodeMasterDataRepository.deleteAll();
-			list.getLines().forEach(barcode -> barcodeMasterDataRepository.save(barcode));
+			barcodeMasterDataRepository.saveAll(list.getLines());
 		}
 	}
 	
