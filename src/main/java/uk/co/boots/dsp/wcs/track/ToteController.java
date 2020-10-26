@@ -35,13 +35,13 @@ public class ToteController {
 		if (tote == null) return;
 		long started = System.currentTimeMillis();
 		long trackTravelTimeLeft = osrBuffer.getToteTravelTime();
-		long timeTravelled = System.currentTimeMillis() - started;
-
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, tote));
 		toteService.setupStartTime(Calendar.getInstance(), tote);
 		String toteName = tote.getHeader().getOrderId() + "_" + tote.getHeader().getSheetNumber();
 		logger.info("[ToteController::releaseTote] " + toteName + " started Travelling around track");
-		
+		toteService.setupTransportContainer(tote);
+		toteService.setupOrderLines(tote);
+		long timeTravelled = System.currentTimeMillis() - started;
 		while (timeTravelled <= trackTravelTimeLeft) {
 			try {
 				Thread.sleep(trackTravelTimeLeft);
@@ -54,12 +54,8 @@ public class ToteController {
 				started = System.currentTimeMillis();
 			}
 		}
-
 		logger.info("[ToteController::releaseTote] " + toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
-
-		toteService.setupTransportContainer(tote);
-		toteService.setupEndTime(Calendar.getInstance(), tote);
-		toteService.setupOrderLines(tote);
+		toteService.setupEndTime(Calendar.getInstance(), tote);		
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY, tote));
 		// signal tote has ended
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_DEACTIVATED, tote));

@@ -29,6 +29,15 @@ public class TrackStatus {
 	
 	@JsonIgnore
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+
+	
+	@JsonIgnore
+	public synchronized void resetStatus() {
+		adjustActiveTotes(true, false, null);
+		adjustTotalTotes(true,  false);
+		adjustTotesProcessed(true,  false);
+	}
+
 	@JsonIgnore
 	public synchronized void adjustTotesProcessed (boolean reset, boolean increment) {
 		if (reset) totesProcessed = 0;

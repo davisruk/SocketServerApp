@@ -14,7 +14,8 @@ public class ToteEvent {
 									TOTE_ACTIVATED,
 									TOTE_DEACTIVATED,
 									RECEIVE_CHANNEL_CHANGE,
-									SEND_CHANNEL_CHANGE
+									SEND_CHANNEL_CHANGE,
+									RESET_RUN
 									}
 	private EventType eventType;
 	private Tote tote;

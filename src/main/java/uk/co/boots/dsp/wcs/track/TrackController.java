@@ -11,11 +11,11 @@ import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.comms.websocket.WebSocketController;
 import uk.co.boots.dsp.messages.base.entity.Tote;
-import uk.co.boots.dsp.wcs.events.DSPEventHandler;
 import uk.co.boots.dsp.wcs.events.DSPEventHandlerAdapter;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
 import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
+import uk.co.boots.dsp.wcs.events.ToteEvent.EventType;
 import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 import uk.co.boots.dsp.wcs.service.ToteService;
 
@@ -130,7 +130,10 @@ public class TrackController {
 	}
 	
 	public synchronized void resetTrackController () {
+		trackStatus.resetStatus();
 		setStopTrackController(true);
+		ToteEvent te = new ToteEvent(EventType.RESET_RUN, null);
+		dspEventNotifier.notifyEventHandlers(te);
 	}
 	
 	private synchronized void setStopTrackController (boolean val) {
