@@ -47,8 +47,7 @@ public class TrackController {
 	public void start() {
 		setStopTrackController(false);
 		trackStatus.adjustTotesProcessed(true, false);
-		trackStatus.adjustActiveTotes(true, false);
-		// dspEventNotifier.resetHandlers();		
+		trackStatus.adjustActiveTotes(true, false, null);
 		dspEventNotifier.registerEventHandler(eventLogger);
 		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
 		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
@@ -86,19 +85,14 @@ public class TrackController {
 			// TODO Auto-generated method stub
 			switch (event.getEventType()) {
 				case TOTE_ACTIVATED:
-					trackStatus.adjustActiveTotes(false,  true);
+					trackStatus.adjustActiveTotes(false,  true, event);
 					break;
 				case TOTE_DEACTIVATED:
-					trackStatus.adjustActiveTotes(false,  false);
+					trackStatus.adjustActiveTotes(false,  false, event);
 					break;
 				default:
 					break;
 			}
-		}
-
-		@Override
-		public void setName(String name) {
-						
 		}
 	}
 	
