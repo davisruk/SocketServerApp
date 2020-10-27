@@ -65,10 +65,18 @@ public class ToteService {
 		return toteRepository.findAllTotesUsingFilter(pageable, searchTerm);
 	}
 
+	public RawMessage getRawMessage(long id) {
+		return toteRepository.findRawMessageById(id);
+	}
+	
 	// allows the Tote table to be queried like a queue
 	public Tote getToteInQueuePosition(int queuePos) {
 		Page<Tote> page = getTotePage(queuePos, 1);
 		return page.getNumberOfElements() > 0 ? page.toList().get(0) : null;
+	}
+
+	public List<RawMessage> getRawMessagesByToteId(long toteId) {
+		return toteRepository.findAllRawMessagesByToteId(toteId);
 	}
 
 	public Tote save(Tote tote) {

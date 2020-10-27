@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import uk.co.boots.dsp.messages.base.entity.OrderLine;
+import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 
 public interface ToteRepository extends PagingAndSortingRepository<Tote, Long> {
@@ -59,6 +60,18 @@ public interface ToteRepository extends PagingAndSortingRepository<Tote, Long> {
             "OR tc is null"
     )
 	public Page<Tote> findAllTotesUsingFilterReplaceNoneWithNullForContainer(Pageable pageable, @Param("filter") String filter);
+
+	@Query(
+	"SELECT rm " +
+	"FROM RawMessage rm " +
+	"WHERE rm.tote.id = :toteId"
+	)
+	public List<RawMessage> findAllRawMessagesByToteId(@Param("toteId") long toteId);
 	
-	
+	@Query(
+	"SELECT rm " +
+	"FROM RawMessage rm " +
+	"WHERE rm.id = :id"
+	)
+	public RawMessage findRawMessageById(@Param("id") long id);
 }

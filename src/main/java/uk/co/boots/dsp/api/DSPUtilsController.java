@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,14 +18,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import uk.co.boots.dsp.api.dto.PageRequestDetail;
 import uk.co.boots.dsp.api.dto.ToteDTOService;
+import uk.co.boots.dsp.api.dto.ToteMessageSummary;
 import uk.co.boots.dsp.api.dto.ToteSummaryPage;
 import uk.co.boots.dsp.comms.tcp.SocketServer;
+import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
 import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
 import uk.co.boots.dsp.wcs.masterdata.entity.ProductMasterDataList;
 import uk.co.boots.dsp.wcs.masterdata.service.MasterDataService;
 import uk.co.boots.dsp.wcs.rules.RuleParameterList;
+import uk.co.boots.dsp.wcs.service.ToteService;
 
 @RestController
 @RequestMapping("/utils")
@@ -46,14 +48,27 @@ public class DSPUtilsController {
 	@Autowired
 	private ToteDTOService toteDTOService;
 
+	@Autowired
+	private ToteService toteService;
+
 	@PostMapping("/prettify")
     public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
-		byte[] messageBytes = file.getBytes();
+		return getToteFromBytes(file.getBytes());
+    }
+
+	@GetMapping("/tote/messages/prettify")
+    public Tote prettifyMessage(@RequestParam long messageId) throws IOException{
+		// get the raw message
+		RawMessage rm = toteService.getRawMessage(messageId);
+		return getToteFromBytes(rm.getMessage().getBytes());
+    }
+	
+	private Tote getToteFromBytes(byte[] messageBytes) {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		if (messageBytes[0] != SocketServer.START_FRAME) {
 			buf.write(0x0A);
 		}
-		buf.write(messageBytes, 0, messageBytes.length - 1);
+		buf.write(messageBytes, 0, messageBytes.length);
 		if (messageBytes[messageBytes.length-1] != SocketServer.END_FRAME) {
 			buf.write(0x0D);
 		}
@@ -61,7 +76,7 @@ public class DSPUtilsController {
 		String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
 		Deserializer d = deserializerFactory.getDeserializer(msgType).get();
 		return (Tote) d.deserialize(messageBytes);
-    }
+	}
 	
 	@RequestMapping (path="/uploadBarcodes",  method=RequestMethod.POST, consumes = {"multipart/form-data"})
 	public ResponseEntity<String> uploadBarcodes(@RequestParam("file") MultipartFile file) throws IOException{
@@ -97,9 +112,16 @@ public class DSPUtilsController {
 	}
 	
 	@GetMapping(path = "/tote/page")
-	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam String filter) {
-		ToteSummaryPage result = toteDTOService.getSummaryDTOsForPage(new PageRequestDetail(pageNumber, pageSize, filter));
+	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam int pageNumber, @RequestParam int pageSize,
+			@RequestParam String filter) {
+		ToteSummaryPage result = toteDTOService
+				.getSummaryDTOsForPage(new PageRequestDetail(pageNumber, pageSize, filter));
 		return ResponseEntity.ok().body(result);
-	  }
+	}
 
+	@GetMapping(path = "/tote/messages")
+	public ResponseEntity<ToteMessageSummary> loadToteMessages(@RequestParam long toteId) {
+		ToteMessageSummary result = toteDTOService.getMessageDTOsForTote(toteId);
+		return ResponseEntity.ok().body(result);
+	}
 }

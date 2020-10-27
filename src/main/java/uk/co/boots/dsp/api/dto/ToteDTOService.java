@@ -1,14 +1,15 @@
 package uk.co.boots.dsp.api.dto;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.co.boots.dsp.messages.base.entity.Header;
+import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.messages.base.entity.TransportContainer;
 import uk.co.boots.dsp.wcs.service.ToteService;
@@ -54,5 +55,23 @@ public class ToteDTOService {
 		pd.setPageResponseDetail(prd);
 		result.setPageDetail(pd);
 		return result;
+	}
+	
+	public ToteMessageSummary getMessageDTOsForTote(long toteId) {
+		ToteMessageSummary tms = new ToteMessageSummary();
+		tms.setToteId(toteId);
+		List<RawMessageDTO> rml = tms.getMessages();
+		List<RawMessage> messages = toteService.getRawMessagesByToteId(toteId);
+		messages.forEach(message -> rml.add(convertRawMessageToDTO(message)));
+		return tms;
+	}
+	
+	private RawMessageDTO convertRawMessageToDTO(RawMessage msg) {
+		RawMessageDTO dto = new RawMessageDTO();
+		dto.setId(msg.getId());
+		dto.setMessage(msg.getMessage());
+		dto.setMessageType(msg.getMessageType());
+		dto.setCreationTime(new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(msg.getCreationDateTime()));
+		return dto;
 	}
 }
