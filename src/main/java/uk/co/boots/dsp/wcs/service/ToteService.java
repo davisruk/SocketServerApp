@@ -59,7 +59,9 @@ public class ToteService {
 	
 	public Page<Tote> getTotePageUsingSearch(int pageNumber, int pageSize, String searchTerm) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
-		//return toteRepository.findAllByHeaderOrderIdContainingOrHeaderSheetNumberContaining(pageable, searchTerm, searchTerm);
+		if ("None".contains(searchTerm)) {
+			return toteRepository.findAllTotesUsingFilterReplaceNoneWithNullForContainer(pageable, searchTerm);
+		}
 		return toteRepository.findAllTotesUsingFilter(pageable, searchTerm);
 	}
 

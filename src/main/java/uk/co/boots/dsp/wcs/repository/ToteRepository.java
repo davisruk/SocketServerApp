@@ -48,4 +48,17 @@ public interface ToteRepository extends PagingAndSortingRepository<Tote, Long> {
     )
 	public Page<Tote> findAllTotesUsingFilter(Pageable pageable, @Param("filter") String filter);
 
+	@Query(
+            "SELECT t " +
+            "FROM Tote t " +
+            "LEFT JOIN t.toteIdentifier ti " +            		 
+            "LEFT JOIN t.transportContainer tc " +
+            "WHERE t.header.orderId like %:filter% " +
+            "OR t.header.sheetNumber like %:filter% " +
+            "OR ti.payload like %:filter% " +
+            "OR tc is null"
+    )
+	public Page<Tote> findAllTotesUsingFilterReplaceNoneWithNullForContainer(Pageable pageable, @Param("filter") String filter);
+	
+	
 }
