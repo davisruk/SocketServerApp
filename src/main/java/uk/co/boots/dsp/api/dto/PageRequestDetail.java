@@ -8,4 +8,5 @@ import lombok.Data;
 public class PageRequestDetail {
 	private int pageNumber;
 	private int pageSize;
+	private String searchTerm;
 }

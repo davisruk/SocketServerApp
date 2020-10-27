@@ -97,8 +97,8 @@ public class DSPUtilsController {
 	}
 	
 	@GetMapping(path = "/tote/page")
-	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam int pageNumber, @RequestParam int pageSize) {
-		ToteSummaryPage result = toteDTOService.getSummaryDTOsForPage(new PageRequestDetail(pageNumber, pageSize));
+	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam String filter) {
+		ToteSummaryPage result = toteDTOService.getSummaryDTOsForPage(new PageRequestDetail(pageNumber, pageSize, filter));
 		return ResponseEntity.ok().body(result);
 	  }
 

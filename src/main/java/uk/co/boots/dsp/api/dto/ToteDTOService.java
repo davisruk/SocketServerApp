@@ -38,7 +38,13 @@ public class ToteDTOService {
 		ToteSummaryPage result = new ToteSummaryPage();
 		PageDetail pd = new PageDetail();
 		pd.setPageRequestDetail(pageRequestDetail);
-		Page<Tote>totes = toteService.getTotePage(pageRequestDetail.getPageNumber(), pageRequestDetail.getPageSize());
+		String searchTerm = pageRequestDetail.getSearchTerm();
+		Page<Tote> totes;
+		if (searchTerm != null && searchTerm.length() > 0) {
+			totes = toteService.getTotePageUsingSearch(pageRequestDetail.getPageNumber(), pageRequestDetail.getPageSize(), searchTerm);
+		} else {
+			totes = toteService.getTotePage(pageRequestDetail.getPageNumber(), pageRequestDetail.getPageSize());
+		}
 		List<ToteSummaryDTO> toteSummaryList = new ArrayList<ToteSummaryDTO>();
 		totes.forEach(tote -> toteSummaryList.add(convertToteEntityToToteSummaryDTO(tote)));
 		result.setToteEntries(toteSummaryList);

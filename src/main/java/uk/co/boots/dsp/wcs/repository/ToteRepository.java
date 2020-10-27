@@ -2,6 +2,8 @@ package uk.co.boots.dsp.wcs.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +35,17 @@ public interface ToteRepository extends PagingAndSortingRepository<Tote, Long> {
 	"AND ti.payload = :toteOrderType"
 	)
 	public List<OrderLine> findRelatedOrderLineByOrderLineNumber(@Param("orderLineNumber") String orderLineNumber, @Param("toteOrderType") String relatedToteOrderType);
+	
+	@Query(
+            "SELECT t " +
+            "FROM Tote t " +
+            "LEFT JOIN t.toteIdentifier ti " +            		 
+            "LEFT JOIN t.transportContainer tc " +
+            "WHERE t.header.orderId like %:filter% " +
+            "OR t.header.sheetNumber like %:filter% " +
+            "OR ti.payload like %:filter% " +
+            "OR tc.payload like %:filter%"
+    )
+	public Page<Tote> findAllTotesUsingFilter(Pageable pageable, @Param("filter") String filter);
+
 }

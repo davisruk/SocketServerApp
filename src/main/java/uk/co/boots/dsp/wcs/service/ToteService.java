@@ -56,6 +56,12 @@ public class ToteService {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
 		return toteRepository.findAll(pageable);
 	}
+	
+	public Page<Tote> getTotePageUsingSearch(int pageNumber, int pageSize, String searchTerm) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
+		//return toteRepository.findAllByHeaderOrderIdContainingOrHeaderSheetNumberContaining(pageable, searchTerm, searchTerm);
+		return toteRepository.findAllTotesUsingFilter(pageable, searchTerm);
+	}
 
 	// allows the Tote table to be queried like a queue
 	public Tote getToteInQueuePosition(int queuePos) {
