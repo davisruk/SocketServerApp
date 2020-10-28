@@ -71,7 +71,7 @@ public class ToteDTOService {
 		dto.setId(msg.getId());
 		dto.setMessage(msg.getMessage());
 		dto.setMessageType(msg.getMessageType());
-		dto.setCreationTime(new SimpleDateFormat("dd.mm.yy HH.mm.ss").format(msg.getCreationDateTime()));
+		dto.setCreationTime(new SimpleDateFormat("HH.mm.ss.SSS").format(msg.getCreationDateTime()));
 		return dto;
 	}
 }
