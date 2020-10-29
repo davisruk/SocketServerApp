@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -40,6 +41,11 @@ public class WebSocketController implements DSPEventHandler {
 		} catch (MessagingException me) {
 			me.printStackTrace();
 		}
+	}
+
+	@MessageMapping("/trackStatus")
+	public void trackStatus() {
+		send();
 	}
 
 	@Override
