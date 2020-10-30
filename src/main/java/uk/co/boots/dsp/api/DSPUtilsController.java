@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import uk.co.boots.dsp.api.dto.MessageDTO;
 import uk.co.boots.dsp.api.dto.PageRequestDetail;
 import uk.co.boots.dsp.api.dto.ToteDTOService;
 import uk.co.boots.dsp.api.dto.ToteMessageSummary;
@@ -63,6 +65,14 @@ public class DSPUtilsController {
 		return getToteFromBytes(rm.getMessage().getBytes());
     }
 	
+	@GetMapping("/tote/messages/{id}")
+    public ResponseEntity<MessageDTO> getMessage(@PathVariable("id") long messageId) throws IOException{
+		// get the raw message
+		RawMessage rm = toteService.getRawMessage(messageId);
+		Tote t = getToteFromBytes(rm.getMessage().getBytes());
+		return ResponseEntity.ok(new MessageDTO(rm.getMessage(), t)); 
+    }
+
 	private Tote getToteFromBytes(byte[] messageBytes) {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		if (messageBytes[0] != SocketServer.START_FRAME) {
