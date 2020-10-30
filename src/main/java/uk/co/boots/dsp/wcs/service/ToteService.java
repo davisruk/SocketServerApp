@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +54,12 @@ public class ToteService {
 	@Autowired
 	private OSRBuffer osrBuffer;
 	
+
+    @Transactional
+    public void truncateToteTable() {
+    	toteRepository.truncateToteTable();
+    }
+
 	public Page<Tote> getTotePage(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
 		return toteRepository.findAll(pageable);

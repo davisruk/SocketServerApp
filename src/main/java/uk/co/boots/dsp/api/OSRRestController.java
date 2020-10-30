@@ -48,7 +48,7 @@ public class OSRRestController {
 	public ResponseEntity<String> resetRun() {
 		osrBuffer.setStarted(false);
 		trackController.resetTrackController();
-		toteService.deleteAll();
+		toteService.truncateToteTable();
 		trackController.start();
 		return new ResponseEntity<>("Run has been reset.", HttpStatus.OK);		
 	}
