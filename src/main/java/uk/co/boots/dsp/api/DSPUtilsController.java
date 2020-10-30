@@ -58,13 +58,6 @@ public class DSPUtilsController {
 		return getToteFromBytes(file.getBytes());
     }
 
-	@GetMapping("/tote/messages/prettify")
-    public Tote prettifyMessage(@RequestParam long messageId) throws IOException{
-		// get the raw message
-		RawMessage rm = toteService.getRawMessage(messageId);
-		return getToteFromBytes(rm.getMessage().getBytes());
-    }
-	
 	@GetMapping("/tote/messages/{id}")
     public ResponseEntity<MessageDTO> getMessage(@PathVariable("id") long messageId) throws IOException{
 		// get the raw message
