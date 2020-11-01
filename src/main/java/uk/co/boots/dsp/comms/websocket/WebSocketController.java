@@ -7,6 +7,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import uk.co.boots.dsp.wcs.events.DSPEventHandler;
 import uk.co.boots.dsp.wcs.events.EventLogger;
@@ -14,6 +15,7 @@ import uk.co.boots.dsp.wcs.events.ToteEvent;
 import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @Controller
+@CrossOrigin(origins = "*")
 public class WebSocketController implements DSPEventHandler {
 	
 	private SimpMessagingTemplate template;
