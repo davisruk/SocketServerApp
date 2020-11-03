@@ -284,7 +284,7 @@ public class ToteService {
 		masterDataService.getInfoForProduct(line.getProductId()).ifPresentOrElse(product ->
 										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode(product.getEanBarcode(), fmdSupport)),
 									() -> 
-										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("No Barcode", fmdSupport))
+										line.setProductBarcode(OrderLineArrayListSerializationControl.formatProductBarcode("", fmdSupport))
 									);
 	}
 

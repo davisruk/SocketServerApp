@@ -31,7 +31,7 @@ public class OrderLineArrayListSerializationControl {
 	
 	private final SerialisationControlField identifierInfo = new SerialisationControlField ("%c", 0, 1);
 	private final SerialisationControlField numberOrderLinesInfo = new SerialisationControlField ("%03d", identifierInfo.getNextOffset(), 3);
-	private final SerialisationControlField orderLineRefInfo = new SerialisationControlField ("%02d", numberOrderLinesInfo.getNextOffset(), 2);
+	private final SerialisationControlField orderLineRefInfo = new SerialisationControlField ("%06d", numberOrderLinesInfo.getNextOffset(), 6);
 	private final SerialisationControlField orderLineTypeInfo = new SerialisationControlField ("%02d", orderLineRefInfo.getNextOffset(), 2);	
 	private final SerialisationControlField pharmacyIdInfo = new SerialisationControlField ("%02d", orderLineTypeInfo.getNextOffset(), 2);
 	private final SerialisationControlField patientIdInfo = new SerialisationControlField ("%02d", pharmacyIdInfo.getNextOffset(), 2);
