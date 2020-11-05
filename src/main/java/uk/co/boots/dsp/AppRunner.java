@@ -22,15 +22,9 @@ public class AppRunner implements CommandLineRunner {
     ReceiveServer receiveServer;
 	@Autowired
 	private TrackController trackController;
-	@Autowired
-    @Qualifier("dspEventNotifier")	
-	private DSPEventNotifier dspEventNotifier;
-	@Autowired
-	private WebSocketController webSocketController;
     
 	@Override
     public void run(String... args) throws Exception {
-		dspEventNotifier.registerEventHandler(webSocketController);
 		trackController.start();
 		receiveServer.startServer();
 		sendServer.startServer();
