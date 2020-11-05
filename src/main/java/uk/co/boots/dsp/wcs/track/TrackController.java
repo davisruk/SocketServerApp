@@ -56,7 +56,6 @@ public class TrackController {
 					Tote t = toteService.getToteInQueuePosition(totesProcessed);
 					logger.info("[TrackController::start] processing tote " + (totesProcessed + 1) + " of " + totesInOSR);
 					toteController.releaseTote(t);
-					trackStatus.adjustTotesProcessed(false, true);
 					try {
 						Thread.sleep(osrBuffer.getToteReleaseInterval());
 					} catch (InterruptedException ie) {

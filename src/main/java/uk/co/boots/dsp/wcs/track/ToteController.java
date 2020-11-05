@@ -26,6 +26,8 @@ public class ToteController {
     @Qualifier("dspEventNotifier")	
 	private DSPEventNotifier dspEventNotifier;
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+	@Autowired
+	TrackStatus trackStatus;
 	
 	@Async
 	public void releaseTote(Tote tote) {
@@ -51,10 +53,11 @@ public class ToteController {
 				started = System.currentTimeMillis();
 			}
 		}
+		trackStatus.adjustTotesProcessed(false, true);
+		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_DEACTIVATED, tote));
 		logger.info("[ToteController::releaseTote] " + toteName + " finished Travelling around track in " + timeTravelled / 1000 + " seconds");
 		toteService.setupEndTime(Calendar.getInstance(), tote);		
 		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY, tote));
-		// signal tote has ended
-		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_DEACTIVATED, tote));
+		
 	}
 }

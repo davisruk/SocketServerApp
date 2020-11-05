@@ -24,13 +24,21 @@ public class OrderPersistedHandler extends DSPEventHandlerAdapter {
 		super("OrderPersistedHandler");
 	}
 	
-	public void handleEvent(ToteEvent event) {
-		if (! osrBuffer.sendThirtyTwoRShort()) return;
+	public boolean handleEvent(ToteEvent event) {
 		if (event.getEventType() == ToteEvent.EventType.TOTE_ORDER_PERSISTED) {
+			if (! osrBuffer.sendThirtyTwoRShort()) return true;
 			Tote t = event.getTote();
 			DSPCommsMessage msg = toteService.processClientOrderPersisted(t);
 			dspCommunicationNotifier.notifyCommunicationHandlers(msg);
 			toteService.save(t);
+			return true;
+		} else {
+			return false;
 		}
+	}
+
+	@Override
+	public boolean affectsLiveStats() {
+		return true;
 	}
 }

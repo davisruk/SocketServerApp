@@ -16,7 +16,7 @@ import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @Controller
 @CrossOrigin(origins = "*")
-public class WebSocketController implements DSPEventHandler {
+public class WebSocketController{
 	
 	private SimpMessagingTemplate template;
 	@Autowired
@@ -28,8 +28,7 @@ public class WebSocketController implements DSPEventHandler {
 		this.template = template;
 	}
 
-	@Override
-	public void handleEvent(ToteEvent event) {
+	public void sendEvent(ToteEvent event) {
 		// An event was fired - we're not really that interested in the tote
 		// We want to notify the client of the overall status
 		send();
@@ -49,17 +48,4 @@ public class WebSocketController implements DSPEventHandler {
 	public void trackStatus() {
 		send();
 	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "WebSocketController";
-	}
-
-	@Override
-	public void setName(String name) {
-		// TODO Auto-generated method stub
-		
-	}	
-
 }

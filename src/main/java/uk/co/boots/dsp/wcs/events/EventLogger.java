@@ -21,7 +21,8 @@ public class EventLogger extends DSPEventHandlerAdapter {
 	Logger logger = LoggerFactory.getLogger(EventLogger.class);
 
 	@Override
-	public void handleEvent(ToteEvent event) {
+	public boolean handleEvent(ToteEvent event) {
+		boolean handled = true;
 		switch (event.getEventType()) {
 		case TOTE_ACTIVATED:
 			logger.info("[EventLogger::handleEvent] [TOTE_ACTIVATED_EVENT] " + event.getTote().getHeader().getOrderId());
@@ -40,9 +41,12 @@ public class EventLogger extends DSPEventHandlerAdapter {
 			break;
 		case TOTE_RELEASED_FOR_DELIVERY:
 			logger.info("[EventLogger::handleEvent] [TOTE_RELEASED_FOR_DELIVERY_EVENT] " + event.getTote().getHeader().getOrderId());
+			break;
 		default:
+			handled = false;
 			break;
 		}
+		return handled;
 
 	}
 }

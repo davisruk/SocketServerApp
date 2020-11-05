@@ -3,6 +3,7 @@ package uk.co.boots.dsp.wcs.events;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @Component
@@ -15,17 +16,22 @@ public class ToteActivationHandler extends DSPEventHandlerAdapter {
 	private TrackStatus trackStatus;
 
 	@Override
-	public void handleEvent(ToteEvent event) {
+	public boolean handleEvent(ToteEvent event) {
 		// TODO Auto-generated method stub
 		switch (event.getEventType()) {
 			case TOTE_ACTIVATED:
 				trackStatus.adjustActiveTotes(false,  true, event);
-				break;
+				return true;
 			case TOTE_DEACTIVATED:
 				trackStatus.adjustActiveTotes(false,  false, event);
-				break;
+				return true;
 			default:
-				break;
+				return false;
 		}
+	}
+	
+	@Override
+	public boolean affectsLiveStats() {
+		return true;
 	}
 }

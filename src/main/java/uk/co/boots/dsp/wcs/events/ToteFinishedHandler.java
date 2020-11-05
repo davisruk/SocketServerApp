@@ -18,20 +18,26 @@ public class ToteFinishedHandler extends DSPEventHandlerAdapter {
 	@Autowired
 	@Qualifier("dspCommunicationNotifier")
 	private DSPCommunicationNotifier dspCommunicationNotifier;
+	@Autowired
+	@Qualifier("dspEventNotifier")	
+	private DSPEventNotifier dspEventNotifier;
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	
 	public ToteFinishedHandler() {
 		super("ToteFinishedHandler");
 	} 
 	@Override
-	public void handleEvent(ToteEvent event) {
+	public boolean handleEvent(ToteEvent event) {
 		if (event.getEventType() == ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY) {
 			Tote t = event.getTote();
 			logger.info("[ToteFinishedHandler::handleEvent] Tote Finished");
 			DSPCommsMessage msg = toteService.processToteFinished(t);
-			dspCommunicationNotifier.notifyCommunicationHandlers(msg);
 			toteService.save(t);
+			dspCommunicationNotifier.notifyCommunicationHandlers(msg);
 			logger.info("[ToteFinishedHandler::handleEvent] Tote Saved");
+			return true;
+		} else {
+			return false;
 		}
 	}
 }
