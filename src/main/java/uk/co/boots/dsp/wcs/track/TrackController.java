@@ -62,7 +62,7 @@ public class TrackController {
 				// start tote on track
 				int totesInOSR = trackStatus.getTotalTotes();
 				int totesReleased = trackStatus.getTotesReleased();
-				if (totesInOSR > 0 & totesReleased < totesInOSR) {
+				if (totesInOSR > 0 && totesReleased < totesInOSR) {
 					Tote t = toteService.getToteInQueuePosition(totesReleased);
 					logger.info("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
 					toteController.releaseTote(t);
