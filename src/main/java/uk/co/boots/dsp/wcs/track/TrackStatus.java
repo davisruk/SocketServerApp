@@ -21,6 +21,8 @@ public class TrackStatus {
 	private int activeTotes;
 	private int totalTotes;
 	private int totesProcessed;
+	private int totesReleased;
+	
 	private ArrayList<String> toteNames = new ArrayList<String>();
 
 	@Setter
@@ -37,6 +39,7 @@ public class TrackStatus {
 		adjustActiveTotes(true, false, null);
 		adjustTotalTotes(true,  false);
 		adjustTotesProcessed(true,  false);
+		adjustTotesReleased(true,  false);
 	}
 
 	@JsonIgnore
@@ -47,6 +50,14 @@ public class TrackStatus {
 		logger.info("[TrackStatus::adjustTotesProcessed] totesProcessed: " + totesProcessed);		
 	}
 	
+	@JsonIgnore
+	public synchronized void adjustTotesReleased (boolean reset, boolean increment) {
+		if (reset) totesReleased = 0;
+		else if (increment) totesReleased ++;
+		else totesReleased --;
+		logger.info("[TrackStatus::adjustTotesReleased] totesReleased: " + totesReleased);		
+	}
+
 	@JsonIgnore
 	public synchronized void adjustActiveTotes(boolean reset, boolean increment, ToteEvent event) {
 		
@@ -77,7 +88,7 @@ public class TrackStatus {
 		if (reset) totalTotes = 0;
 		else if (increment) totalTotes ++;
 		else totalTotes --;
-		logger.info("[TrackStatus::adjustTotalTotes] totesProcessed: " + totesProcessed);		
+		logger.info("[TrackStatus::adjustTotalTotes] totalTotes: " + totalTotes);		
 	}
 	
 
