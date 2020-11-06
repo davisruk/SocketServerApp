@@ -40,14 +40,16 @@ public class TrackController {
 	TrackStatus trackStatus;
 	@Autowired
 	WebSocketController webSocketController; // re-factor this out
+
+	
+	
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	private boolean stopTrackController = false;
 
 	@Async
 	public void start() {
 		setStopTrackController(false);
-		trackStatus.adjustTotesProcessed(true, false);
-		trackStatus.adjustActiveTotes(true, false, null);
+		trackStatus.resetStatus();
 		dspEventNotifier.registerEventHandler(eventLogger);
 		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
 		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
@@ -93,6 +95,7 @@ public class TrackController {
 				default:
 					break;
 			}
+			webSocketController.handleEvent(event);
 		}
 	}
 	

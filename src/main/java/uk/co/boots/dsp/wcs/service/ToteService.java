@@ -87,6 +87,7 @@ public class ToteService {
 		return toteRepository.findAllRawMessagesByToteId(toteId);
 	}
 
+	@Transactional
 	public Tote save(Tote tote) {
 		return toteRepository.save(tote);
 	}

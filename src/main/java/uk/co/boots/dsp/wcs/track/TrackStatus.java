@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import uk.co.boots.dsp.messages.base.entity.Tote;
@@ -15,7 +16,7 @@ import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
 
 @Component
-@Getter
+@Data
 public class TrackStatus {
 	private int activeTotes;
 	private int totalTotes;
