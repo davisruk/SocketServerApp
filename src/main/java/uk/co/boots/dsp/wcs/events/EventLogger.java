@@ -40,6 +40,10 @@ public class EventLogger extends DSPEventHandlerAdapter {
 			break;
 		case TOTE_RELEASED_FOR_DELIVERY:
 			logger.info("[EventLogger::handleEvent] [TOTE_RELEASED_FOR_DELIVERY_EVENT] " + event.getTote().getHeader().getOrderId());
+			break;
+		case RESET_RUN:
+			logger.debug("[EventLogger::handleEvent] [TOTE_RESET_RUN_EVENT]");
+			break;
 		default:
 			break;
 		}

@@ -32,16 +32,7 @@ public class TrackController {
     @Qualifier("dspEventNotifier")	
 	private DSPEventNotifier dspEventNotifier;
 	@Autowired
-	@Qualifier("dspCommunicationNotifier")
-	private DSPCommunicationNotifier dspCommunicationNotifier;
-	@Autowired
-	private EventLogger eventLogger;
-	@Autowired
 	TrackStatus trackStatus;
-	@Autowired
-	WebSocketController webSocketController; // re-factor this out
-
-	
 	
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	private boolean stopTrackController = false;
@@ -49,11 +40,7 @@ public class TrackController {
 	@Async
 	public void start() {
 		setStopTrackController(false);
-		trackStatus.resetStatus();
-		dspEventNotifier.registerEventHandler(eventLogger);
-		dspEventNotifier.registerEventHandler(new ToteActivationHandler());
-		dspEventNotifier.registerEventHandler(new ToteFinishedHandler());
-		dspEventNotifier.registerEventHandler(new OrderPersistedHandler());
+		sendReset();
 		logger.info("[TrackController::start] Track Controller Started");
 		// osrBuffer needs to be releasing totes - wait if not 
 		while (!isStopTrackController()) {
@@ -64,9 +51,9 @@ public class TrackController {
 				int totesReleased = trackStatus.getTotesReleased();
 				if (totesInOSR > 0 && totesReleased < totesInOSR) {
 					Tote t = toteService.getToteInQueuePosition(totesReleased);
-					logger.info("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
+					logger.debug("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
 					dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, t));
-					trackStatus.adjustTotesReleased(false, true);
+					dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_RELEASED_FROM_OSR, t));
 					toteController.releaseTote(t);
 					try {
 						Thread.sleep(osrBuffer.getToteReleaseInterval());
@@ -77,70 +64,16 @@ public class TrackController {
 			}
 		}
 	}
-
-	private class ToteActivationHandler extends DSPEventHandlerAdapter {
-		public ToteActivationHandler() {
-			super("ToteActivationHandler");
-		}
-
-		@Override
-		public void handleEvent(ToteEvent event) {
-			// TODO Auto-generated method stub
-			switch (event.getEventType()) {
-				case TOTE_ACTIVATED:
-					trackStatus.adjustActiveTotes(false,  true, event);
-					break;
-				case TOTE_DEACTIVATED:
-					trackStatus.adjustActiveTotes(false,  false, event);
-					break;
-				default:
-					break;
-			}
-			webSocketController.send();
-		}
-	}
-	
-	private class OrderPersistedHandler extends DSPEventHandlerAdapter {
-		public OrderPersistedHandler() {
-			super("OrderPersistedHandler");
-		}
-		
-		public void handleEvent(ToteEvent event) {
-			if (! osrBuffer.sendThirtyTwoRShort()) return;
-			if (event.getEventType() == ToteEvent.EventType.TOTE_ORDER_PERSISTED) {
-				Tote t = event.getTote();
-				DSPCommsMessage msg = toteService.processClientOrderPersisted(t);
-				dspCommunicationNotifier.notifyCommunicationHandlers(msg);
-				toteService.save(t);
-			}
-		}
-	}
-	
-	private class ToteFinishedHandler extends DSPEventHandlerAdapter {
-		public ToteFinishedHandler() {
-			super("ToteFinishedHandler");
-		} 
-		@Override
-		public void handleEvent(ToteEvent event) {
-			if (event.getEventType() == ToteEvent.EventType.TOTE_RELEASED_FOR_DELIVERY) {
-				Tote t = event.getTote();
-				logger.info("[ToteFinishedHandler::handleEvent] Tote Finished");
-				DSPCommsMessage msg = toteService.processToteFinished(t);
-				dspCommunicationNotifier.notifyCommunicationHandlers(msg);
-				toteService.save(t);
-				trackStatus.adjustTotesProcessed(false, true);
-				logger.info("[ToteFinishedHandler::handleEvent] Tote Saved");
-			}
-		}
-	}
 	
 	public synchronized void resetTrackController () {
-		trackStatus.resetStatus();
+		sendReset();
 		setStopTrackController(true);
+	}
+	
+	private void sendReset() {
 		ToteEvent te = new ToteEvent(EventType.RESET_RUN, null);
 		dspEventNotifier.notifyEventHandlers(te);
 	}
-	
 	private synchronized void setStopTrackController (boolean val) {
 		stopTrackController = val;
 	}

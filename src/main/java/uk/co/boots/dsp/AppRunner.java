@@ -22,9 +22,6 @@ public class AppRunner implements CommandLineRunner {
     ReceiveServer receiveServer;
 	@Autowired
 	private TrackController trackController;
-	@Autowired
-    @Qualifier("dspEventNotifier")	
-	private DSPEventNotifier dspEventNotifier;
     
 	@Override
     public void run(String... args) throws Exception {
