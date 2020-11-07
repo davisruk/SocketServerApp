@@ -1,6 +1,8 @@
 package uk.co.boots.dsp.wcs.track;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.Setter;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.wcs.events.EventLogger;
@@ -23,7 +24,7 @@ public class TrackStatus {
 	private int totesProcessed;
 	private int totesReleased;
 	
-	private ArrayList<String> toteNames = new ArrayList<String>();
+	private List<String> toteNames = Collections.synchronizedList(new ArrayList<String>());
 
 	@Setter
 	private String receiveChannelClient;
@@ -90,6 +91,5 @@ public class TrackStatus {
 		else totalTotes --;
 		logger.info("[TrackStatus::adjustTotalTotes] totalTotes: " + totalTotes);		
 	}
-	
 
 }
