@@ -96,7 +96,7 @@ public class TrackController {
 				default:
 					break;
 			}
-			webSocketController.handleEvent(event);
+			webSocketController.send();
 		}
 	}
 	

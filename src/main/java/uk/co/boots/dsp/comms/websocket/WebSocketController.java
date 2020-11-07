@@ -27,14 +27,6 @@ public class WebSocketController {
 	public WebSocketController (SimpMessagingTemplate template){
 		this.template = template;
 	}
-
-	public void handleEvent(ToteEvent event) {
-		// An event was fired - we're not really that interested in the tote
-		// We want to notify the client of the overall status
-		if (event != null && event.getTote() != null)
-			logger.info("[WebSocketController::handleEvent] Event: " + event.getEventType().name() + " Tote Id:" + event.getTote().getId());
-		send();
-	}
 	
 	public void send() {
 		// TODO Auto-generated method stub
@@ -50,17 +42,4 @@ public class WebSocketController {
 	public void trackStatus() {
 		send();
 	}
-
-	
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "WebSocketController";
-	}
-
-	
-	public void setName(String name) {
-		// TODO Auto-generated method stub
-		
-	}	
-
 }
