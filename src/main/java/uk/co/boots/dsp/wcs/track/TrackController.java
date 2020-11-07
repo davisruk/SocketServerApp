@@ -65,8 +65,9 @@ public class TrackController {
 				if (totesInOSR > 0 && totesReleased < totesInOSR) {
 					Tote t = toteService.getToteInQueuePosition(totesReleased);
 					logger.info("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
-					toteController.releaseTote(t);
+					dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, t));
 					trackStatus.adjustTotesReleased(false, true);
+					toteController.releaseTote(t);
 					try {
 						Thread.sleep(osrBuffer.getToteReleaseInterval());
 					} catch (InterruptedException ie) {

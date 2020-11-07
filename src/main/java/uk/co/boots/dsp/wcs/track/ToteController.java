@@ -33,7 +33,6 @@ public class ToteController {
 		if (tote == null) return;
 		long started = System.currentTimeMillis();
 		long trackTravelTimeLeft = osrBuffer.getToteTravelTime();
-		dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, tote));
 		toteService.setupStartTime(Calendar.getInstance(), tote);
 		String toteName = tote.getHeader().getOrderId() + "_" + tote.getHeader().getSheetNumber();
 		logger.info("[ToteController::releaseTote] " + toteName + " started Travelling around track");
