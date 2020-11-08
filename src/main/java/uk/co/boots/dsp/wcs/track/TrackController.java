@@ -48,6 +48,7 @@ public class TrackController {
 
 	@Async
 	public void start() {
+		Long lastProcessedId = 0L;
 		setStopTrackController(false);
 		trackStatus.resetStatus();
 		dspEventNotifier.registerEventHandler(eventLogger);
@@ -64,6 +65,10 @@ public class TrackController {
 				int totesReleased = trackStatus.getTotesReleased();
 				if (totesInOSR > 0 && totesReleased < totesInOSR) {
 					Tote t = toteService.getToteInQueuePosition(totesReleased);
+					if (lastProcessedId.longValue() == t.getId().longValue()) {
+						logger.error("Tote: " + lastProcessedId + " already processed");
+					}
+					lastProcessedId = t.getId();
 					logger.info("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
 					dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, t));
 					trackStatus.adjustTotesReleased(false, true);

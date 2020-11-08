@@ -34,8 +34,8 @@ public class TrackStatus {
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 
 	
-	public List<String> getToteNames() {
-		return toteNames;
+	public synchronized List<String> getToteNames() {
+		return new ArrayList<>(toteNames);
 
 	}
 	
@@ -70,7 +70,7 @@ public class TrackStatus {
 	@JsonIgnore
 	public synchronized void adjustActiveTotes(boolean reset, boolean increment, ToteEvent event) {
 		// make toteNames immutable so list doesn't change on concurrent threads 
-		List<String> names = new ArrayList<>(toteNames);
+		List<String> names = getToteNames();
 		
 		if (reset) {
 			activeTotes = 0;
