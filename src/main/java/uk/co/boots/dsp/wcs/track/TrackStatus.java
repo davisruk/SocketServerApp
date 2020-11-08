@@ -1,7 +1,6 @@
 package uk.co.boots.dsp.wcs.track;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -24,7 +23,7 @@ public class TrackStatus {
 	private int totesProcessed;
 	private int totesReleased;
 	
-	private List<String> toteNames = Collections.synchronizedList(new ArrayList<String>());
+	private List<String> toteNames = new ArrayList<String>();
 
 	@Setter
 	private String receiveChannelClient;
@@ -34,6 +33,15 @@ public class TrackStatus {
 	@JsonIgnore
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 
+	
+	public List<String> getToteNames() {
+		return toteNames;
+
+	}
+	
+	public synchronized void setToteNames(List<String> newNames) {
+		this.toteNames = newNames;
+	}
 	
 	@JsonIgnore
 	public synchronized void resetStatus() {
@@ -61,10 +69,12 @@ public class TrackStatus {
 
 	@JsonIgnore
 	public synchronized void adjustActiveTotes(boolean reset, boolean increment, ToteEvent event) {
+		List<String> names = new ArrayList<>(toteNames);
 		
 		if (reset) {
 			activeTotes = 0;
-			toteNames.clear();
+			names.clear();
+			setToteNames(names);
 			return;
 		}
 		
@@ -72,18 +82,20 @@ public class TrackStatus {
 		
 		if (increment) {
 			activeTotes ++;
-			toteNames.add(t.getHeader().getOrderId() +  ":" + t.getHeader().getSheetNumber() + ":" + t.getId());
-			toteNames.removeIf(name -> name.equals("None"));
+			names.add(t.getHeader().getOrderId() +  ":" + t.getHeader().getSheetNumber() + ":" + t.getId());
+			names.removeIf(name -> name.equals("None"));
 		}
 		else {
 			activeTotes --;
-			toteNames.removeIf(name -> name.equals(t.getHeader().getOrderId() +  ":" + t.getHeader().getSheetNumber() + ":" + t.getId()));
-			if (toteNames.isEmpty()) {
-				toteNames.add("None");
+			names.removeIf(name -> name.equals(t.getHeader().getOrderId() +  ":" + t.getHeader().getSheetNumber() + ":" + t.getId()));
+			if (names.isEmpty()) {
+				names.add("None");
 			}
 		}
+		setToteNames(names);
 		logger.info("[TrackStatus::adjustActiveTotes] Active Totes: " + activeTotes);		
 	}
+	
 	@JsonIgnore
 	public synchronized void adjustTotalTotes (boolean reset, boolean increment) {
 		if (reset) totalTotes = 0;
