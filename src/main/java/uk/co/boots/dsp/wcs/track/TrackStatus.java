@@ -22,7 +22,7 @@ public class TrackStatus {
 	private int totalTotes;
 	private int totesProcessed;
 	private int totesReleased;
-	
+	// any operations on this list must be immutable
 	private List<String> toteNames = new ArrayList<String>();
 
 	@Setter
@@ -69,6 +69,7 @@ public class TrackStatus {
 
 	@JsonIgnore
 	public synchronized void adjustActiveTotes(boolean reset, boolean increment, ToteEvent event) {
+		// make toteNames immutable so list doesn't change on concurrent threads 
 		List<String> names = new ArrayList<>(toteNames);
 		
 		if (reset) {
