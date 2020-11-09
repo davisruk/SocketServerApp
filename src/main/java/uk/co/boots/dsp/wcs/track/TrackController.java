@@ -1,5 +1,7 @@
 package uk.co.boots.dsp.wcs.track;
 
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +42,13 @@ public class TrackController {
 	TrackStatus trackStatus;
 	@Autowired
 	WebSocketController webSocketController; // re-factor this out
-
-	
 	
 	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
 	private boolean stopTrackController = false;
 
 	@Async
 	public void start() {
-		Long lastProcessedId = 0L;
+		HashSet<Long> processedIds = new HashSet<>();
 		setStopTrackController(false);
 		trackStatus.resetStatus();
 		dspEventNotifier.registerEventHandler(eventLogger);
@@ -65,18 +65,20 @@ public class TrackController {
 				int totesReleased = trackStatus.getTotesReleased();
 				if (totesInOSR > 0 && totesReleased < totesInOSR) {
 					Tote t = toteService.getToteInQueuePosition(totesReleased);
-					if (lastProcessedId.longValue() == t.getId().longValue()) {
-						logger.error("Tote: " + lastProcessedId + " already processed");
-					}
-					lastProcessedId = t.getId();
-					logger.info("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
-					dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, t));
-					trackStatus.adjustTotesReleased(false, true);
-					toteController.releaseTote(t);
-					try {
-						Thread.sleep(osrBuffer.getToteReleaseInterval());
-					} catch (InterruptedException ie) {
-						logger.info("[Track Controller::start] Interrupted - resuming");
+					if (!processedIds.add(t.getId())) {
+						// this should never happen but it's just a safety check
+						// to ensure that totes are not processed more than once
+						logger.error("Tote: " + t.getId() + " already processed");
+					} else {
+						logger.info("[TrackController::start] processing tote " + (totesReleased + 1) + " of " + totesInOSR);
+						dspEventNotifier.notifyEventHandlers(new ToteEvent(ToteEvent.EventType.TOTE_ACTIVATED, t));
+						trackStatus.adjustTotesReleased(false, true);
+						toteController.releaseTote(t);
+						try {
+							Thread.sleep(osrBuffer.getToteReleaseInterval());
+						} catch (InterruptedException ie) {
+							logger.info("[Track Controller::start] Interrupted - resuming");
+						}
 					}
 				}
 			}

@@ -1,3 +1,10 @@
+/*************************************
+ * This class is used in a muti-threaded environment
+ * All access to member variables is synchronized
+ * Immutability for the toteNames list is enforced
+ * through the getter. Do not manipulate this list
+ * directly, always use its getter and then the setter 
+ **************************************/
 package uk.co.boots.dsp.wcs.track;
 
 import java.util.ArrayList;
@@ -35,6 +42,7 @@ public class TrackStatus {
 
 	
 	public synchronized List<String> getToteNames() {
+		// make toteNames immutable so list doesn't change on concurrent threads
 		return new ArrayList<>(toteNames);
 
 	}
@@ -69,7 +77,7 @@ public class TrackStatus {
 
 	@JsonIgnore
 	public synchronized void adjustActiveTotes(boolean reset, boolean increment, ToteEvent event) {
-		// make toteNames immutable so list doesn't change on concurrent threads 
+		// get a thread-safe list of toteNames
 		List<String> names = getToteNames();
 		
 		if (reset) {
@@ -93,6 +101,7 @@ public class TrackStatus {
 				names.add("None");
 			}
 		}
+		// set the new list
 		setToteNames(names);
 		logger.info("[TrackStatus::adjustActiveTotes] Active Totes: " + activeTotes);		
 	}

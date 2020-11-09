@@ -3,21 +3,26 @@ package uk.co.boots.dsp.comms;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 @Component ("dspCommunicationNotifier")
 public class DSPCommunicationNotifierImpl implements DSPCommunicationNotifier{
 	private List<DSPCommunicationHandler> commsHandlers = new ArrayList<DSPCommunicationHandler>();
 	private List<DSPCommsMessage> failedMessages = new ArrayList<DSPCommsMessage>();
-
+	private Logger logger = LoggerFactory.getLogger(EventLogger.class);
+	
 	@Override
 	public void notifyCommunicationHandlers(DSPCommsMessage message) {
 		commsHandlers.forEach(handler -> {
 			try {
 				handler.handleCommsForMessage(message);
 			} catch (DSPMessageException ioe) {
+				logger.error("[DSPCommunicationNotifierImpl::notifyCommunicationHandlers] Failed to send " + message.getRawMessage().getMessageType() + "-" + handler.getTypeExtension() + " for " + message.getTote().getId());
 				failedMessages.add(message);
 			}
 			// continue processing
