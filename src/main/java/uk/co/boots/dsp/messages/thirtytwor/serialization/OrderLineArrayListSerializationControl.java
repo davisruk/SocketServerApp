@@ -1,7 +1,6 @@
 package uk.co.boots.dsp.messages.thirtytwor.serialization;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;

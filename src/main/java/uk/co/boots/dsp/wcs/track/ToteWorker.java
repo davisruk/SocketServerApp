@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
-import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
+import uk.co.boots.dsp.wcs.events.handlers.EventLogger;
 import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 import uk.co.boots.dsp.wcs.service.ToteService;
 
 @Component
-public class ToteController {
+public class ToteWorker {
 	@Autowired
 	private OSRBuffer osrBuffer;
 	@Autowired

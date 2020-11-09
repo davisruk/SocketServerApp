@@ -14,9 +14,8 @@ import org.springframework.stereotype.Component;
 import lombok.Setter;
 import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
-import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
-import uk.co.boots.dsp.wcs.track.TrackController;
+import uk.co.boots.dsp.wcs.events.handlers.EventLogger;
 import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @Component

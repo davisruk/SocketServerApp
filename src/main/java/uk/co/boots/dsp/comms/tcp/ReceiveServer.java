@@ -33,8 +33,8 @@ import uk.co.boots.dsp.messages.framework.entity.BasicMessage;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
 import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
 import uk.co.boots.dsp.wcs.events.DSPEventNotifier;
-import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
+import uk.co.boots.dsp.wcs.events.handlers.EventLogger;
 import uk.co.boots.dsp.wcs.service.ToteService;
 import uk.co.boots.dsp.wcs.track.TrackStatus;
 

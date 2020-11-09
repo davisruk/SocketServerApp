@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Setter;
 import uk.co.boots.dsp.messages.base.entity.Tote;
-import uk.co.boots.dsp.wcs.events.EventLogger;
 import uk.co.boots.dsp.wcs.events.ToteEvent;
+import uk.co.boots.dsp.wcs.events.handlers.EventLogger;
 
 @Component
 @Data

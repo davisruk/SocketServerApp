@@ -13,8 +13,7 @@ import lombok.Getter;
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.comms.DSPCommunicationHandler;
 import uk.co.boots.dsp.messages.MessageResponseHandler;
-import uk.co.boots.dsp.wcs.events.DSPEventHandler;
-import uk.co.boots.dsp.wcs.events.EventLogger;
+import uk.co.boots.dsp.wcs.events.handlers.EventLogger;
 import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 public class SendClientSocketHandler implements DSPCommunicationHandler {

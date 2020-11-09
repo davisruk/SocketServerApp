@@ -10,7 +10,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.co.boots.dsp.comms.DSPCommunicationNotifier;
 import uk.co.boots.dsp.wcs.osr.OSRConfig;
 
 @Configuration

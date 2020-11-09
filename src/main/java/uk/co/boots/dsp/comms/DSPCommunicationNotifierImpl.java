@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import uk.co.boots.dsp.wcs.events.EventLogger;
+import uk.co.boots.dsp.wcs.events.handlers.EventLogger;
 import uk.co.boots.dsp.wcs.exceptions.DSPMessageException;
 
 @Component ("dspCommunicationNotifier")

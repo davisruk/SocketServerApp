@@ -4,11 +4,14 @@
  * Some may be null as they are set in different parts
  * of the life cycle. Header properties will always be set.
  *****/
-package uk.co.boots.dsp.wcs.events;
+package uk.co.boots.dsp.wcs.events.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import uk.co.boots.dsp.wcs.events.DSPEventHandlerAdapter;
+import uk.co.boots.dsp.wcs.events.ToteEvent;
 
 @Component
 public class EventLogger extends DSPEventHandlerAdapter {

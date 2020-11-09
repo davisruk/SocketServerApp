@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import lombok.Data;
 import uk.co.boots.dsp.messages.base.entity.OrderDetail;
-import uk.co.boots.dsp.messages.base.entity.OrderLine;
 import uk.co.boots.dsp.messages.framework.serialization.SerialisationControlField;
 
 @Component

@@ -13,7 +13,6 @@ import uk.co.boots.dsp.wcs.osr.OSRBuffer;
 import uk.co.boots.dsp.wcs.osr.OSRConfig;
 import uk.co.boots.dsp.wcs.service.ToteService;
 import uk.co.boots.dsp.wcs.track.TrackController;
-import uk.co.boots.dsp.wcs.track.TrackStatus;
 
 @RestController
 @RequestMapping("/osr")

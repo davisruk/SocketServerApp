@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component ("dspEventNotifier")
 public class DSPEventNotifierImpl implements DSPEventNotifier {
-	private List<DSPEventHandler> eventHandlers = new ArrayList<DSPEventHandler>();
+	@Autowired
+	private List<DSPEventHandler> eventHandlers;
 	
 	public void registerEventHandler (DSPEventHandler newHandler) {
 		int i = IntStream.range(0, eventHandlers.size())
