@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import lombok.Data;
 import uk.co.boots.dsp.api.dto.MessageDTO;
 import uk.co.boots.dsp.api.dto.PageRequestDetail;
 import uk.co.boots.dsp.api.dto.ToteDTOService;
@@ -33,7 +36,6 @@ import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
 import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
-import uk.co.boots.dsp.messages.thirtytwor.entity.GsOneDetail;
 import uk.co.boots.dsp.wcs.masterdata.entity.ProductMasterDataList;
 import uk.co.boots.dsp.wcs.masterdata.service.MasterDataService;
 import uk.co.boots.dsp.wcs.rules.RuleParameterList;
@@ -95,33 +97,71 @@ public class DSPUtilsController {
     public ResponseEntity<String> prettifyMessage(@RequestBody PrettifyRequest req) throws IOException{
 		String message = req.getMessage();
 		Tote t  = getToteFromBytes(message.getBytes());
-		// testing GS1 barcode conversion
 		GS1Builder gs1Builder = new GS1Builder();
-		t.getOrderDetail().getOrderLines().forEach(ol -> {
-			GsOneDetail gsOneDetail = ol.getGsOneDetail();
-			if (gsOneDetail != null) {
-				gsOneDetail.getGsOneLines().forEach(gsol -> {
-					if (gsol.getGsOne() != null) {
-						// convert the GS1 barcode to a GSOneBarcode
-						GSOneBarcode gs1 = gs1Builder.createGSOneFromBarcodeString(gsol.getGsOne());
-						System.out.println(gs1);
-					}
-				});
-			}	
-		});
-		// end of testing GS1 barcode conversion
-		
 		String json = objectMapper
 				.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(t);
 		
+		// Unpack the GS1 barcodes to JSON objects
+		// and replace the barcode strings with the GSOneBarcode objects
+		// Really this should be done in the deserializer,
+		// but the OrderLine->GSOneDetail structure only
+		// contains the barcode string, not the GSOneBarcode object
+		String retVal = updateGsOneFields(json, gs1Builder);
+
+		return ResponseEntity
+			.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(retVal);
+    }
+	
+	@Data
+	public static class GSOneBarcodeRequest {
+		private String barcode;
+	}
+	
+	@PostMapping(path="/prettifyGS1",
+				produces = MediaType.APPLICATION_JSON_VALUE,
+				consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> prettifyGS1(@RequestBody GSOneBarcodeRequest request) throws IOException{
+		GS1Builder gs1Builder = new GS1Builder();
+		GSOneBarcode barcode = gs1Builder.createGSOneFromBarcodeString(request.getBarcode());
+		ObjectMapper objectMapper = new ObjectMapper();
+		String retVal = objectMapper.writerWithDefaultPrettyPrinter()
+		.writeValueAsString(barcode);
 		
 		return ResponseEntity
-				.ok()
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(json);
-    }
+			.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(retVal);
+	}
+	
+	private String updateGsOneFields(String originalJson, GS1Builder builder) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode rootNode = objectMapper.readTree(originalJson);
+		replaceGsOneFields(rootNode, builder, objectMapper);
+		return objectMapper.writeValueAsString(rootNode);
+	}
 
+	private void replaceGsOneFields(JsonNode node, GS1Builder builder, ObjectMapper objectMapper) {
+		if (node.isObject()) {
+			ObjectNode objectNode = (ObjectNode) node;
+			if (objectNode.has("gsOne")) {
+				String gsOneValue = objectNode.get("gsOne").asText();
+				GSOneBarcode gs1 = builder.createGSOneFromBarcodeString(gsOneValue);
+				JsonNode gs1Node = objectMapper.valueToTree(gs1);
+				objectNode.set("gsOne", gs1Node);
+			}
+			objectNode.fields().forEachRemaining(entry -> {
+				replaceGsOneFields(entry.getValue(), builder, objectMapper);
+			});
+		} else if (node.isArray()) {
+			for (JsonNode arrayElement : node) {
+				replaceGsOneFields(arrayElement, builder, objectMapper);
+			}
+		}
+	}
+	
 	@GetMapping("/tote/messages/{id}")
     public ResponseEntity<MessageDTO> getMessage(@PathVariable("id") long messageId) throws IOException{
 		// get the raw message
