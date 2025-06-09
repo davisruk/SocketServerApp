@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.messages.base.entity.OrderDetail;
 import uk.co.boots.dsp.messages.base.entity.OrderLine;
@@ -62,6 +61,7 @@ public class ToteService {
 
 	public Page<Tote> getTotePage(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Order.asc("id")));
+		toteRepository.findAll(pageable);
 		return toteRepository.findAll(pageable);
 	}
 	

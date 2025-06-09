@@ -1,44 +1,56 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.3.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
- 	id "io.freefair.lombok" version "5.2.1"
- 	id 'com.palantir.docker' version '0.25.0'
-	id 'java'
+    id 'org.springframework.boot' version '2.7.13'
+    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+    id 'com.bmuschko.docker-spring-boot-application' version '9.4.0'
+    id 'java'
 }
 
 group = 'uk.co.boots'
 def version_number = '0.0.1'
-//def image_version = "${version_number}-DEBUG"
-version = "${version_number}-SNAPSHOT"
-def image_version = "${version}"
+def version = "${version_number}-SNAPSHOT"
+def image_name = 'cpas-stub-test'
+def image_repository = 'davisruk'
+def full_image_details = "${image_repository}/${image_name}:${version}"
 
-
-
-sourceCompatibility = '14'
-
-repositories {
-	mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	implementation('org.postgresql:postgresql')	
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 docker {
-	name "davisruk/cpas-stub:${image_version}"
-	buildArgs([JAR_FILE: "build/libs/${project.name}-${version}.jar"])
-	copySpec.from("build").into("build")
-	dockerfile file('Dockerfile') 
-	//dockerfile file('Dockerfile.debug')
+	springBootApplication {
+        baseImage = 'openjdk:17-jdk-alpine'
+        ports = [8080]
+        //images = ['davisruk/cpas-stub-test:0.0.1-SNAPSHOT']
+        images = ["${full_image_details}"]
+        jvmArgs = ['-Xmx512m']
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.postgresql:postgresql'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }

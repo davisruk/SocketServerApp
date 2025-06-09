@@ -11,22 +11,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import uk.co.boots.dsp.api.dto.MessageDTO;
 import uk.co.boots.dsp.api.dto.PageRequestDetail;
 import uk.co.boots.dsp.api.dto.ToteDTOService;
 import uk.co.boots.dsp.api.dto.ToteMessageSummary;
 import uk.co.boots.dsp.api.dto.ToteSummaryPage;
+import uk.co.boots.dsp.api.gs1.GS1Builder;
+import uk.co.boots.dsp.api.gs1.GSOneBarcode;
 import uk.co.boots.dsp.comms.tcp.SocketServer;
 import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 import uk.co.boots.dsp.messages.framework.serialization.Deserializer;
 import uk.co.boots.dsp.messages.framework.serialization.DeserializerFactory;
+import uk.co.boots.dsp.messages.thirtytwor.entity.GsOneDetail;
 import uk.co.boots.dsp.wcs.masterdata.entity.ProductMasterDataList;
 import uk.co.boots.dsp.wcs.masterdata.service.MasterDataService;
 import uk.co.boots.dsp.wcs.rules.RuleParameterList;
@@ -53,9 +60,66 @@ public class DSPUtilsController {
 	@Autowired
 	private ToteService toteService;
 
+	private final ObjectMapper objectMapper;
+	
+	@Autowired
+	public DSPUtilsController(DeserializerFactory deserializerFactory, MasterDataService masterDataService,
+			ToteDTOService toteDTOService, ToteService toteService, ObjectMapper mapper) {
+		this.deserializerFactory = deserializerFactory;
+		this.masterDataService = masterDataService;
+		this.toteDTOService = toteDTOService;
+		this.toteService = toteService;
+		this.objectMapper = mapper.copy().enable(SerializationFeature.INDENT_OUTPUT);
+	}
+	
 	@PostMapping("/prettify")
     public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
 		return getToteFromBytes(file.getBytes());
+    }
+	
+	public static class PrettifyRequest {
+		private String message;
+
+		public String getMessage() {
+			return message;
+		}
+
+		public void setMessage(String message) {
+			this.message = message;
+		}
+	}
+	
+	@PostMapping(path="/prettifyMessage",
+				produces = MediaType.APPLICATION_JSON_VALUE,
+				consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> prettifyMessage(@RequestBody PrettifyRequest req) throws IOException{
+		String message = req.getMessage();
+		Tote t  = getToteFromBytes(message.getBytes());
+		// testing GS1 barcode conversion
+		GS1Builder gs1Builder = new GS1Builder();
+		t.getOrderDetail().getOrderLines().forEach(ol -> {
+			GsOneDetail gsOneDetail = ol.getGsOneDetail();
+			if (gsOneDetail != null) {
+				gsOneDetail.getGsOneLines().forEach(gsol -> {
+					if (gsol.getGsOne() != null) {
+						// convert the GS1 barcode to a GSOneBarcode
+						GSOneBarcode gs1 = gs1Builder.createGSOneFromBarcodeString(gsol.getGsOne());
+						System.out.println(gs1);
+					}
+				});
+			}	
+		});
+		// end of testing GS1 barcode conversion
+		
+		String json = objectMapper
+				.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(t);
+		
+		
+		return ResponseEntity
+				.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(json);
     }
 
 	@GetMapping("/tote/messages/{id}")
@@ -75,10 +139,46 @@ public class DSPUtilsController {
 		if (messageBytes[messageBytes.length-1] != SocketServer.END_FRAME) {
 			buf.write(0x0D);
 		}
-		messageBytes = buf.toByteArray();		
+		
+		// write the message length into the message if required
+		messageBytes = insertLengthIfMissing(buf.toByteArray());		
 		String msgType = new String(messageBytes, messageTypePos, messageTypeLength);
 		Deserializer d = deserializerFactory.getDeserializer(msgType).get();
 		return (Tote) d.deserialize(messageBytes);
+	}
+	
+	// note - you must only call this method once the message contains start and end frame bytes
+	// length field is 5 bytes long
+	// if the length is missing we are guaranteed to have a message type somewhere in those 5 bytes
+	// message type always contains a letter and so cannot be a number
+	private byte[] insertLengthIfMissing (byte[] payload) {
+		final int lengthFieldSize = 5;
+		if (isAsciiDigitBlock(payload, 1, lengthFieldSize)) {
+			return payload;
+		}
+		
+		byte[] buff = new byte[payload.length + lengthFieldSize];
+		//Start frame
+		System.arraycopy(payload, 0, buff, 0, 1);
+		//End frame
+		System.arraycopy(payload, payload.length - 1, buff, buff.length - 1, 1);
+		// Payload with length
+		int contentLength = payload.length - 2; // -2 for start and end frame
+		String payloadLength = String.format("%05d", contentLength);
+		byte[] lengthBytes = payloadLength.getBytes();
+		System.arraycopy(lengthBytes, 0, buff, 1, lengthFieldSize);
+		System.arraycopy(payload, 1, buff, lengthFieldSize + 1, contentLength); // +1 for start frame
+		return buff;
+	}
+	
+	private boolean isAsciiDigitBlock(byte[] data, int offset, int length) {
+		for (int i = offset; i < offset + length; i++) {
+			byte b = data[offset + i];
+			if (b < '0' || b > '9') {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@RequestMapping (path="/uploadBarcodes",  method=RequestMethod.POST, consumes = {"multipart/form-data"})
