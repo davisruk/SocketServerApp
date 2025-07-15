@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -61,6 +62,9 @@ public class DSPUtilsController {
 
 	@Autowired
 	private ToteService toteService;
+	
+	@Autowired
+	private GS1Builder gs1Builder;
 
 	private final ObjectMapper objectMapper;
 	
@@ -75,8 +79,24 @@ public class DSPUtilsController {
 	}
 	
 	@PostMapping("/prettify")
-    public Tote prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
-		return getToteFromBytes(file.getBytes());
+    public ResponseEntity<String> prettifyMessage(@RequestParam("file") MultipartFile file) throws IOException{
+		Tote t = getToteFromBytes(file.getBytes());
+
+		String json = objectMapper
+			.writerWithDefaultPrettyPrinter()
+			.writeValueAsString(t);
+		
+		// Unpack the GS1 barcodes to JSON objects
+		// and replace the barcode strings with the GSOneBarcode objects
+		// Really this should be done in the deserializer,
+		// but the OrderLine->GSOneDetail structure only
+		// contains the barcode string, not the GSOneBarcode object
+		String retVal = updateGsOneFields(json);
+
+		return ResponseEntity
+			.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(retVal);
     }
 	
 	public static class PrettifyRequest {
@@ -97,7 +117,7 @@ public class DSPUtilsController {
     public ResponseEntity<String> prettifyMessage(@RequestBody PrettifyRequest req) throws IOException{
 		String message = req.getMessage();
 		Tote t  = getToteFromBytes(message.getBytes());
-		GS1Builder gs1Builder = new GS1Builder();
+
 		String json = objectMapper
 				.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(t);
@@ -107,7 +127,7 @@ public class DSPUtilsController {
 		// Really this should be done in the deserializer,
 		// but the OrderLine->GSOneDetail structure only
 		// contains the barcode string, not the GSOneBarcode object
-		String retVal = updateGsOneFields(json, gs1Builder);
+		String retVal = updateGsOneFields(json);
 
 		return ResponseEntity
 			.ok()
@@ -124,11 +144,10 @@ public class DSPUtilsController {
 				produces = MediaType.APPLICATION_JSON_VALUE,
 				consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> prettifyGS1(@RequestBody GSOneBarcodeRequest request) throws IOException{
-		GS1Builder gs1Builder = new GS1Builder();
-		GSOneBarcode barcode = gs1Builder.createGSOneFromBarcodeString(request.getBarcode());
 		ObjectMapper objectMapper = new ObjectMapper();
-		String retVal = objectMapper.writerWithDefaultPrettyPrinter()
-		.writeValueAsString(barcode);
+		GSOneBarcode barcode = gs1Builder.createGSOneFromBarcodeString(request.getBarcode());
+		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		String retVal = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(barcode);
 		
 		return ResponseEntity
 			.ok()
@@ -136,10 +155,9 @@ public class DSPUtilsController {
 			.body(retVal);
 	}
 	
-	private String updateGsOneFields(String originalJson, GS1Builder builder) throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
+	private String updateGsOneFields(String originalJson) throws IOException {
 		JsonNode rootNode = objectMapper.readTree(originalJson);
-		replaceGsOneFields(rootNode, builder, objectMapper);
+		replaceGsOneFields(rootNode, gs1Builder, objectMapper);
 		return objectMapper.writeValueAsString(rootNode);
 	}
 
@@ -149,8 +167,19 @@ public class DSPUtilsController {
 			if (objectNode.has("gsOne")) {
 				String gsOneValue = objectNode.get("gsOne").asText();
 				GSOneBarcode gs1 = builder.createGSOneFromBarcodeString(gsOneValue);
-				JsonNode gs1Node = objectMapper.valueToTree(gs1);
-				objectNode.set("gsOne", gs1Node);
+				try {
+					// Could use JsonNode gs1Node = objectMapper.valueToTree(gs1) instead here
+					// Then remove the nodes with null values - probably more efficient
+					// We are dealing with very small structure however so using the
+					// double traversal doesn't really matter
+					objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+					String gs1String = objectMapper.writeValueAsString(gs1);
+					JsonNode gs1Node = objectMapper.readTree(gs1String);
+					objectNode.set("gsOne", gs1Node);
+				}
+				catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
 			}
 			objectNode.fields().forEachRemaining(entry -> {
 				replaceGsOneFields(entry.getValue(), builder, objectMapper);

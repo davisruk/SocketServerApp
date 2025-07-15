@@ -198,6 +198,7 @@ public class ThirtyTwoRDeserializer implements Deserializer{
 			line.setPharmacyId(new String(messagePayload, currentOffset + sc.getPharmacyIdOffset(od), od.getPharmacyIdLength()));
 			line.setPatientId(new String(messagePayload, currentOffset + sc.getPatientIdOffset(od), od.getPatientIdLength()));
 			line.setPrescriptionId(new String(messagePayload, currentOffset + sc.getPrescriptionIdOffset(od), od.getPrescriptionIdLength()));
+			line.setPlasticBagId(new String(messagePayload, currentOffset + sc.getPlasticBagIdOffset(od), od.getPlasticBagIdLength()));			
 			line.setProductId(new String(messagePayload, currentOffset + sc.getProductIdOffset(od), od.getProductIdLength()));
 			line.setNumberOfPacks(new String(messagePayload, currentOffset + sc.getNumPacksOffset(od), od.getNumPacksLength()));
 			line.setNumberOfPills(new String(messagePayload, currentOffset + sc.getNumPillsOffset(od), od.getNumPillsLength()));
