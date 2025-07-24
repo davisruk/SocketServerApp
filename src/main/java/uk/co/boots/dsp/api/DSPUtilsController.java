@@ -18,20 +18,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boots.gs1.api.GSOneBarcodeRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import lombok.Data;
 import uk.co.boots.dsp.api.dto.MessageDTO;
 import uk.co.boots.dsp.api.dto.PageRequestDetail;
 import uk.co.boots.dsp.api.dto.ToteDTOService;
 import uk.co.boots.dsp.api.dto.ToteMessageSummary;
 import uk.co.boots.dsp.api.dto.ToteSummaryPage;
-import uk.co.boots.dsp.api.gs1.GS1Builder;
-import uk.co.boots.dsp.api.gs1.GSOneBarcode;
+import com.boots.gs1.data.GSOneBarcode;
 import uk.co.boots.dsp.comms.tcp.SocketServer;
 import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
@@ -63,9 +62,8 @@ public class DSPUtilsController {
 	@Autowired
 	private ToteService toteService;
 	
-	@Autowired
-	private GS1Builder gs1Builder;
-
+	@Autowired ExternalServiceClient serviceClient;
+	
 	private final ObjectMapper objectMapper;
 	
 	@Autowired
@@ -135,38 +133,17 @@ public class DSPUtilsController {
 			.body(retVal);
     }
 	
-	@Data
-	public static class GSOneBarcodeRequest {
-		private String barcode;
-	}
-	
-	@PostMapping(path="/prettifyGS1",
-				produces = MediaType.APPLICATION_JSON_VALUE,
-				consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> prettifyGS1(@RequestBody GSOneBarcodeRequest request) throws IOException{
-		ObjectMapper objectMapper = new ObjectMapper();
-		GSOneBarcode barcode = gs1Builder.createGSOneFromBarcodeString(request.getBarcode());
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		String retVal = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(barcode);
-		
-		return ResponseEntity
-			.ok()
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(retVal);
-	}
-	
 	private String updateGsOneFields(String originalJson) throws IOException {
 		JsonNode rootNode = objectMapper.readTree(originalJson);
-		replaceGsOneFields(rootNode, gs1Builder, objectMapper);
+		replaceGsOneFields(rootNode, objectMapper);
 		return objectMapper.writeValueAsString(rootNode);
 	}
 
-	private void replaceGsOneFields(JsonNode node, GS1Builder builder, ObjectMapper objectMapper) {
+	private void replaceGsOneFields(JsonNode node, ObjectMapper objectMapper) {
 		if (node.isObject()) {
 			ObjectNode objectNode = (ObjectNode) node;
 			if (objectNode.has("gsOne")) {
-				String gsOneValue = objectNode.get("gsOne").asText();
-				GSOneBarcode gs1 = builder.createGSOneFromBarcodeString(gsOneValue);
+				GSOneBarcode gs1 = serviceClient.getGSOne(objectNode.get("gsOne").asText()).block();				
 				try {
 					// Could use JsonNode gs1Node = objectMapper.valueToTree(gs1) instead here
 					// Then remove the nodes with null values - probably more efficient
@@ -182,11 +159,11 @@ public class DSPUtilsController {
 				}
 			}
 			objectNode.fields().forEachRemaining(entry -> {
-				replaceGsOneFields(entry.getValue(), builder, objectMapper);
+				replaceGsOneFields(entry.getValue(), objectMapper);
 			});
 		} else if (node.isArray()) {
 			for (JsonNode arrayElement : node) {
-				replaceGsOneFields(arrayElement, builder, objectMapper);
+				replaceGsOneFields(arrayElement, objectMapper);
 			}
 		}
 	}
