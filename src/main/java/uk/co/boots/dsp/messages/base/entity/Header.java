@@ -1,7 +1,7 @@
 package uk.co.boots.dsp.messages.base.entity;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 
 import lombok.Data;
 import uk.co.boots.dsp.messages.framework.serialization.SerialisationControlField;

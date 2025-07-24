@@ -1,14 +1,15 @@
 package uk.co.boots.dsp.api;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.boots.gs1.api.GSOneBarcodeRequest;
+import com.boots.gs1.data.GSOneBarcode;
 
 import reactor.core.publisher.Mono;
-import com.boots.gs1.data.GSOneBarcode;
 
 @Service
 public class ExternalServiceClient {
@@ -21,7 +22,7 @@ public class ExternalServiceClient {
 
 	public class CustomClientException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
-		private final HttpStatus status;
+		private final HttpStatusCode status;
 	    private final String responseBody;
 
 	    public CustomClientException(String message, WebClientResponseException cause) {
@@ -30,7 +31,7 @@ public class ExternalServiceClient {
 	        this.responseBody = cause.getResponseBodyAsString();
 	    }
 
-	    public HttpStatus getStatus() {
+	    public HttpStatusCode getStatus() {
 	        return status;
 	    }
 
@@ -45,7 +46,7 @@ public class ExternalServiceClient {
 		        .uri("/gs1utils/barcodeFrom")
 		        .bodyValue(req)
 		        .retrieve()
-		        .onStatus(HttpStatus::is4xxClientError, response ->
+		        .onStatus(HttpStatusCode::is4xxClientError, response ->
 		            response.createException().map(ex -> {
 		                System.err.println("Status: " + ex.getStatusCode());
 		                System.err.println("Body: " + ex.getResponseBodyAsString());

@@ -1,7 +1,7 @@
 package uk.co.boots.dsp.messages.thirtytwor.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

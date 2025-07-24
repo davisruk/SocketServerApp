@@ -15,7 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import uk.co.boots.dsp.comms.DSPCommsMessage;
 import uk.co.boots.dsp.messages.base.entity.OrderDetail;
 import uk.co.boots.dsp.messages.base.entity.OrderLine;

@@ -261,15 +261,15 @@ public class DSPUtilsController {
 	}
 	
 	@GetMapping(path = "/tote/page")
-	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam int pageNumber, @RequestParam int pageSize,
-			@RequestParam String filter) {
+	public ResponseEntity<ToteSummaryPage> loadTotePage(@RequestParam (name="pageNumber") int pageNumber, @RequestParam (name="pageSize") int pageSize,
+			@RequestParam (name="filter") String filter) {
 		ToteSummaryPage result = toteDTOService
 				.getSummaryDTOsForPage(new PageRequestDetail(pageNumber, pageSize, filter));
 		return ResponseEntity.ok().body(result);
 	}
 
 	@GetMapping(path = "/tote/messages")
-	public ResponseEntity<ToteMessageSummary> loadToteMessages(@RequestParam long toteId) {
+	public ResponseEntity<ToteMessageSummary> loadToteMessages(@RequestParam (name="toteId") long toteId) {
 		ToteMessageSummary result = toteDTOService.getMessageDTOsForTote(toteId);
 		return ResponseEntity.ok().body(result);
 	}

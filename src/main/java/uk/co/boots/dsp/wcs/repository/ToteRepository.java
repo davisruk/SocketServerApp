@@ -6,14 +6,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import uk.co.boots.dsp.messages.base.entity.OrderLine;
 import uk.co.boots.dsp.messages.base.entity.RawMessage;
 import uk.co.boots.dsp.messages.base.entity.Tote;
 
-public interface ToteRepository extends PagingAndSortingRepository<Tote, Long> {
+@Repository
+public interface ToteRepository extends PagingAndSortingRepository<Tote, Long>, CrudRepository<Tote, Long> {
 	@Query(
              "SELECT t " +
              "FROM Tote t " +
